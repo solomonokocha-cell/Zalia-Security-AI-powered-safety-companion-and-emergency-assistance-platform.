@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Zalia gives quick access to emergency contacts, SOS tools, and local dispatch information for Rivers State." />
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/png" sizes="650x650" href="/images/zalia-app-icon.png">
+  <meta name="theme-color" content="#000000">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Zalia">
+  <link rel="apple-touch-icon" sizes="600x600" href="/images/Zalia's-final-logo.png">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="tailwind-shim.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="lucide-local.js"></script>
+  <script src="pwa-install.js"></script>
+  <script src="/sw-register.js" defer></script>
+  
+  <script>
+   
+    if (localStorage.getItem('zalia_theme') === 'dark' || (!('zalia_theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+
+  
+    function toggleZaliaTheme() {
+      const isDark = document.documentElement.classList.contains('dark');
+      if (isDark) {
+        document.documentElement.classList.remove('dark');
+        localStorage.setItem('zalia_theme', 'light');
+      } else {
+        document.documentElement.classList.add('dark');
+        localStorage.setItem('zalia_theme', 'dark');
+      }
+      updateThemeButtonUI();
+    }
+
+    function updateThemeButtonUI() {
+      const isDark = document.documentElement.classList.contains('dark');
+      document.querySelectorAll('.zalia-theme-btn').forEach(btn => {
+        const text = btn.querySelector('.theme-text');
+        const icon = btn.querySelector('[data-lucide]');
+        if (text) text.textContent = isDark ? 'Light Mode' : 'Night Mode';
+        if (icon) icon.setAttribute('data-lucide', isDark ? 'sun' : 'moon');
+      });
+      if (window.lucide) lucide.createIcons();
+    }
+
+    
+    function checkNetworkStatus() {
+      let banner = document.getElementById('zaliaOfflineBanner');
+      if (!navigator.onLine) {
+        if (!banner) {
+          banner = document.createElement('div');
+          banner.id = 'zaliaOfflineBanner';
+          banner.className = 'w-full bg-amber-600 text-white text-xs font-bold text-center py-2 px-4 sticky top-0 z-50 flex items-center justify-center gap-2 shadow-md';
+          banner.innerHTML = `<span>⚠️ You are offline. Cached safety data active.</span>`;
+          document.body.prepend(banner);
+        }
+      } else if (banner) {
+        banner.remove();
+      }
+    }
+
+    window.addEventListener('online', checkNetworkStatus);
+    window.addEventListener('offline', checkNetworkStatus);
+    document.addEventListener('DOMContentLoaded', () => {
+      checkNetworkStatus();
+      updateThemeButtonUI();
+    });
+  </script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            gold: { 
+              50: '#FDFBF7', 100: '#FAF5EA', 200: '#F4E7CE', 300: '#EBD4A4',
+              400: '#DFBC72', 500: '#D4A345', 600: '#B88230', 700: '#936125',
+              800: '#774C23', 900: '#623F21', 950: '#422812'
+            },
+            marble: { 
+              50: '#FFFFFF', 100: '#FAF9F6', 200: '#F5F3EF',
+              300: '#EBE7E0', 400: '#D6CFBF', 500: '#B8AFA0'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Emergency Contacts • Zalia Security</title>
+  
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="offline-tailwind.css" />
+</head>
+<body class="bg-marble-100 dark:bg-black page-dark-shell text-stone-800 dark:text-stone-100 font-sans min-h-screen pb-16 transition-colors duration-200">
+
+  <div class="max-w-5xl mx-auto p-4 sm:p-6 lg:p-10">
+    
+   
+    <header class="flex justify-between items-center mb-8 pb-6 border-b border-gold-200 dark:border-stone-800">
+     
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl gold-gradient-bg p-0.5 shadow-gold-glow flex items-center justify-center">
+          <div class="w-full h-full bg-white dark:bg-stone-900 rounded-[10px] flex items-center justify-center">
+            <i data-lucide="shield-check" class="w-5 h-5 text-gold-600"></i>
+          </div>
+        </div>
+        <a href="contact.html" class="text-2xl font-serif font-extrabold gold-gradient-text tracking-tight">Emergency Contacts </a>
+      </div>
+
+
+<nav class="flex items-center gap-4 text-xs font-bold flex-wrap flex-1">
+
+    <a href="index.html"
+       class="text-stone-500 hover:text-gold-700 transition-colors">
+      Dashboard
+    </a>
+
+    <a href="about.html"
+       class="text-stone-500 hover:text-gold-700 dark:hover:text-gold-400 transition-colors">
+      About
+    </a>
+
+    <a href="contact.html"
+       class="text-gold-700 dark:text-gold-400 border-b-2 border-gold-500 pb-1">
+      Emergency Contacts
+    </a>
+
+    <a href="ZaziAi.html"
+       class="text-stone-500 hover:text-gold-700 dark:hover:text-gold-400 transition-colors">
+      Zazi AI
+    </a>
+
+    <a href="incidents.html"
+       class="text-stone-500 hover:text-gold-700 dark:hover:text-gold-400 transition-colors">
+      Incidents
+    </a>
+
+    <a href="simulator.html"
+       class="text-stone-500 hover:text-gold-700 dark:hover:text-gold-400 transition-colors">
+      Crisis Simulator
+    </a>
+
+    <a href="route-planner.html"
+       class="text-stone-500 hover:text-gold-700 dark:hover:text-gold-400 transition-colors">
+      Route Planner
+    </a>
+    <a href="safetyacademy.html"
+       class="text-stone-500 hover:text-gold-700 dark:hover:text-gold-400 transition-colors">
+      Safety Academy
+
+  </nav>
+
+     
+      <button onclick="toggleZaliaTheme()" class="zalia-theme-btn flex items-center gap-2 px-4 py-2 bg-white dark:bg-stone-900 border border-gold-200 dark:border-stone-800 rounded-2xl text-xs font-bold text-stone-800 dark:text-stone-100 shadow-sm hover:border-gold-500 transition-all">
+        <i data-lucide="moon" class="w-4 h-4 text-gold-600"></i>
+        <span class="theme-text">Night Mode</span>
+      </button>
+    </header>
+
+    <section class="page-hero mb-8">
+      <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div>
+          <span class="hero-pill"><i data-lucide="sparkles" class="w-3.5 h-3.5"></i> quick help, clearer flow</span>
+          <h2 class="mt-2 text-2xl sm:text-3xl font-bold text-stone-900 dark:text-stone-100">Fast access to emergency support and trusted contacts.</h2>
+          <p class="mt-2 text-sm text-stone-600 dark:text-stone-400 max-w-2xl">The redesigned contact experience keeps every action easy to find when speed matters most.</p>
+        </div>
+        <div class="hero-actions">
+          <a href="index.html" class="bg-gold-600 text-white">Go to dashboard</a>
+          <a href="incidents.html" class="bg-white dark:bg-stone-900 text-stone-700 dark:text-stone-200 border border-gold-200">View live alerts</a>
+        </div>
+      </div>
+    </section>
+
+   
+    <div class="mb-8 rounded-3xl border border-red-200 dark:border-red-900/50 bg-gradient-to-r from-red-900 via-stone-900 to-rose-950 p-6 text-white shadow-xl">
+      <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div class="space-y-1">
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-red-500/20 text-red-300 border border-red-500/30 text-[10px] font-bold uppercase tracking-wider">
+            <span class="w-2 h-2 rounded-full bg-red-500 animate-ping"></span> Live Tactical SOS
+          </span>
+          <h2 class="font-serif text-xl font-bold text-white">Broadcast Instant GPS Coordinates via WhatsApp</h2>
+          <p class="text-xs text-stone-300">Generates a live distress broadcast with your Google Maps location link & sends direct to security command or next of kin.</p>
+        </div>
+        <button id="sendGpsSosBtn" class="shrink-0 w-full md:w-auto px-5 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer border border-emerald-400">
+          <i data-lucide="send" class="w-4 h-4"></i> Send Live Location SOS
+        </button>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      
+      
+      <div class="lg:col-span-2 space-y-6">
+        
+        
+        <div class="bg-white dark:bg-stone-900 border border-gold-200 dark:border-stone-800 rounded-3xl p-6 sm:p-7 shadow-lux-card dark:shadow-none">
+          <div class="flex items-center gap-2 mb-1">
+            <i data-lucide="user-plus" class="w-5 h-5 text-gold-600"></i>
+            <h2 class="text-lg font-serif font-bold text-stone-900 dark:text-stone-100">Add Trusted Emergency Contact</h2>
+          </div>
+          <p class="text-xs text-stone-500 dark:text-stone-400 mb-5">
+            Add family, next of kin, or personal security details. Stored securely on your device & synced with your private cloud vault.
+          </p>
+
+          <form id="contactForm" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-stone-700 dark:text-stone-300 mb-1">Contact Name</label>
+              <input id="contactName" type="text" required placeholder="e.g. Chief Emeka (Brother)" class="w-full bg-marble-50 dark:bg-stone-800 border border-gold-200 dark:border-stone-700 rounded-xl p-3 text-xs text-stone-800 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500 focus:outline-none focus:border-gold-500" />
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-stone-700 dark:text-stone-300 mb-1">Relationship / Tag</label>
+              <select id="contactRelation" class="w-full bg-marble-50 dark:bg-stone-800 border border-gold-200 dark:border-stone-700 rounded-xl p-3 text-xs text-stone-800 dark:text-stone-100 focus:outline-none focus:border-gold-500">
+                <option value="Next of Kin">Next of Kin</option>
+                <option value="Family">Family Member</option>
+                <option value="Personal Security / Escort">Personal Security / Escort</option>
+                <option value="Colleague / Employer">Colleague / Employer</option>
+                <option value="Legal Counsel">Legal Counsel</option>
+                <option value="Medical Doctor">Medical Doctor</option>
+              </select>
+            </div>
+
+            <div class="sm:col-span-2">
+              <label class="block text-xs font-bold text-stone-700 dark:text-stone-300 mb-1">Phone Number (Local or WhatsApp)</label>
+              <input id="contactPhone" type="tel" required placeholder="e.g. 0801 234 5678" class="w-full bg-marble-50 dark:bg-stone-800 border border-gold-200 dark:border-stone-700 rounded-xl p-3 text-xs text-stone-800 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500 focus:outline-none focus:border-gold-500" />
+            </div>
+
+            <div class="sm:col-span-2 pt-2">
+              <button type="submit" id="saveBtn" class="w-full py-3 bg-gold-500 hover:bg-gold-600 text-white font-bold text-xs rounded-xl shadow-gold-glow transition-all flex items-center justify-center gap-2 cursor-pointer">
+                <i data-lucide="save" class="w-4 h-4"></i> Save Emergency Contact
+              </button>
+            </div>
+          </form>
+        </div>
+
+       
+        <div class="bg-white dark:bg-stone-900 border border-gold-200 dark:border-stone-800 rounded-3xl p-6 sm:p-7 shadow-lux-card dark:shadow-none">
+          <div class="flex flex-wrap justify-between items-center gap-2 mb-4">
+            <h2 class="text-base font-serif font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2">
+              <i data-lucide="shield-user" class="w-5 h-5 text-gold-600"></i> My Saved Personal Contacts
+            </h2>
+            <div class="flex items-center gap-2">
+              <button id="exportContactsBtn" title="Export Contacts JSON" class="text-[10px] font-bold bg-marble-100 dark:bg-stone-800 hover:bg-gold-100 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 border border-gold-200 dark:border-stone-700 px-2.5 py-1 rounded-lg flex items-center gap-1 transition-colors">
+                <i data-lucide="download" class="w-3 h-3"></i> Export
+              </button>
+              <span id="contactCountBadge" class="text-[10px] font-bold bg-gold-100 dark:bg-gold-900/40 text-gold-800 dark:text-gold-300 border border-gold-300 dark:border-gold-800 px-2.5 py-1 rounded-full">
+                0 Saved
+              </span>
+            </div>
+          </div>
+
+          <div id="contactsContainer" class="space-y-3">
+            
+          </div>
+        </div>
+
+      </div>
+
+      
+      <div class="space-y-6">
+        <div class="bg-white dark:bg-stone-900 border border-gold-200 dark:border-stone-800 rounded-3xl p-6 sm:p-7 shadow-lux-card dark:shadow-none">
+          <h3 class="text-xs font-extrabold text-gold-700 dark:text-gold-400 mb-2 uppercase tracking-widest flex items-center gap-2">
+            <i data-lucide="phone-call" class="w-4 h-4 text-gold-600"></i> Official Rivers Dispatch Directory
+          </h3>
+          <p class="text-xs text-stone-500 dark:text-stone-400 mb-4 leading-relaxed">
+            Verified state-wide commands, marine escorts, trauma centers, & traffic emergency units:
+          </p>
+
+        
+          <div class="mb-4 relative">
+            <i data-lucide="search" class="w-4 h-4 text-stone-400 dark:text-stone-500 absolute left-3 top-3"></i>
+            <input id="hotlineSearch" type="text" placeholder="Search police, hospital, marine, FRSC..." class="w-full bg-marble-50 dark:bg-stone-800 border border-gold-200 dark:border-stone-700 rounded-xl pl-9 pr-3 py-2 text-xs text-stone-800 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500 focus:outline-none focus:border-gold-500" />
+          </div>
+
+          <div id="hotlinesContainer" class="space-y-3 max-h-[520px] overflow-y-auto pr-1">
+            
+           
+            <a href="tel:08032003514" data-category="police" class="hotline-card flex justify-between items-center p-3.5 bg-marble-50 dark:bg-stone-800/60 hover:bg-gold-50/60 dark:hover:bg-stone-800 rounded-2xl border border-gold-200 dark:border-stone-700/60 transition-all group">
+              <div>
+                <p class="text-xs font-bold text-stone-900 dark:text-stone-100 group-hover:text-gold-800 dark:group-hover:text-gold-400">Rivers Police Command HQ</p>
+                <p class="text-[10px] text-stone-500 dark:text-stone-400">Port Harcourt Control Room</p>
+              </div>
+              <span class="text-xs font-bold text-gold-700 dark:text-gold-300 bg-gold-100 dark:bg-gold-900/40 px-3 py-1 rounded-xl border border-gold-300 dark:border-gold-800">CALL</span>
+            </a>
+
+          
+            <a href="tel:08033880011" data-category="military marine" class="hotline-card flex justify-between items-center p-3.5 bg-marble-50 dark:bg-stone-800/60 hover:bg-gold-50/60 dark:hover:bg-stone-800 rounded-2xl border border-gold-200 dark:border-stone-700/60 transition-all group">
+              <div>
+                <p class="text-xs font-bold text-stone-900 dark:text-stone-100 group-hover:text-gold-800 dark:group-hover:text-gold-400">JTF Operation Delta Safe</p>
+                <p class="text-[10px] text-stone-500 dark:text-stone-400">Waterways & Marine Patrol</p>
+              </div>
+              <span class="text-xs font-bold text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-900/40 px-3 py-1 rounded-xl border border-amber-300 dark:border-amber-800">JTF</span>
+            </a>
+
+           
+            <a href="tel:112" data-category="general police" class="hotline-card flex justify-between items-center p-3.5 bg-marble-50 dark:bg-stone-800/60 hover:bg-gold-50/60 dark:hover:bg-stone-800 rounded-2xl border border-gold-200 dark:border-stone-700/60 transition-all group">
+              <div>
+                <p class="text-xs font-bold text-stone-900 dark:text-stone-100 group-hover:text-gold-800 dark:group-hover:text-gold-400">National Emergency Toll-Free</p>
+                <p class="text-[10px] text-stone-500 dark:text-stone-400">Unified Emergency Dispatch</p>
+              </div>
+              <span class="text-xs font-bold text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900/40 px-3 py-1 rounded-xl border border-blue-300 dark:border-blue-800">112</span>
+            </a>
+
+            
+            <a href="tel:08033102030" data-category="medical hospital" class="hotline-card flex justify-between items-center p-3.5 bg-marble-50 dark:bg-stone-800/60 hover:bg-gold-50/60 dark:hover:bg-stone-800 rounded-2xl border border-gold-200 dark:border-stone-700/60 transition-all group">
+              <div>
+                <p class="text-xs font-bold text-stone-900 dark:text-stone-100 group-hover:text-gold-800 dark:group-hover:text-gold-400">UPTH Trauma Center</p>
+                <p class="text-[10px] text-stone-500 dark:text-stone-400">UniPort Teaching Hospital ER</p>
+              </div>
+              <span class="text-xs font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-900/40 px-3 py-1 rounded-xl border border-emerald-300 dark:border-emerald-800">MED</span>
+            </a>
+
+           
+            <a href="tel:08030001122" data-category="medical hospital" class="hotline-card flex justify-between items-center p-3.5 bg-marble-50 dark:bg-stone-800/60 hover:bg-gold-50/60 dark:hover:bg-stone-800 rounded-2xl border border-gold-200 dark:border-stone-700/60 transition-all group">
+              <div>
+                <p class="text-xs font-bold text-stone-900 dark:text-stone-100 group-hover:text-gold-800 dark:group-hover:text-gold-400">Braithwaite Specialist Hospital</p>
+                <p class="text-[10px] text-stone-500 dark:text-stone-400">Old GRA Port Harcourt ER</p>
+              </div>
+              <span class="text-xs font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-900/40 px-3 py-1 rounded-xl border border-emerald-300 dark:border-emerald-800">MED</span>
+            </a>
+
+           
+            <a href="tel:122" data-category="traffic road" class="hotline-card flex justify-between items-center p-3.5 bg-marble-50 dark:bg-stone-800/60 hover:bg-gold-50/60 dark:hover:bg-stone-800 rounded-2xl border border-gold-200 dark:border-stone-700/60 transition-all group">
+              <div>
+                <p class="text-xs font-bold text-stone-900 dark:text-stone-100 group-hover:text-gold-800 dark:group-hover:text-gold-400">FRSC Traffic Hotline</p>
+                <p class="text-[10px] text-stone-500 dark:text-stone-400">Federal Road Safety Corps</p>
+              </div>
+              <span class="text-xs font-bold text-red-700 dark:text-red-300 bg-red-100 dark:bg-red-900/40 px-3 py-1 rounded-xl border border-red-300 dark:border-red-800">122</span>
+            </a>
+
+           
+            <a href="tel:08033334455" data-category="fire" class="hotline-card flex justify-between items-center p-3.5 bg-marble-50 dark:bg-stone-800/60 hover:bg-gold-50/60 dark:hover:bg-stone-800 rounded-2xl border border-gold-200 dark:border-stone-700/60 transition-all group">
+              <div>
+                <p class="text-xs font-bold text-stone-900 dark:text-stone-100 group-hover:text-gold-800 dark:group-hover:text-gold-400">Rivers State Fire Service</p>
+                <p class="text-[10px] text-stone-500 dark:text-stone-400">Central Fire Dispatch Headquarters</p>
+              </div>
+              <span class="text-xs font-bold text-orange-700 dark:text-orange-300 bg-orange-100 dark:bg-orange-900/40 px-3 py-1 rounded-xl border border-orange-300 dark:border-orange-800">FIRE</span>
+            </a>
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+ <footer class="mt-12 pt-8 border-t border-gold-200/80 dark:border-stone-800 text-center text-xs text-stone-500 dark:text-stone-400 space-y-2">
+      <p class="font-semibold text-stone-700 dark:text-stone-300">ZALIA • Maritime & Highway Intelligence Portal</p>
+      <p>Providing real-time surveillance, waterway escort requests & emergency tactical dispatch across Rivers State.</p>
+      <p class="text-[10px] text-stone-400 mt-4">© 2026 Zalia Security Systems. All rights reserved.</p>
+    </footer>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { 
+      getFirestore, 
+      collection, 
+      addDoc, 
+      getDocs, 
+      deleteDoc, 
+      doc 
+    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    
+    if (window.lucide) {
+      window.lucide.createIcons();
+    }
+
+   
+    const firebaseConfig = {
+      apiKey: "AIzaSyDpPyV0n_NS3x72LBNQ6OTuwgXOzmneNKg",
+      authDomain: "adelias-zaliaproject.firebaseapp.com",
+      projectId: "adelias-zaliaproject",
+      storageBucket: "adelias-zaliaproject.firebasestorage.app",
+      messagingSenderId: "1030386427394",
+      appId: "1:1030386427394:web:a66775a8f1db4498b5a91b"
+    };
+
+    let db = null;
+    try {
+      const app = initializeApp(firebaseConfig);
+      db = getFirestore(app);
+    } catch (e) {
+      console.warn("Firebase Notice:", e);
+    }
+
+    let personalContacts = [];
+
+   
+    async function loadContacts() {
+     
+      const localData = JSON.parse(localStorage.getItem('zalia_contacts')) || [];
+      personalContacts = [...localData];
+
+      
+      if (db) {
+        try {
+          const snapshot = await getDocs(collection(db, "contacts"));
+          const fbContacts = [];
+          snapshot.forEach((docSnap) => {
+            fbContacts.push({ firestoreId: docSnap.id, ...docSnap.data() });
+          });
+          if (fbContacts.length > 0) {
+         
+            const merged = [...fbContacts, ...personalContacts];
+            const uniqueMap = new Map();
+            merged.forEach(item => uniqueMap.set(item.phone, item));
+            personalContacts = Array.from(uniqueMap.values());
+          }
+        } catch (err) {
+          console.warn("Firestore contact load warning:", err);
+        }
+      }
+
+      renderContacts();
+    }
+
+    function renderContacts() {
+      const container = document.getElementById('contactsContainer');
+      const badge = document.getElementById('contactCountBadge');
+      
+      badge.innerText = `${personalContacts.length} Saved`;
+      container.innerHTML = '';
+
+      if (personalContacts.length === 0) {
+        container.innerHTML = `
+          <div class="p-6 text-center bg-marble-50 dark:bg-stone-800/40 rounded-2xl border border-gold-200 dark:border-stone-800">
+            <p class="text-xs text-stone-500 dark:text-stone-400 font-medium">No personal emergency contacts added yet.</p>
+            <p class="text-[11px] text-stone-400 dark:text-stone-500 mt-1">Fill out the form above to save your first trusted contact.</p>
+          </div>
+        `;
+        return;
+      }
+
+      personalContacts.forEach((contact, index) => {
+        const card = document.createElement('div');
+        card.className = 'flex items-center justify-between p-4 bg-marble-50 dark:bg-stone-800/60 rounded-2xl border border-gold-200 dark:border-stone-700/60 transition-all hover:border-gold-300 dark:hover:border-stone-600 shadow-2xs';
+        
+        const cleanPhone = contact.phone.replace(/\s+/g, '');
+        const waLink = `https://wa.me/${cleanPhone.startsWith('0') ? '234' + cleanPhone.slice(1) : cleanPhone}?text=${encodeURIComponent('URGENT: I need emergency assistance. Please contact me immediately.')}`;
+
+        card.innerHTML = `
+          <div class="space-y-0.5">
+            <div class="flex items-center gap-2">
+              <p class="text-xs font-bold text-stone-900 dark:text-stone-100">${contact.name}</p>
+              <span class="text-[9px] font-bold bg-gold-100 dark:bg-gold-900/40 text-gold-800 dark:text-gold-300 px-2 py-0.5 rounded-md border border-gold-200 dark:border-gold-800">
+                ${contact.relation || 'Emergency'}
+              </span>
+            </div>
+            <p class="text-xs text-stone-600 dark:text-stone-400 font-mono">${contact.phone}</p>
+          </div>
+
+          <div class="flex items-center gap-1.5">
+            <a href="${waLink}" target="_blank" class="p-2 bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 hover:bg-emerald-200 dark:hover:bg-emerald-900/80 rounded-xl text-xs font-bold transition-colors" title="WhatsApp SOS">
+              <i data-lucide="message-square" class="w-3.5 h-3.5"></i>
+            </a>
+            <a href="tel:${contact.phone}" class="px-3 py-1.5 bg-emerald-600 text-white rounded-xl text-xs font-bold flex items-center gap-1 shadow-xs hover:bg-emerald-700 transition-colors">
+              <i data-lucide="phone" class="w-3.5 h-3.5"></i> Call
+            </a>
+            <button data-index="${index}" class="delete-btn p-1.5 text-stone-400 hover:text-red-600 dark:hover:text-red-400 transition-colors cursor-pointer">
+              <i data-lucide="trash-2" class="w-4 h-4"></i>
+            </button>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+
+     
+      if (window.lucide) {
+        window.lucide.createIcons();
+      }
+
+     
+      document.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const idx = e.currentTarget.getAttribute('data-index');
+          deleteContact(idx);
+        });
+      });
+    }
+
+    
+    document.getElementById('contactForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const nameInput = document.getElementById('contactName');
+      const relationInput = document.getElementById('contactRelation');
+      const phoneInput = document.getElementById('contactPhone');
+
+      const newContact = {
+        name: nameInput.value.trim(),
+        relation: relationInput.value,
+        phone: phoneInput.value.trim(),
+        createdAt: new Date().toISOString()
+      };
+
+      if (!newContact.name || !newContact.phone) return;
+
+      personalContacts.push(newContact);
+      localStorage.setItem('zalia_contacts', JSON.stringify(personalContacts));
+
+      if (db) {
+        try {
+          const docRef = await addDoc(collection(db, "contacts"), newContact);
+          newContact.firestoreId = docRef.id;
+        } catch (err) {
+          console.warn("Could not sync to cloud, saved locally:", err);
+        }
+      }
+
+      document.getElementById('contactForm').reset();
+      renderContacts();
+      alert("✅ Emergency contact saved successfully!");
+    });
+
+   
+    async function deleteContact(index) {
+      const target = personalContacts[index];
+
+      if (db && target && target.firestoreId) {
+        try {
+          await deleteDoc(doc(db, "contacts", target.firestoreId));
+        } catch (e) {
+          console.warn("Firestore delete warning:", e);
+        }
+      }
+
+      personalContacts.splice(index, 1);
+      localStorage.setItem('zalia_contacts', JSON.stringify(personalContacts));
+      renderContacts();
+    }
+
+   
+    document.getElementById('hotlineSearch')?.addEventListener('input', (e) => {
+      const query = e.target.value.toLowerCase();
+      document.querySelectorAll('.hotline-card').forEach(card => {
+        const text = card.innerText.toLowerCase();
+        const cat = card.getAttribute('data-category') || '';
+        if (text.includes(query) || cat.includes(query)) {
+          card.style.display = 'flex';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    });
+
+   
+    document.getElementById('exportContactsBtn')?.addEventListener('click', () => {
+      if (personalContacts.length === 0) {
+        alert("No saved contacts to export.");
+        return;
+      }
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(personalContacts, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `zalia_emergency_contacts_${new Date().toISOString().slice(0,10)}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    });
+
+   
+    document.getElementById('sendGpsSosBtn')?.addEventListener('click', () => {
+      if (!navigator.geolocation) {
+        alert("Geolocation is not supported by your browser.");
+        return;
+      }
+      
+      const btn = document.getElementById('sendGpsSosBtn');
+      btn.innerText = "Extracting GPS...";
+
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const lat = pos.coords.latitude.toFixed(5);
+          const lng = pos.coords.longitude.toFixed(5);
+          const mapsUrl = `https://maps.google.com/?q=${lat},${lng}`;
+          const msg = `🚨 EMERGENCY SOS - ZALIA SECURITY ALERT 🚨\n\nI need urgent assistance in Rivers State!\n📍 Live GPS Coordinates: ${lat}, ${lng}\n🗺️ Google Maps Location: ${mapsUrl}\n\nPlease dispatch emergency response immediately.`;
+          
+          btn.innerHTML = `<i data-lucide="send" class="w-4 h-4"></i> Send Live Location SOS`;
+          if (window.lucide) window.lucide.createIcons();
+
+          const targetPhone = personalContacts.length > 0 ? personalContacts[0].phone.replace(/\s+/g, '') : "2348032003514";
+          const formattedPhone = targetPhone.startsWith('0') ? '234' + targetPhone.slice(1) : targetPhone;
+          
+          window.open(`https://wa.me/${formattedPhone}?text=${encodeURIComponent(msg)}`, '_blank');
+        },
+        (err) => {
+          btn.innerHTML = `<i data-lucide="send" class="w-4 h-4"></i> Send Live Location SOS`;
+          if (window.lucide) window.lucide.createIcons();
+          alert("Could not access live GPS position. Please check browser permissions.");
+        },
+        { enableHighAccuracy: true, timeout: 10000 }
+      );
+    });
+
+    
+    loadContacts();
+  </script>
+<script>
+  (function () {
+    function updateZaziNightState() {
+      const hour = new Date().getHours();
+      const isLate = hour >= 22 || hour < 6;
+      document.querySelectorAll('img[src*="zaziimage"]').forEach(avatar => {
+        const wrapper = avatar.parentElement;
+        wrapper.classList.add('zalia-sleepy-avatar-wrap');
+        avatar.classList.toggle('zalia-sleepy-avatar', isLate);
+        let badge = wrapper.querySelector('.zalia-sleepy-badge');
+        if (!badge) {
+          badge = document.createElement('span');
+          badge.className = 'zalia-sleepy-badge';
+          badge.textContent = '😴';
+          badge.setAttribute('aria-label', 'Zazi is sleepy');
+          wrapper.appendChild(badge);
+        }
+        badge.hidden = !isLate;
+      });
+    }
+    document.addEventListener('DOMContentLoaded', updateZaziNightState);
+    window.setInterval(updateZaziNightState, 60000);
+  }());
+</script>
+<script src="zazi-presence.js"></script>
+
+</body>
+</html>

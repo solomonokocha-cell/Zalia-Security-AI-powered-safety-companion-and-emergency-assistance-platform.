@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5.0, user-scalable=yes">
+<meta name="description" content="Zazi Games - Interactive safety and security training games from Zalia Security.">
+<meta name="keywords" content="Zalia, Zazi Games, safety games, security training, emergency training">
+<meta name="application-name" content="Zalia">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Zalia">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="msapplication-starturl" content="/">
+<meta name="msapplication-TileColor" content="#FAF9F6">
+<link rel="icon" type="image/png" sizes="650x650" href="/images/zalia-app-icon.png">
+<link rel="apple-touch-icon" sizes="600x600" href="/images/Zalia's-final-logo.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="offline-tailwind.css">
+<meta name="theme-color" content="#0f172a">
+<title>Zazi Games | Zalia Security</title>
+<link rel="stylesheet" href="/pwa-mobile.css">
+<script src="/sw-register.js" defer></script>
+<script src="/pwa-install.js" defer></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,800;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<script src="tailwind-shim.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="lucide-local.js"></script>
+<script>
+tailwind.config = {
+  darkMode: "class",
+  theme: {
+    extend: {
+      colors: {
+        gold: {
+          50: "#FDFBF7", 100: "#FAF5EA", 200: "#F4E7CE", 300: "#EBD4A4",
+          400: "#DFBC72", 500: "#D4A345", 600: "#B88230", 700: "#936125",
+          800: "#774C23", 900: "#623F21"
+        },
+        marble: {
+          50: "#FFFFFF", 100: "#FAF9F6", 200: "#F5F3EF",
+          300: "#EBE7E0", 400: "#D6CFBF", 500: "#B8AFA0"
+        }
+      }
+    }
+  }
+};
+
+if (
+  localStorage.getItem("zalia_theme") === "dark" ||
+  (!("zalia_theme" in localStorage) &&
+   window.matchMedia("(prefers-color-scheme: dark)").matches)
+) {
+  document.documentElement.classList.add("dark");
+}
+</script>
+
+<script>
+(function(){
+  const saved=localStorage.getItem("zalia_theme");
+  const theme=saved || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+  document.documentElement.classList.toggle("dark", theme === "dark");
+})();
+window.toggleZaliaTheme = function(){ toggleTheme(); };
+</script>
+
+<style>
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:"Plus Jakarta Sans",ui-sans-serif,system-ui,sans-serif;-webkit-tap-highlight-color:transparent}
+button{user-select:none}
+.no-scrollbar::-webkit-scrollbar{display:none}.no-scrollbar{scrollbar-width:none}
+.gold-gradient-text{background:linear-gradient(135deg,#B88230 0%,#D4A345 50%,#936125 100%);background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.gold-gradient-bg{background:linear-gradient(135deg,#DFBC72 0%,#B88230 100%)}
+.game-shell{position:relative;overflow:hidden;min-height:clamp(360px,58vw,500px);background:#F5F3EF;border:1px solid rgba(212,163,69,.28);border-radius:22px}
+.game-canvas{width:100%;height:clamp(360px,58vw,500px);display:block;background:#F5F3EF;border-radius:22px;touch-action:none}
+.game-hud{position:absolute;top:12px;left:12px;right:12px;z-index:5;display:flex;justify-content:space-between;gap:8px;pointer-events:none}
+.hud-box{background:rgba(255,255,255,.94);color:#292524;border:1px solid rgba(212,163,69,.28);backdrop-filter:blur(8px);border-radius:14px;padding:8px 11px;font-weight:800;font-size:11px;box-shadow:0 4px 14px rgba(184,130,48,.10)}
+.overlay{position:absolute;inset:0;z-index:10;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(255,255,255,.82);backdrop-filter:blur(5px)}
+.overlay-card{width:min(500px,100%);max-height:92%;overflow:auto;background:#fff;color:#292524;border-radius:26px;padding:24px;text-align:center;box-shadow:0 25px 70px rgba(184,130,48,.16);border:1px solid #F4E7CE}
+.game-card{transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}
+.game-card:hover{transform:translateY(-4px);box-shadow:0 18px 45px rgba(184,130,48,.12)}
+.tap-btn{min-width:72px;min-height:60px;border-radius:18px;font-size:24px;font-weight:900;border:2px solid rgba(212,163,69,.35);background:rgba(212,163,69,.1)}
+.tap-btn:active{transform:scale(.94)}
+.page-hero{background:linear-gradient(135deg,#FFFFFF 0%,#FDFBF7 55%,#FAF9F6 100%);border:1px solid rgba(212,163,69,.30);border-radius:28px;padding:22px;box-shadow:0 10px 30px -5px rgba(0,0,0,.04),0 4px 12px -2px rgba(212,163,69,.08)}
+.dark .page-hero{background:linear-gradient(135deg,#1c1917,#0c0a09);color:#fff}
+.dark .game-shell{background:#111827;border-color:#3f3f46}.dark .game-canvas{background:#111827}
+.dark .hud-box{background:rgba(15,23,42,.88);color:#fff;border-color:rgba(255,255,255,.14)}
+.dark .overlay{background:rgba(2,6,23,.74)}.dark .overlay-card{background:#0c0a09;color:#fff;border-color:#292524}
+html:not(.dark) body,html:not(.dark) main,html:not(.dark) .app-frame{background:#FAF9F6!important;color:#292524}
+html:not(.dark) .sidebar{background:#FFFFFF!important}
+html:not(.dark) .game-content-light{background:#FFFFFF!important}
+@media(max-width:1023px){
+  .desktop-sidebar{display:none!important}
+  .app-frame{min-height:100dvh!important;border-radius:0!important;border:0!important;box-shadow:none!important}
+  .mobile-bottom-nav{display:flex!important}
+  main{padding-bottom:78px}
+}
+@media(min-width:1024px){.mobile-bottom-nav{display:none!important}}
+@media(max-width:640px){
+  .game-hud{top:8px;left:8px;right:8px}.hud-box{padding:7px 8px;font-size:10px}
+  .overlay{padding:10px}.overlay-card{padding:18px;border-radius:22px}
+  .game-canvas{height:clamp(350px,72vw,430px)}.game-shell{min-height:clamp(350px,72vw,430px)}
+}
+</style>
+</head>
+
+<body class="bg-marble-100 dark:bg-stone-950 min-h-screen w-full font-sans text-stone-800 dark:text-stone-100 transition-colors duration-200">
+
+
+<div class="app-frame w-full min-h-screen bg-marble-100 dark:bg-stone-950 overflow-hidden flex flex-col lg:flex-row transition-colors">
+
+<!-- SIDEBAR -->
+<aside class="desktop-sidebar hidden lg:flex flex-col w-80 bg-stone-50/80 dark:bg-stone-900/80 text-stone-800 dark:text-stone-200 p-6 border-r border-gold-500/20 justify-between flex-shrink-0">
+  <div>
+    <div class="flex items-center gap-3 mb-8">
+      <img src="images/zazi-image-final.png"
+           onerror="this.onerror=null;this.src='https://via.placeholder.com/80/D4AF37/FFFFFF?text=Zazi';"
+           class="w-12 h-12 rounded-2xl object-cover border-2 border-gold-500 bg-white"
+           alt="Zazi">
+      <div>
+        <h2 class="font-extrabold text-lg">Zazi 🐾</h2>
+        <p class="text-[10px] text-gold-700 dark:text-gold-300 font-bold uppercase tracking-widest">Zalia Security</p>
+      </div>
+    </div>
+
+    <div class="p-3 bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700/50 rounded-2xl text-xs space-y-1 mb-6">
+      <div class="flex items-center gap-1.5 font-bold text-amber-900 dark:text-amber-300">
+        <span class="w-2.5 h-2.5 rounded-full bg-amber-500 animate-ping"></span>
+        TRAINING MODE ACTIVE
+      </div>
+      <p class="text-amber-800 dark:text-amber-400 text-[11px] leading-tight">These games are a safe practice space for building safety awareness and emergency decision-making skills.</p>
+    </div>
+
+    <p class="text-[11px] uppercase tracking-widest font-bold text-stone-400 mb-2">Navigation</p>
+    <nav class="space-y-1.5 text-sm font-semibold">
+      <a href="index.html" class="block p-3 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 border border-transparent">🏠 Home</a>
+      <a href="simulator.html" class="block p-3 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 border border-transparent">⚡ Crisis Simulator</a>
+      <a href="incidents.html" class="block p-3 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 border border-transparent">🚨 Incident Reports</a>
+      <a href="ZaziAi.html" class="block p-3 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 border border-transparent">🤖 Zazi AI</a>
+      <a href="route-planner.html" class="block p-3 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 border border-transparent">🗺️ Route Planner</a>
+      <a href="about.html" class="block p-3 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 border border-transparent">ℹ️ About Zalia</a>
+      <a href="contact.html" class="block p-3 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 border border-transparent">📞 Contact</a>
+      <a href="games.html" class="block p-3 rounded-xl bg-gold-500 text-white shadow-md">🎮 Zazi Games</a>
+      <a href="safetyacademy.html" class="block p-3 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 border border-transparent">📚 Safety Academy</a>
+
+    </nav>
+  </div>
+
+  <div>
+    <a href="tel:112" class="flex items-center justify-between p-3 rounded-xl bg-white dark:bg-stone-950 border border-stone-200 dark:border-stone-800 mb-3 text-xs font-bold">
+      <span>Emergency</span><b class="bg-gold-500 text-white px-2 py-1 rounded-lg">112</b>
+    </a>
+    <button onclick="toggleTheme()" class="w-full p-3 rounded-2xl gold-gradient-bg hover:opacity-95 dark:bg-stone-800 dark:hover:bg-stone-700 text-white font-bold text-xs transition shadow-md">
+      🌙 <span id="themeText">Night Mode</span>
+    </button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="flex-1 flex flex-col min-h-screen w-full overflow-visible bg-marble-100 dark:bg-stone-950">
+
+<header class="sticky top-0 z-30 bg-white/95 dark:bg-stone-950/95 backdrop-blur border-b border-gold-200/80 dark:border-stone-800">
+  <div class="w-full px-4 sm:px-6 py-3.5 sm:py-4 flex items-center justify-between gap-3">
+    <div class="flex items-center gap-3">
+      <img src="images/shy-zazi.png"
+           onerror="this.onerror=null;this.src='https://via.placeholder.com/70/D4AF37/FFFFFF?text=Zazi';"
+           class="w-11 h-11 rounded-xl object-cover border-2 border-gold-500"
+           alt="Zazi">
+      <div>
+        <h1 class="font-black text-xl sm:text-2xl">Zazi Games 🎮</h1>
+        <p class="text-xs text-stone-500 dark:text-stone-400">Endless safety challenges</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-3">
+      <div class="hidden sm:block text-right">
+        <div class="text-[9px] uppercase tracking-widest text-stone-400 font-bold">Best Score</div>
+        <div id="topBest" class="font-black text-gold-700 dark:text-gold-300">0</div>
+      </div>
+      <button onclick="toggleTheme()" class="flex items-center gap-2 px-3 py-2 bg-stone-50 dark:bg-stone-800 border border-gold-200 dark:border-stone-700 rounded-xl text-xs font-bold text-gold-800 dark:text-gold-200 shadow-sm hover:border-gold-500 transition-all"><span id="topThemeIcon">🌙</span><span class="hidden sm:inline" id="topThemeText">Night Mode</span></button>
+    </div>
+  </div>
+
+  <div class="lg:hidden px-4 pb-3 flex gap-2 overflow-x-auto no-scrollbar whitespace-nowrap">
+    <button id="gamesInstallMobileBtn" data-install-zalia onclick="installZaliaPWA()" class="hidden px-3 py-2 rounded-lg gold-gradient-bg text-white text-xs font-bold shadow-sm">📲 Install Zalia</button>
+    <a href="index.html" class="px-3 py-2 rounded-lg bg-stone-100 dark:bg-stone-800 text-xs">🏠 Home</a>
+    <a href="simulator.html" class="px-3 py-2 rounded-lg bg-stone-100 dark:bg-stone-800 text-xs">⚡ Simulator</a>
+    <a href="route-planner.html" class="px-3 py-2 rounded-lg bg-stone-100 dark:bg-stone-800 text-xs">🗺️ Routes</a>
+    <a href="games.html" class="px-3 py-2 rounded-lg bg-gold-500 text-white text-xs font-bold">🎮 Games</a>
+  </div>
+</header>
+
+<div class="flex-1 p-4 sm:p-6 lg:p-8 overflow-visible bg-marble-100 dark:bg-stone-950 scroll-smooth">
+
+<!-- HERO / GAME HUB -->
+<section id="gameHub" class="space-y-6">
+  <section class="page-hero">
+    <div class="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+      <div class="max-w-3xl">
+        <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-gold-500/10 border border-gold-500/25 text-gold-700 dark:text-gold-300 text-xs font-bold">
+          🏆 ENDLESS SAFETY & SECURITY TRAINING
+        </span>
+        <h2 class="mt-3 text-2xl sm:text-4xl font-black leading-tight text-stone-900 dark:text-white">How safely can you respond? 🛡️</h2>
+        <p class="mt-2 text-sm text-stone-600 dark:text-stone-400 max-w-2xl">
+          Each game turns an important safety skill into an endless challenge. Practise hazard awareness, emergency response, road safety, fire safety and safety-sign recognition while building your high score.
+        </p>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <button onclick="openGame('road')" class="bg-gold-600 hover:bg-gold-700 text-white px-4 py-2.5 rounded-xl font-bold text-xs shadow-sm">🚗 Start Road Challenge</button>
+        <button onclick="openGame('reaction')" class="bg-white dark:bg-stone-900 text-stone-700 dark:text-stone-200 border border-gold-200 dark:border-stone-700 hover:border-gold-500 px-4 py-2.5 rounded-xl font-bold text-xs">⚡ Quick Sign Test</button>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="flex items-end justify-between mb-4">
+      <div>
+        <p class="text-[11px] uppercase tracking-widest font-bold text-stone-400">Choose your mission</p>
+        <h2 class="text-xl sm:text-2xl font-black text-stone-900 dark:text-white">Safety Games</h2>
+      </div>
+      <p class="text-xs text-stone-500 dark:text-stone-400 hidden sm:block">Learn the skill. Beat your score. Stay safe.</p>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-4">
+      <button onclick="openGame('road')" class="game-card text-left bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-2xl p-5 shadow-sm">
+        <div class="flex items-start justify-between"><span class="text-4xl">🚗</span><span class="text-[10px] font-extrabold uppercase px-2 py-1 rounded-full bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300">Road Safety</span></div>
+        <h3 class="font-bold text-lg mt-4 text-stone-900 dark:text-white">Safe Route Challenge</h3>
+        <p class="text-sm text-stone-500 dark:text-stone-400 mt-1">Navigate an endless road while identifying hazards, following safe-driving rules and avoiding dangerous vehicles.</p>
+        <div class="mt-4 text-xs font-bold text-gold-700 dark:text-gold-300">ENDLESS • ARROW KEYS / SWIPE</div>
+      </button>
+
+      <button onclick="openGame('fire')" class="game-card text-left bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-2xl p-5 shadow-sm">
+        <div class="flex items-start justify-between"><span class="text-4xl">🔥</span><span class="text-[10px] font-extrabold uppercase px-2 py-1 rounded-full bg-orange-50 dark:bg-orange-950/40 text-orange-800 dark:text-orange-300">Fire Safety</span></div>
+        <h3 class="font-bold text-lg mt-4 text-stone-900 dark:text-white">Fire Escape Challenge</h3>
+        <p class="text-sm text-stone-500 dark:text-stone-400 mt-1">Practise emergency escape awareness by moving away from fire and keeping a safe route to an exit.</p>
+        <div class="mt-4 text-xs font-bold text-gold-700 dark:text-gold-300">ENDLESS • LEFT / RIGHT</div>
+      </button>
+
+      <button onclick="openGame('catch')" class="game-card text-left bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-2xl p-5 shadow-sm">
+        <div class="flex items-start justify-between"><span class="text-4xl">🧰</span><span class="text-[10px] font-extrabold uppercase px-2 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300">Hazard Awareness</span></div>
+        <h3 class="font-bold text-lg mt-4 text-stone-900 dark:text-white">Hazard Hunt</h3>
+        <p class="text-sm text-stone-500 dark:text-stone-400 mt-1">Identify useful safety equipment while avoiding dangerous hazards.</p>
+        <div class="mt-4 text-xs font-bold text-gold-700 dark:text-gold-300">ENDLESS • MOVE / SWIPE</div>
+      </button>
+
+      <button onclick="openGame('reaction')" class="game-card text-left bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-2xl p-5 shadow-sm">
+        <div class="flex items-start justify-between"><span class="text-4xl">⚡</span><span class="text-[10px] font-extrabold uppercase px-2 py-1 rounded-full bg-blue-50 dark:bg-blue-950/40 text-blue-800 dark:text-blue-300">Safety Signs</span></div>
+        <h3 class="font-bold text-lg mt-4 text-stone-900 dark:text-white">Safety Sign Challenge</h3>
+        <p class="text-sm text-stone-500 dark:text-stone-400 mt-1">Recognise emergency, fire, traffic and personal-safety symbols before the timer runs out.</p>
+        <div class="mt-4 text-xs font-bold text-gold-700 dark:text-gold-300">ENDLESS • TAP</div>
+      </button>
+
+      <button onclick="openGame('crisis')" class="game-card text-left bg-white dark:bg-stone-800 border border-gold-500/30 rounded-2xl p-5 shadow-sm md:col-span-2">
+        <div class="flex items-start justify-between"><span class="text-4xl">🚨</span><span class="text-[10px] font-extrabold uppercase px-2 py-1 rounded-full bg-red-50 dark:bg-red-950/40 text-red-800 dark:text-red-300">Crisis Response</span></div>
+        <h3 class="font-bold text-lg mt-4 text-stone-900 dark:text-white">Crisis Response Challenge</h3>
+        <p class="text-sm text-stone-500 dark:text-stone-400 mt-1">Respond to endless emergency situations by choosing the safest action as quickly as possible.</p>
+        <div class="mt-4 text-xs font-bold text-gold-700 dark:text-gold-300">ENDLESS • CHOOSE FAST</div>
+      </button>
+    </div>
+  </section>
+</section>
+
+<!-- GAME AREA -->
+<section id="gameArea" class="hidden mt-8">
+  <div class="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-3xl shadow-xl overflow-hidden">
+    <div class="p-5 sm:p-7 border-b border-stone-200 dark:border-stone-800 flex items-center justify-between gap-3">
+      <div>
+        <p id="gameKicker" class="text-[10px] uppercase tracking-widest text-gold-700 dark:text-gold-300 font-bold"></p>
+        <h2 id="gameTitle" class="text-2xl sm:text-3xl font-black"></h2>
+      </div>
+      <button onclick="closeGame()" class="px-4 py-2 rounded-xl bg-stone-100 dark:bg-stone-800 text-sm font-bold">← Games</button>
+    </div>
+    <div id="gameContent" class="p-4 sm:p-6 bg-white dark:bg-stone-900"></div>
+  </div>
+</section>
+
+<nav class="mobile-bottom-nav hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 dark:bg-stone-950/95 backdrop-blur border-t border-gold-200/80 dark:border-stone-800 px-2 pt-2 pb-[calc(8px+env(safe-area-inset-bottom))] justify-around shadow-[0_-8px_30px_rgba(0,0,0,.08)]">
+  <a href="index.html" class="flex flex-col items-center gap-1 px-3 py-1.5 text-[10px] font-bold text-stone-500 dark:text-stone-400">🏠<span>Home</span></a>
+  <a href="simulator.html" class="flex flex-col items-center gap-1 px-3 py-1.5 text-[10px] font-bold text-stone-500 dark:text-stone-400">⚡<span>Simulator</span></a>
+  <a href="games.html" class="flex flex-col items-center gap-1 px-3 py-1.5 rounded-xl bg-gold-100 dark:bg-stone-800 text-gold-700 dark:text-gold-300">🎮<span>Games</span></a>
+  <a href="ZaziAi.html" class="flex flex-col items-center gap-1 px-3 py-1.5 text-[10px] font-bold text-stone-500 dark:text-stone-400">🤖<span>Zazi AI</span></a>
+  <button onclick="toggleTheme()" class="flex flex-col items-center gap-1 px-3 py-1.5 text-[10px] font-bold text-stone-500 dark:text-stone-400">🌙<span>Theme</span></button>
+</nav>
+
+<footer class="text-center text-xs text-stone-500 py-10">
+  Zazi Games 🛡️ • Practise smart. Stay alert. Stay safe.
+</footer>
+
+</div>
+</main>
+</div>
+
+<script>
+/* =========================
+   THEME
+========================= */
+function toggleTheme(){
+  const dark=document.documentElement.classList.toggle("dark");
+  localStorage.setItem("zalia_theme",dark?"dark":"light");
+  document.getElementById("themeText").textContent=dark?"Light Mode":"Night Mode";
+  const topText=document.getElementById("topThemeText");
+  const topIcon=document.getElementById("topThemeIcon");
+  if(topText) topText.textContent=dark?"Light Mode":"Night Mode";
+  if(topIcon) topIcon.textContent=dark?"☀️":"🌙";
+}
+
+function syncThemeUI(){
+  const dark=document.documentElement.classList.contains("dark");
+  const text=document.getElementById("themeText");
+  const topText=document.getElementById("topThemeText");
+  const topIcon=document.getElementById("topThemeIcon");
+  if(text) text.textContent=dark?"Light Mode":"Night Mode";
+  if(topText) topText.textContent=dark?"Light Mode":"Night Mode";
+  if(topIcon) topIcon.textContent=dark?"☀️":"🌙";
+}
+
+document.addEventListener("DOMContentLoaded",syncThemeUI);
+
+
+const savedBest=JSON.parse(localStorage.getItem("zaziGameBest")||"{}");
+const totalPlayed=Number(localStorage.getItem("zaziGamesPlayed")||0);
+
+function getBest(game){return Number(savedBest[game]||0)}
+function saveBest(game,score){
+  if(score>getBest(game)){
+    savedBest[game]=score;
+    localStorage.setItem("zaziGameBest",JSON.stringify(savedBest));
+    return true;
+  }
+  return false;
+}
+function addPlayed(){
+  const n=Number(localStorage.getItem("zaziGamesPlayed")||0)+1;
+  localStorage.setItem("zaziGamesPlayed",String(n));
+}
+function updateTopBest(){
+  const best=Math.max(0,...Object.values(savedBest).map(Number));
+  document.getElementById("topBest").textContent=best;
+}
+updateTopBest();
+
+
+let activeCleanup=null;
+function isDarkGame(){ return document.documentElement.classList.contains("dark"); }
+
+const gameInfo={
+  road:["🛣️ SAFE ROUTE TRAINING","Safe Route Challenge"],
+  fire:["🔥 FIRE SAFETY TRAINING","Fire Escape Challenge"],
+  catch:["🧰 HAZARD AWARENESS","Hazard Hunt"],
+  reaction:["⚡ SAFETY SIGN TRAINING","Safety Sign Challenge"],
+  crisis:["🚨 CRISIS RESPONSE TRAINING","Crisis Response Challenge"]
+};
+
+function openGame(type){
+  if(activeCleanup)activeCleanup();
+  document.getElementById("gameHub").classList.add("hidden");
+  document.getElementById("gameArea").classList.remove("hidden");
+  document.getElementById("gameKicker").textContent=gameInfo[type][0];
+  document.getElementById("gameTitle").textContent=gameInfo[type][1];
+
+  const content=document.getElementById("gameContent");
+  content.innerHTML="";
+
+  if(type==="road")activeCleanup=createRoad(content);
+  if(type==="fire")activeCleanup=createFire(content);
+  if(type==="catch")activeCleanup=createCatch(content);
+  if(type==="reaction")activeCleanup=createReaction(content);
+  if(type==="crisis")activeCleanup=createCrisis(content);
+
+  window.scrollTo({top:document.getElementById("gameArea").offsetTop-90,behavior:"smooth"});
+}
+
+function closeGame(){
+  if(activeCleanup)activeCleanup();
+  activeCleanup=null;
+  document.getElementById("gameArea").classList.add("hidden");
+  document.getElementById("gameHub").classList.remove("hidden");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function gameLayout(content,instructions){
+  content.innerHTML=`
+    <div class="max-w-5xl mx-auto">
+      <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <p class="text-sm text-stone-500 dark:text-stone-400">${instructions}</p>
+        <p class="text-xs font-bold text-gold-700 dark:text-gold-300">BEST: <span class="bestValue">0</span></p>
+      </div>
+      <div class="game-shell">
+        <canvas class="game-canvas"></canvas>
+        <div class="game-hud">
+          <div class="hud-box">SCORE <span class="scoreValue">0</span></div>
+          <div class="hud-box">LEVEL <span class="levelValue">1</span></div>
+          <div class="hud-box">❤️ <span class="lifeValue">3</span></div>
+        </div>
+        <div class="overlay">
+          <div class="overlay-card">
+            <div class="text-5xl mb-3">🎮</div>
+            <h3 class="text-2xl font-black mb-1">How to Play</h3>
+            <p class="text-sm text-stone-500 dark:text-stone-400 mb-4">${instructions}</p>
+
+            <div class="text-left bg-stone-100 dark:bg-stone-800 rounded-2xl p-4 mb-5">
+              <p class="text-xs uppercase tracking-widest font-black text-gold-700 dark:text-gold-300 mb-3">Game Instructions</p>
+              <ul class="space-y-2 text-sm text-stone-600 dark:text-stone-300">
+                <li>🎯 <b>Goal:</b> Practise the safety skill in the game while building the highest score.</li>
+                <li>📈 <b>Difficulty:</b> The challenge increases as your score gets higher.</li>
+                <li>❤️ <b>Three lives:</b> A mistake costs one heart. Lose all 3 hearts to end the run.</li>
+                <li>🏆 <b>High score:</b> Your best score is saved automatically.</li>
+              </ul>
+            </div>
+
+            <p class="text-xs font-bold text-stone-400 mb-4">Controls: ${instructions}</p>
+            <button class="startButton bg-gold-500 hover:bg-gold-600 text-white px-6 py-3 rounded-2xl font-black">START GAME 🚀</button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  return {
+    canvas:content.querySelector("canvas"),
+    score:content.querySelector(".scoreValue"),
+    level:content.querySelector(".levelValue"),
+    life:content.querySelector(".lifeValue"),
+    best:content.querySelector(".bestValue"),
+    overlay:content.querySelector(".overlay"),
+    overlayCard:content.querySelector(".overlay-card"),
+    start:content.querySelector(".startButton"),
+    lives:3,
+    hitCooldown:0
+  };
+}
+
+function endScreen(ui,game,score,message){
+  saveBest(game,score);
+  updateTopBest();
+  ui.best.textContent=getBest(game);
+  ui.overlay.classList.remove("hidden");
+  ui.overlayCard.innerHTML=`
+    <div class="text-5xl mb-4">💥</div>
+    <h3 class="text-3xl font-black mb-2">Game Over!</h3>
+    <p class="text-sm text-stone-500 dark:text-stone-400 mb-2">${message}</p>
+    <div class="text-4xl font-black text-gold-700 dark:text-gold-300 mb-1">${score}</div>
+    <p class="text-xs text-stone-500 mb-5">Best: ${getBest(game)}</p>
+    <button class="restartButton bg-gold-500 hover:bg-gold-600 text-white px-6 py-3 rounded-2xl font-black">PLAY AGAIN</button>`;
+
+  // Make PLAY AGAIN restart the same game immediately instead of
+  // forcing the player to return to the game selection screen.
+  const restartButton=ui.overlayCard.querySelector(".restartButton");
+  if(restartButton){
+    restartButton.onclick=()=>openGame(game);
+  }
+
+  addPlayed();
+}
+
+function loseLife(ui,game,score,message){
+  const now=performance.now();
+  if(ui.hitCooldown && now<ui.hitCooldown) return false;
+  ui.hitCooldown=now+900;
+  ui.lives=Math.max(0,(ui.lives||3)-1);
+  ui.life.textContent=ui.lives;
+  if(ui.lives<=0){
+    ui.hitCooldown=0;
+    endScreen(ui,game,score,message);
+    return true;
+  }
+  return false;
+}
+
+function createRoad(content){
+  const ui=gameLayout(content,"← → or A/D • mobile: drag left/right");
+  ui.best.textContent=getBest("road");
+  const c=ui.canvas,x=c.getContext("2d");
+  let W=0,H=0,raf=0,running=false,score=0,level=1,last=0,spawn=0,roadOffset=0;
+  let car={x:0,y:0,w:48,h:82},traffic=[];
+
+  function resize(){
+    const d=devicePixelRatio||1;W=c.clientWidth;H=c.clientHeight;
+    c.width=W*d;c.height=H*d;x.setTransform(d,0,0,d,0,0);
+    car.y=H-105;if(!running)car.x=W/2-24;
+  }
+  resize();window.addEventListener("resize",resize);
+
+  function move(dir){if(!running)return;car.x+=dir*42;car.x=Math.max(W*.18,Math.min(W*.82-car.w,car.x))}
+  const key=e=>{
+    if(["ArrowLeft","a","A"].includes(e.key)){e.preventDefault();move(-1)}
+    if(["ArrowRight","d","D"].includes(e.key)){e.preventDefault();move(1)}
+  };
+  window.addEventListener("keydown",key);
+
+  let dragging=false,lastX=0;
+  const pd=e=>{dragging=true;lastX=e.clientX};
+  const pm=e=>{if(dragging){move((e.clientX-lastX)/25);lastX=e.clientX}};
+  const pu=()=>dragging=false;
+  c.addEventListener("pointerdown",pd);c.addEventListener("pointermove",pm);
+  window.addEventListener("pointerup",pu);
+
+  function hit(a,b){
+    return a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y;
+  }
+  function start(){
+    ui.overlay.classList.add("hidden");running=true;score=0;level=1;ui.lives=3;ui.life.textContent=3;ui.hitCooldown=0;last=performance.now();spawn=0;traffic=[];
+    car={x:W/2-24,y:H-105,w:48,h:82};raf=requestAnimationFrame(loop);
+  }
+  ui.start.onclick=start;
+
+  function loop(t){
+    if(!running)return;
+    const dt=Math.min(.035,(t-last)/1000);last=t;
+    score+=dt*10;level=1+Math.floor(score/400);
+    const speed=260+level*32;roadOffset=(roadOffset+speed*dt)%80;
+    spawn-=dt;
+    if(spawn<=0){
+      spawn=Math.max(.45,.9-level*.025);
+      const lanes=[W*.27,W*.47,W*.67];
+      traffic.push({x:lanes[Math.floor(Math.random()*lanes.length)]-23,y:-100,w:46,h:80});
+    }
+    traffic.forEach(v=>v.y+=speed*dt);
+    for(const v of traffic){
+      if(hit(car,v)){v.y=H+300;if(loseLife(ui,"road",Math.floor(score),"A traffic hazard reached your lane.")){running=false;draw();return}}
+    }
+    traffic=traffic.filter(v=>v.y<H+100);
+    draw();
+    ui.score.textContent=Math.floor(score);ui.level.textContent=level;
+    raf=requestAnimationFrame(loop);
+  }
+
+  function draw(){
+    x.clearRect(0,0,W,H);x.fillStyle=isDarkGame()?"#166534":"#f5f5f4";x.fillRect(0,0,W,H);
+    const left=W*.15,right=W*.85;
+    x.fillStyle=isDarkGame()?"#374151":"#e7e5e4";x.fillRect(left,0,right-left,H);
+    x.strokeStyle="#f8fafc";x.lineWidth=5;x.setLineDash([35,35]);
+    [W*.38,W*.62].forEach(l=>{x.beginPath();x.moveTo(l,-80+roadOffset);x.lineTo(l,H+80);x.stroke()});
+    x.setLineDash([]);
+    // player car
+    x.fillStyle="#D4AF37";x.beginPath();x.roundRect(car.x,car.y,car.w,car.h,12);x.fill();
+    x.fillStyle=isDarkGame()?"#111827":"#e7e2d8";x.fillRect(car.x+9,car.y+12,30,23);
+    x.fillStyle="#ef4444";x.fillRect(car.x+6,car.y+67,10,7);x.fillRect(car.x+32,car.y+67,10,7);
+    traffic.forEach(v=>{
+      x.fillStyle="#ef4444";x.beginPath();x.roundRect(v.x,v.y,v.w,v.h,12);x.fill();
+      x.fillStyle="#cbd5e1";x.fillRect(v.x+8,v.y+12,30,22);
+      x.fillStyle="#fbbf24";x.fillRect(v.x+5,v.y+4,8,5);x.fillRect(v.x+33,v.y+4,8,5);
+    });
+  }
+  draw();
+
+  return ()=>{
+    running=false;cancelAnimationFrame(raf);
+    window.removeEventListener("resize",resize);window.removeEventListener("keydown",key);
+    c.removeEventListener("pointerdown",pd);c.removeEventListener("pointermove",pm);window.removeEventListener("pointerup",pu);
+  };
+}
+
+
+function createFire(content){
+  const ui=gameLayout(content,"← → or A/D • keep moving • avoid the flames");
+  ui.best.textContent=getBest("fire");
+  const c=ui.canvas,x=c.getContext("2d");
+  let W=0,H=0,raf=0,running=false,score=0,level=1,last=0,spawn=0;
+  let player={x:0,y:0,w:34,h:45},flames=[];
+
+  function resize(){
+    const d=devicePixelRatio||1;W=c.clientWidth;H=c.clientHeight;
+    c.width=W*d;c.height=H*d;x.setTransform(d,0,0,d,0,0);
+    player.y=H-90;if(!running)player.x=W/2-17;
+  }
+  resize();window.addEventListener("resize",resize);
+
+  function move(dir){if(running){player.x+=dir*40;player.x=Math.max(18,Math.min(W-52,player.x))}}
+  const key=e=>{
+    if(["ArrowLeft","a","A"].includes(e.key)){e.preventDefault();move(-1)}
+    if(["ArrowRight","d","D"].includes(e.key)){e.preventDefault();move(1)}
+  };
+  window.addEventListener("keydown",key);
+
+  function start(){
+    ui.overlay.classList.add("hidden");running=true;score=0;level=1;ui.lives=3;ui.life.textContent=3;ui.hitCooldown=0;last=performance.now();spawn=0;
+    player={x:W/2-17,y:H-90,w:34,h:45};flames=[];raf=requestAnimationFrame(loop);
+  }
+  ui.start.onclick=start;
+
+  function hit(a,b){return a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y}
+
+  function loop(t){
+    if(!running)return;
+    const dt=Math.min(.035,(t-last)/1000);last=t;
+    score+=dt*12;level=1+Math.floor(score/350);
+    const speed=210+level*30;spawn-=dt;
+    if(spawn<=0){
+      spawn=Math.max(.25,.7-level*.02);
+      const w=30+Math.random()*48;
+      flames.push({x:20+Math.random()*(W-40-w),y:-60,w,h:30+Math.random()*45});
+    }
+    flames.forEach(f=>{f.y+=speed*dt;f.h+=dt*3});
+    for(const f of flames){
+      if(hit(player,f)){f.y=H+300;if(loseLife(ui,"fire",Math.floor(score),"The fire caught up with you.")){running=false;draw();return}}
+    }
+    flames=flames.filter(f=>f.y<H+80);
+    draw();ui.score.textContent=Math.floor(score);ui.level.textContent=level;
+    raf=requestAnimationFrame(loop);
+  }
+
+  function draw(){
+    x.clearRect(0,0,W,H);
+    x.fillStyle=isDarkGame()?"#1c1917":"#ffffff";x.fillRect(0,0,W,H);
+    // corridor
+    x.fillStyle=isDarkGame()?"#292524":"#faf9f6";x.fillRect(30,0,W-60,H);
+    for(let y=0;y<H;y+=70){
+      x.fillStyle=isDarkGame()?"#44403c":"#e7e5e4";x.fillRect(30,y,W-60,2);
+      x.fillStyle=isDarkGame()?"#57534e":"#d6d3d1";x.fillRect(35,y+20,18,28);x.fillRect(W-53,y+20,18,28);
+    }
+    // exit
+    x.fillStyle="#22c55e";x.fillRect(W/2-45,8,90,35);
+    x.fillStyle=isDarkGame()?"#fff":"#292524";x.font="bold 14px sans-serif";x.textAlign="center";x.fillText("EXIT",W/2,30);
+
+    flames.forEach(f=>{
+      x.fillStyle="#ef4444";x.beginPath();x.roundRect(f.x,f.y,f.w,f.h,15);x.fill();
+      x.fillStyle="#f97316";x.beginPath();x.ellipse(f.x+f.w/2,f.y+f.h/2,f.w*.35,f.h*.38,0,0,Math.PI*2);x.fill();
+      x.fillStyle="#fde047";x.beginPath();x.ellipse(f.x+f.w/2,f.y+f.h*.58,f.w*.18,f.h*.22,0,0,Math.PI*2);x.fill();
+    });
+
+    x.fillStyle="#D4AF37";x.beginPath();x.roundRect(player.x,player.y,player.w,player.h,10);x.fill();
+    x.fillStyle=isDarkGame()?"#111827":"#57534e";x.beginPath();x.arc(player.x+10,player.y+15,3,0,Math.PI*2);x.fill();
+    x.beginPath();x.arc(player.x+24,player.y+15,3,0,Math.PI*2);x.fill();
+    x.font="bold 13px sans-serif";x.textAlign="center";x.fillText("Z",player.x+17,player.y+37);
+  }
+  draw();
+
+  return ()=>{
+    running=false;cancelAnimationFrame(raf);window.removeEventListener("resize",resize);window.removeEventListener("keydown",key);
+  };
+}
+
+/* =========================
+   SAFETY CATCH
+========================= */
+function createCatch(content){
+  const ui=gameLayout(content,"← → or A/D • catch equipment • avoid hazards");
+  ui.best.textContent=getBest("catch");
+  const c=ui.canvas,x=c.getContext("2d");
+  let W=0,H=0,raf=0,running=false,score=0,level=1,last=0,spawn=0;
+  let player={x:0,y:0,w:70,h:28},items=[];
+
+  function resize(){
+    const d=devicePixelRatio||1;W=c.clientWidth;H=c.clientHeight;
+    c.width=W*d;c.height=H*d;x.setTransform(d,0,0,d,0,0);
+    player.y=H-70;if(!running)player.x=W/2-35;
+  }
+  resize();window.addEventListener("resize",resize);
+
+  function move(dir){if(running){player.x+=dir*42;player.x=Math.max(10,Math.min(W-player.w-10,player.x))}}
+  const key=e=>{
+    if(["ArrowLeft","a","A"].includes(e.key)){e.preventDefault();move(-1)}
+    if(["ArrowRight","d","D"].includes(e.key)){e.preventDefault();move(1)}
+  };
+  window.addEventListener("keydown",key);
+
+  let drag=false,lastX=0;
+  const down=e=>{drag=true;lastX=e.clientX};
+  const movePointer=e=>{if(drag){player.x+=e.clientX-lastX;lastX=e.clientX;player.x=Math.max(10,Math.min(W-player.w-10,player.x))}};
+  const up=()=>drag=false;
+  c.addEventListener("pointerdown",down);c.addEventListener("pointermove",movePointer);window.addEventListener("pointerup",up);
+
+  function hit(a,b){return a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y}
+  function start(){
+    ui.overlay.classList.add("hidden");running=true;score=0;level=1;ui.lives=3;ui.life.textContent=3;ui.hitCooldown=0;last=performance.now();spawn=0;items=[];
+    player={x:W/2-35,y:H-70,w:70,h:28};raf=requestAnimationFrame(loop);
+  }
+  ui.start.onclick=start;
+
+  function loop(t){
+    if(!running)return;
+    const dt=Math.min(.035,(t-last)/1000);last=t;
+    score+=dt*8;level=1+Math.floor(score/300);
+    const speed=150+level*25;spawn-=dt;
+    if(spawn<=0){
+      spawn=Math.max(.25,.62-level*.015);
+      const good=Math.random()>.28;
+      items.push({x:15+Math.random()*(W-45),y:-35,w:34,h:34,good,emoji:good?["🪖","🧯","🦺","🧰"][Math.floor(Math.random()*4)]:"🔥"});
+    }
+    items.forEach(i=>i.y+=speed*dt);
+    for(const i of items){
+      if(hit(player,i)){
+        if(i.good)score+=75;
+        else{ i.dead=true; if(loseLife(ui,"catch",Math.floor(score),"You caught a hazard instead of safety equipment.")){running=false;draw();return} }
+        i.dead=true;
+      }
+    }
+    items=items.filter(i=>!i.dead&&i.y<H+50);
+    draw();ui.score.textContent=Math.floor(score);ui.level.textContent=level;
+    raf=requestAnimationFrame(loop);
+  }
+
+  function draw(){
+    x.clearRect(0,0,W,H);x.fillStyle=isDarkGame()?"#0f172a":"#ffffff";x.fillRect(0,0,W,H);
+    x.fillStyle=isDarkGame()?"#1e293b":"#f5f5f4";x.fillRect(0,H-48,W,48);
+    x.strokeStyle="#D4AF37";x.lineWidth=2;x.strokeRect(0,H-48,W,48);
+    items.forEach(i=>{
+      x.font="30px sans-serif";x.textAlign="center";x.fillText(i.emoji,i.x+i.w/2,i.y+29);
+    });
+    x.fillStyle="#D4AF37";x.beginPath();x.roundRect(player.x,player.y,player.w,player.h,12);x.fill();
+    x.fillStyle=isDarkGame()?"#111827":"#57534e";x.font="bold 15px sans-serif";x.textAlign="center";x.fillText("ZAZI",player.x+35,player.y+20);
+  }
+  draw();
+
+  return ()=>{
+    running=false;cancelAnimationFrame(raf);window.removeEventListener("resize",resize);window.removeEventListener("keydown",key);
+    c.removeEventListener("pointerdown",down);c.removeEventListener("pointermove",movePointer);window.removeEventListener("pointerup",up);
+  };
+}
+
+/* =========================
+   SAFETY SPRINT / REACTION
+========================= */
+function createReaction(content){
+  const ui=gameLayout(content,"Tap the SAFETY symbol • the timer gets faster");
+  ui.best.textContent=getBest("reaction");
+  const c=ui.canvas,x=c.getContext("2d");
+  let W=0,H=0,raf=0,running=false,score=0,level=1,deadline=0,last=0;
+  let target="",options=[],timeLimit=1500;
+
+  const symbols=["🧯","🚗","🪖","🚨","🦺","🔥","⛑️","🔒"];
+  function resize(){
+    const d=devicePixelRatio||1;W=c.clientWidth;H=c.clientHeight;
+    c.width=W*d;c.height=H*d;x.setTransform(d,0,0,d,0,0);draw();
+  }
+  resize();window.addEventListener("resize",resize);
+
+  function makeRound(){
+    target=symbols[Math.floor(Math.random()*symbols.length)];
+    options=[target];
+    while(options.length<4){
+      const s=symbols[Math.floor(Math.random()*symbols.length)];
+      if(!options.includes(s))options.push(s);
+    }
+    options.sort(()=>Math.random()-.5);
+    timeLimit=Math.max(520,1500-score*2);
+    deadline=performance.now()+timeLimit;
+    draw();
+  }
+
+  function start(){
+    ui.overlay.classList.add("hidden");running=true;score=0;level=1;ui.lives=3;ui.life.textContent=3;ui.hitCooldown=0;last=performance.now();makeRound();raf=requestAnimationFrame(loop);
+  }
+  ui.start.onclick=start;
+
+  function choose(s){
+    if(!running)return;
+    if(s!==target){ if(loseLife(ui,"reaction",score,"Wrong symbol — react carefully, not randomly.")){running=false;draw();return} makeRound(); return; }
+    score++;level=1+Math.floor(score/10);makeRound();
+  }
+
+  function loop(t){
+    if(!running)return;
+    if(t>=deadline){ if(loseLife(ui,"reaction",score,"Too slow! The timer beat you.")){running=false;draw();return} makeRound(); return; }
+    draw();raf=requestAnimationFrame(loop);
+  }
+
+  function draw(){
+    x.clearRect(0,0,W,H);x.fillStyle=isDarkGame()?"#111827":"#ffffff";x.fillRect(0,0,W,H);
+    x.fillStyle="#D4AF37";x.font="bold 14px sans-serif";x.textAlign="center";x.fillText("FIND THIS SYMBOL",W/2,55);
+    x.font="76px sans-serif";x.fillText(target,W/2,145);
+    const cols=[W*.22,W*.42,W*.62,W*.82];
+    options.forEach((s,i)=>{
+      x.fillStyle="rgba(212,175,55,.15)";x.strokeStyle="#D4AF37";x.lineWidth=2;
+      x.beginPath();x.roundRect(cols[i]-35,H/2-25,70,70,16);x.fill();x.stroke();
+      x.font="34px sans-serif";x.fillStyle=isDarkGame()?"#fff":"#292524";x.fillText(s,cols[i],H/2+22);
+    });
+    if(running){
+      const remain=Math.max(0,deadline-performance.now());
+      x.fillStyle=isDarkGame()?"#334155":"#e7e5e4";x.fillRect(W*.15,H-55,W*.7,8);
+      x.fillStyle="#D4AF37";x.fillRect(W*.15,H-55,W*.7*(remain/timeLimit),8);
+    }
+  }
+
+  const pointer=e=>{
+    if(!running)return;
+    const r=c.getBoundingClientRect(),mx=e.clientX-r.left,my=e.clientY-r.top;
+    const cols=[W*.22,W*.42,W*.62,W*.82];
+    if(my>=H/2-35&&my<=H/2+60){
+      let nearest=0,dist=Infinity;
+      cols.forEach((v,i)=>{const d=Math.abs(mx-v);if(d<dist){dist=d;nearest=i}});
+      if(dist<60)choose(options[nearest]);
+    }
+  };
+  c.addEventListener("pointerdown",pointer);draw();
+
+  return ()=>{
+    running=false;cancelAnimationFrame(raf);window.removeEventListener("resize",resize);c.removeEventListener("pointerdown",pointer);
+  };
+}
+
+/* =========================
+   CRISIS DASH
+========================= */
+function createCrisis(content){
+  const ui=gameLayout(content,"Choose the safest action • wrong choices end the run");
+  ui.best.textContent=getBest("crisis");
+  const c=ui.canvas,x=c.getContext("2d");
+  let W=0,H=0,raf=0,running=false,score=0,level=1,deadline=0;
+  const situations=[
+    {emoji:"🔥",q:"You see smoke under a door. What is safest?",a:["Open it quickly","Stay low and find another exit","Hide in the room"],correct:1},
+    {emoji:"🚗",q:"A vehicle is approaching while you cross. What should you do?",a:["Run faster","Stop and check the traffic","Look at your phone"],correct:1},
+    {emoji:"⚡",q:"You see a damaged electrical cable. What should you do?",a:["Touch it to test it","Keep away and report it","Pour water on it"],correct:1},
+    {emoji:"🚨",q:"An emergency alarm sounds. What is safest?",a:["Ignore it","Follow the emergency procedure","Wait for someone else"],correct:1},
+    {emoji:"🧯",q:"A small fire starts and you are trained to use an extinguisher. What first?",a:["Raise the alarm and assess safely","Get very close immediately","Block the exit"],correct:0},
+    {emoji:"📱",q:"You receive a suspicious urgent link. What should you do?",a:["Click it quickly","Share it","Do not open it and report it"],correct:2}
+  ];
+  let current=null;
+
+  function resize(){
+    const d=devicePixelRatio||1;W=c.clientWidth;H=c.clientHeight;c.width=W*d;c.height=H*d;x.setTransform(d,0,0,d,0,0);draw();
+  }
+  resize();window.addEventListener("resize",resize);
+
+  function next(){
+    current=situations[Math.floor(Math.random()*situations.length)];
+    deadline=performance.now()+Math.max(2200,5000-score*55);
+    draw();
+  }
+  function start(){
+    ui.overlay.classList.add("hidden");running=true;score=0;level=1;ui.lives=3;ui.life.textContent=3;ui.hitCooldown=0;next();raf=requestAnimationFrame(loop);
+  }
+  ui.start.onclick=start;
+
+  function choose(i){
+    if(!running)return;
+    if(i!==current.correct){ if(loseLife(ui,"crisis",score,"That decision was not the safest available option.")){running=false;draw();return} next(); return; }
+    score++;level=1+Math.floor(score/5);next();
+  }
+
+  function loop(t){
+    if(!running)return;
+    if(t>=deadline){ if(loseLife(ui,"crisis",score,"You ran out of time.")){running=false;draw();return} next(); return; }
+    draw();raf=requestAnimationFrame(loop);
+  }
+
+  function draw(){
+    x.clearRect(0,0,W,H);x.fillStyle=isDarkGame()?"#111827":"#ffffff";x.fillRect(0,0,W,H);
+    if(!current)return;
+    x.fillStyle="#D4AF37";x.font="62px sans-serif";x.textAlign="center";x.fillText(current.emoji,W/2,85);
+    x.fillStyle=isDarkGame()?"#fff":"#292524";x.font="bold 20px sans-serif";
+    wrapText(current.q,W/2,130,W*.75,28);
+    const top=H*.48;
+    current.a.forEach((a,i)=>{
+      const y=top+i*68;
+      x.fillStyle=isDarkGame()?"rgba(255,255,255,.08)":"rgba(41,37,36,.05)";x.strokeStyle="rgba(212,175,55,.5)";x.lineWidth=2;
+      x.beginPath();x.roundRect(W*.12,y,W*.76,52,14);x.fill();x.stroke();
+      x.fillStyle=isDarkGame()?"#fff":"#292524";x.font="bold 14px sans-serif";x.textAlign="left";
+      x.fillText(`${i+1}. ${a}`,W*.15,y+31);
+    });
+    const remain=Math.max(0,deadline-performance.now());
+    x.fillStyle=isDarkGame()?"#334155":"#e7e5e4";x.fillRect(W*.12,H-35,W*.76,7);
+    x.fillStyle="#D4AF37";x.fillRect(W*.12,H-35,W*.76*(remain/Math.max(2200,5000-score*55)),7);
+  }
+
+  function wrapText(text,cx,startY,maxWidth,lineHeight){
+    x.textAlign="center";
+    const words=text.split(" ");let line="",y=startY;
+    for(const word of words){
+      const test=line?line+" "+word:word;
+      if(x.measureText(test).width>maxWidth){x.fillText(line,cx,y);line=word;y+=lineHeight}
+      else line=test;
+    }
+    if(line)x.fillText(line,cx,y);
+  }
+
+  const pointer=e=>{
+    if(!running)return;
+    const r=c.getBoundingClientRect(),mx=e.clientX-r.left,my=e.clientY-r.top;
+    const top=H*.48;
+    current.a.forEach((_,i)=>{
+      const y=top+i*68;
+      if(mx>=W*.12&&mx<=W*.88&&my>=y&&my<=y+52)choose(i);
+    });
+  };
+  c.addEventListener("pointerdown",pointer);draw();
+
+  return ()=>{
+    running=false;cancelAnimationFrame(raf);window.removeEventListener("resize",resize);c.removeEventListener("pointerdown",pointer);
+  };
+}
+</script>
+
+
+<script>
+let zaliaInstallPrompt=null;
+window.addEventListener("beforeinstallprompt",(e)=>{
+  e.preventDefault(); zaliaInstallPrompt=e;
+  document.querySelectorAll("#gamesInstallMobileBtn,#gamesInstallBtn").forEach(b=>b.classList.remove("hidden"));
+});
+window.addEventListener("appinstalled",()=>{
+  zaliaInstallPrompt=null;
+  document.querySelectorAll("#gamesInstallMobileBtn,#gamesInstallBtn").forEach(b=>b.classList.add("hidden"));
+});
+async function installZaliaPWA(){
+  if(!zaliaInstallPrompt){
+    alert("To install Zalia, use your browser menu and choose 'Install Zalia' or 'Add to Home screen'.");
+    return;
+  }
+  zaliaInstallPrompt.prompt();
+  await zaliaInstallPrompt.userChoice;
+  zaliaInstallPrompt=null;
+}
+function checkGamesNetwork(){
+  let b=document.getElementById("zaliaOfflineBanner");
+  if(!navigator.onLine){
+    if(!b){b=document.createElement("div");b.id="zaliaOfflineBanner";b.className="fixed top-0 left-0 right-0 z-[60] bg-amber-600 text-white text-xs font-bold text-center py-2 px-4 shadow-md";b.textContent="⚠️ You are offline. Cached Zazi games remain available.";document.body.prepend(b);}
+  }else if(b)b.remove();
+}
+window.addEventListener("online",checkGamesNetwork);window.addEventListener("offline",checkGamesNetwork);
+window.addEventListener("DOMContentLoaded",()=>{checkGamesNetwork();syncThemeUI();});
+</script>
+<script>
+  (function () {
+    function updateZaziNightState() {
+      const hour = new Date().getHours();
+      const isLate = hour >= 22 || hour < 6;
+      document.querySelectorAll('img[src*="zaziimage"]').forEach(avatar => {
+        const wrapper = avatar.parentElement;
+        wrapper.classList.add('zalia-sleepy-avatar-wrap');
+        avatar.classList.toggle('zalia-sleepy-avatar', isLate);
+        let badge = wrapper.querySelector('.zalia-sleepy-badge');
+        if (!badge) {
+          badge = document.createElement('span');
+          badge.className = 'zalia-sleepy-badge';
+          badge.textContent = '😴';
+          badge.setAttribute('aria-label', 'Zazi is sleepy');
+          wrapper.appendChild(badge);
+        }
+        badge.hidden = !isLate;
+      });
+    }
+    document.addEventListener('DOMContentLoaded', updateZaziNightState);
+    window.setInterval(updateZaziNightState, 60000);
+  }());
+</script>
+<script src="zazi-presence.js"></script>
+
+</body>
+</html>

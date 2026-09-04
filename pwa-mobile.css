@@ -1,0 +1,8 @@
+/* Local mobile baseline used when optional remote styles are unavailable. */
+html, body { min-width: 0; }
+body { overflow-x: hidden; }
+button, a { -webkit-tap-highlight-color: transparent; }
+@media (max-width: 1023px) {
+  .app-frame { min-height: 100dvh; }
+  main { padding-bottom: 4.75rem; }
+}

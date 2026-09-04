@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Track live incident updates, community alerts, and safety reports across Rivers State with Zalia." />
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/png" sizes="650x650" href="/images/zalia-app-icon.png">
+  <meta name="theme-color" content="#0f172a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Zalia">
+  <link rel="apple-touch-icon" sizes="600x600" href="/images/Zalia's-final-logo.png">
+  <title>Live Incidents • Zalia Security Companion</title>
+
+ 
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="tailwind-shim.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="lucide-local.js"></script>
+  <script src="pwa-install.js"></script>
+  <script src="/sw-register.js" defer></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="offline-tailwind.css" />
+
+ 
+  <script>
+  
+    if (localStorage.getItem('zalia_theme') === 'dark' || (!('zalia_theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+
+ 
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            gold: {
+              50: '#FDFBF7', 100: '#FAF5EA', 200: '#F4E7CE', 300: '#EBD4A4',
+              400: '#DFBC72', 500: '#D4A345', 600: '#B88230', 700: '#936125',
+              800: '#774C23', 900: '#623F21', 950: '#422812'
+            },
+            marble: {
+              50: '#FFFFFF', 100: '#FAF9F6', 200: '#F5F3EF',
+              300: '#EBE7E0', 400: '#D6CFBF', 500: '#B8AFA0'
+            }
+          }
+        }
+      }
+    };
+
+   
+    function toggleZaliaTheme() {
+      const isDark = document.documentElement.classList.contains('dark');
+      if (isDark) {
+        document.documentElement.classList.remove('dark');
+        localStorage.setItem('zalia_theme', 'light');
+      } else {
+        document.documentElement.classList.add('dark');
+        localStorage.setItem('zalia_theme', 'dark');
+      }
+      updateThemeButtonUI();
+    }
+
+    function updateThemeButtonUI() {
+      const isDark = document.documentElement.classList.contains('dark');
+      document.querySelectorAll('.zalia-theme-btn').forEach(btn => {
+        const text = btn.querySelector('.theme-text');
+        const icon = btn.querySelector('[data-lucide]');
+        if (text) text.textContent = isDark ? 'Light Mode' : 'Night Mode';
+        if (icon) icon.setAttribute('data-lucide', isDark ? 'sun' : 'moon');
+      });
+      if (window.lucide) lucide.createIcons();
+    }
+
+   
+    function checkNetworkStatus() {
+      let banner = document.getElementById('zaliaOfflineBanner');
+      if (!navigator.onLine) {
+        if (!banner) {
+          banner = document.createElement('div');
+          banner.id = 'zaliaOfflineBanner';
+          banner.className = 'w-full bg-amber-600 text-white text-xs font-bold text-center py-2 px-4 sticky top-0 z-50 flex items-center justify-center gap-2 shadow-md';
+          banner.innerHTML = `<span>⚠️ You are offline. Cached safety data active.</span>`;
+          document.body.prepend(banner);
+        }
+      } else if (banner) {
+        banner.remove();
+      }
+    }
+
+    window.addEventListener('online', checkNetworkStatus);
+    window.addEventListener('offline', checkNetworkStatus);
+    document.addEventListener('DOMContentLoaded', () => {
+      checkNetworkStatus();
+      updateThemeButtonUI();
+    });
+  </script>
+</head>
+
+<body class="bg-marble-100 dark:bg-stone-950 text-stone-800 dark:text-stone-100 font-sans min-h-screen pb-12 transition-colors duration-200">
+
+  <div class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+    
+   
+    <header class="flex justify-between items-center mb-6 pb-6 border-b border-gold-200 dark:border-stone-800">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-gold-400 to-gold-600 p-0.5 shadow-md flex items-center justify-center">
+          <div class="w-full h-full bg-white dark:bg-stone-900 rounded-[10px] flex items-center justify-center">
+            <i data-lucide="radio" class="w-5 h-5 text-gold-600 animate-pulse"></i>
+          </div>
+        </div>
+        <a href="incidents.html" class="text-2xl font-serif font-extrabold text-stone-900 dark:text-stone-100 tracking-tight">Incidents</a>
+       <div>
+          <nav class="flex items-center gap-4 text-xs font-bold mb-1 flex-wrap">
+            <a href="index.html" class="text-gold-700 border-b-2 border-gold-500 pb-1">Dashboard</a>
+            <a href="about.html" class="text-stone-500 hover:text-gold-700 transition-colors">About</a>
+            <a href="contact.html" class="text-stone-500 hover:text-gold-700 transition-colors">Emergency Contacts</a>
+            <a href="ZaziAi.html" class="text-stone-500 hover:text-gold-700 transition-colors">Zazi AI</a>
+            <a href="incidents.html" class="text-stone-500 hover:text-gold-700 transition-colors">Incidents</a>
+            <a href="simulator.html" class="text-stone-500 hover:text-gold-700 transition-colors">Crisis Simulator</a>
+            <a href="route-planner.html" class="text-stone-500 hover:text-gold-700 transition-colors">Route Planner</a>
+            <a href="safetyacademy.html" class="text-stone-500 hover:text-gold-700 transition-colors">Safety Academy</a>
+
+          </nav>
+
+  
+        </div>
+
+      <button onclick="toggleZaliaTheme()" class="zalia-theme-btn flex items-center gap-2 px-4 py-2 bg-white dark:bg-stone-900 border border-gold-200 dark:border-stone-800 rounded-2xl text-xs font-bold text-stone-800 dark:text-stone-100 shadow-xs hover:border-gold-500 transition-all">
+        <i data-lucide="moon"   class="w-4 h-4 text-gold-600 dark:text-gold-400"></i>
+        <span class="theme-text">Night Mode</span>
+      </button>
+    </header>
+
+    <section class="page-hero mb-6">
+      <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div>
+          <span class="hero-pill"><i data-lucide="sparkles" class="w-3.5 h-3.5"></i> live updates that feel reassuring</span>
+          <h2 class="mt-2 text-2xl sm:text-3xl font-bold text-stone-900 dark:text-stone-100">A calmer, clearer incident feed for fast decisions.</h2>
+          <p class="mt-2 text-sm text-stone-600 dark:text-stone-400 max-w-2xl">The feed is easier to scan, quicker to act on, and designed to feel dependable in high-pressure moments.</p>
+        </div>
+        <div class="hero-actions">
+          <a href="contact.html" class="bg-gold-600 text-white">Open emergency contacts</a>
+          <a href="route-planner.html" class="bg-white dark:bg-stone-900 text-stone-700 dark:text-stone-200 border border-gold-200">Try route planner</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Mobile Navigation Bar -->
+    <div class="md:hidden mb-6 bg-white dark:bg-stone-900 border border-gold-200 dark:border-stone-800 rounded-2xl p-2.5 flex items-center justify-between text-xs font-semibold overflow-x-auto whitespace-nowrap scrollbar-none shadow-xs">
+      <div class="flex space-x-2">
+        <a href="route-planner.html" class="bg-marble-100 dark:bg-stone-800 text-stone-700 dark:text-stone-200 px-3 py-1.5 rounded-xl border border-gold-200 dark:border-stone-700">Route Planner</a>
+        <a href="index.html" class="bg-marble-100 dark:bg-stone-800 text-stone-700 dark:text-stone-200 px-3 py-1.5 rounded-xl border border-gold-200 dark:border-stone-700">Home</a>
+        <a href="ZaziAi.html" class="bg-marble-100 dark:bg-stone-800 text-stone-700 dark:text-stone-200 px-3 py-1.5 rounded-xl border border-gold-200 dark:border-stone-700">Zazi AI</a>
+        <a href="incidents.html" class="bg-gold-500 text-white px-3 py-1.5 rounded-xl font-bold shadow-xs">Incidents</a>
+        <a href="contact.html" class="bg-marble-100 dark:bg-stone-800 text-stone-700 dark:text-stone-200 px-3 py-1.5 rounded-xl border border-gold-200 dark:border-stone-700">Emergency</a>
+        <a href="simulator.html" class="bg-marble-100 dark:bg-stone-800 text-stone-700 dark:text-stone-200 px-3 py-1.5 rounded-xl border border-gold-200 dark:border-stone-700">Simulator</a>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+
+      <!-- LEFT SIDEBAR: App Info & Quick Actions -->
+      <div class="lg:col-span-1 space-y-6">
+        <div class="bg-white dark:bg-stone-900 border border-gold-200 dark:border-stone-800 rounded-3xl p-6 shadow-xs space-y-4">
+          <div class="flex items-center gap-3">
+            <img src="images/zaziimage.png" onerror="this.onerror=null; this.src='https://via.placeholder.com/80/D4AF37/FFFFFF?text=Zazi';" alt="Zazi Mascot" class="w-12 h-12 rounded-2xl object-cover border-2 border-gold-500 bg-white shadow-xs" />
+            <div>
+              <h2 class="font-serif font-extrabold text-stone-900 dark:text-stone-100 flex items-center gap-1">Zazi 🐾</h2>
+              <p class="text-[10px] text-gold-700 dark:text-gold-400 font-bold uppercase tracking-wider">Community Sentinel</p>
+            </div>
+          </div>
+          <p class="text-xs text-stone-600 dark:text-stone-400 leading-relaxed">
+            Incident reports logged here are broadcasted in real time and automatically indexed into <strong>Zazi AI</strong>'s threat matrix.
+          </p>
+          <button id="openReportModalBtn" class="w-full py-3 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer border border-red-500/30">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i> Report New Incident
+          </button>
+        </div>
+
+        <div class="bg-white dark:bg-stone-900 border border-gold-200 dark:border-stone-800 rounded-3xl p-5 shadow-xs space-y-3">
+          <h3 class="text-xs font-extrabold text-gold-700 dark:text-gold-400 uppercase tracking-widest flex items-center gap-1.5">
+            <i data-lucide="phone-call" class="w-4 h-4 text-gold-600"></i> Dispatch Hotlines
+          </h3>
+          <div class="space-y-2">
+            <a href="tel:112" class="flex items-center justify-between p-2.5 rounded-xl bg-marble-50 dark:bg-stone-800 hover:bg-gold-50 dark:hover:bg-stone-700 border border-gold-200 dark:border-stone-700 text-xs text-stone-800 dark:text-stone-200 font-medium transition">
+              <span>National Emergency</span>
+              <span class="bg-red-600 text-white px-2.5 py-0.5 rounded-md font-bold text-[10px]">112</span>
+            </a>
+            <a href="tel:08032003514" class="flex items-center justify-between p-2.5 rounded-xl bg-marble-50 dark:bg-stone-800 hover:bg-gold-50 dark:hover:bg-stone-700 border border-gold-200 dark:border-stone-700 text-xs text-stone-800 dark:text-stone-200 font-medium transition">
+              <span>Rivers Police HQ</span>
+              <span class="bg-gold-500 text-white px-2.5 py-0.5 rounded-md font-bold text-[10px]">CALL</span>
+            </a>
+            <a href="tel:08033880011" class="flex items-center justify-between p-2.5 rounded-xl bg-marble-50 dark:bg-stone-800 hover:bg-gold-50 dark:hover:bg-stone-700 border border-gold-200 dark:border-stone-700 text-xs text-stone-800 dark:text-stone-200 font-medium transition">
+              <span>JTF Marine Patrol</span>
+              <span class="bg-amber-600 text-white px-2.5 py-0.5 rounded-md font-bold text-[10px]">JTF</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- MAIN CONTENT: Live Feed & Filters -->
+      <div class="lg:col-span-3 space-y-4">
+        <div class="bg-gold-50/70 dark:bg-stone-900 border border-gold-200 dark:border-stone-800 rounded-3xl p-5 shadow-xs">
+          <div class="flex items-start gap-3">
+            <i data-lucide="badge-check" class="w-5 h-5 text-gold-700 dark:text-gold-300 shrink-0 mt-0.5"></i>
+            <div>
+              <h2 class="text-sm font-serif font-bold text-stone-900 dark:text-stone-100">Verified Nigeria sources</h2>
+              <p class="mt-1 text-[11px] leading-relaxed text-stone-600 dark:text-stone-400">National reports are loaded from ReliefWeb, a UN OCHA service. Confirm urgent information with official channels.</p>
+              <div class="mt-3 flex flex-wrap gap-2 text-[10px] font-bold">
+                <a href="https://reliefweb.int/country/nga" target="_blank" rel="noopener noreferrer" class="rounded-lg border border-gold-300 px-2.5 py-1.5 text-gold-800 dark:text-gold-300">ReliefWeb / UN OCHA</a>
+                <a href="https://nema.gov.ng/" target="_blank" rel="noopener noreferrer" class="rounded-lg border border-gold-300 px-2.5 py-1.5 text-gold-800 dark:text-gold-300">NEMA</a>
+                <a href="https://frsc.gov.ng/" target="_blank" rel="noopener noreferrer" class="rounded-lg border border-gold-300 px-2.5 py-1.5 text-gold-800 dark:text-gold-300">FRSC</a>
+                <a href="https://npf.gov.ng/" target="_blank" rel="noopener noreferrer" class="rounded-lg border border-gold-300 px-2.5 py-1.5 text-gold-800 dark:text-gold-300">Nigeria Police</a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="bg-white dark:bg-stone-900 border border-gold-200 dark:border-stone-800 rounded-3xl p-5 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div class="space-y-1">
+            <div class="flex items-center gap-2">
+              <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span> Real-time Network Active
+              </span>
+              <span class="text-xs font-serif font-bold text-stone-900 dark:text-stone-100">Port Harcourt & Rivers State</span>
+            </div>
+            <p class="text-xs text-stone-500 dark:text-stone-400">Live community alerts logged within the past 6 hours.</p>
+          </div>
+          
+          <button id="mobileReportBtn" class="lg:hidden w-full sm:w-auto px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-xl shadow-xs transition flex items-center justify-center gap-1">
+            <i data-lucide="plus-circle" class="w-4 h-4"></i> Broadcast Incident
+          </button>
+        </div>
+
+        <!-- Filter Chips Bar -->
+        <div class="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none text-xs font-bold">
+          <button data-filter="all" class="filter-chip px-3.5 py-1.5 rounded-xl bg-gold-500 text-white border border-gold-600 shadow-xs">All Alerts</button>
+          <button data-filter="danger" class="filter-chip px-3.5 py-1.5 rounded-xl bg-white dark:bg-stone-900 text-stone-700 dark:text-stone-300 border border-gold-200 dark:border-stone-800">🔴 High Risk</button>
+          <button data-filter="traffic" class="filter-chip px-3.5 py-1.5 rounded-xl bg-white dark:bg-stone-900 text-stone-700 dark:text-stone-300 border border-gold-200 dark:border-stone-800">🚕 Traffic / Gridlock</button>
+          <button data-filter="flood" class="filter-chip px-3.5 py-1.5 rounded-xl bg-white dark:bg-stone-900 text-stone-700 dark:text-stone-300 border border-gold-200 dark:border-stone-800">🌧️ Flooding</button>
+          <button data-filter="checkpoint" class="filter-chip px-3.5 py-1.5 rounded-xl bg-white dark:bg-stone-900 text-stone-700 dark:text-stone-300 border border-gold-200 dark:border-stone-800">🛡️ Checkpoint</button>
+        </div>
+
+        <!-- Incidents List Feed Container -->
+        <div id="incidentsList" class="space-y-3 min-h-[400px]">
+          <div class="bg-white dark:bg-stone-900 border border-gold-200 dark:border-stone-800 rounded-3xl p-10 text-center text-stone-400 dark:text-stone-500 text-xs italic">
+            Connecting to live security broadcast feed... 🐾✨
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MODAL FORM: Report Incident Dialog -->
+  <div id="reportModal" class="fixed inset-0 bg-stone-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white dark:bg-stone-900 border border-gold-200 dark:border-stone-800 w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden">
+      <div class="bg-gradient-to-r from-red-900 to-stone-900 p-5 text-white flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <i data-lucide="shield-alert" class="w-5 h-5 text-red-400"></i>
+          <h3 class="font-serif font-bold text-base">Broadcast Security Incident</h3>
+        </div>
+        <button id="closeModalBtn" class="text-stone-300 hover:text-white p-1 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="incidentForm" class="p-6 space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-stone-700 dark:text-stone-300 mb-1">Incident Category</label>
+          <select id="modalType" required class="w-full bg-marble-50 dark:bg-stone-800 border border-gold-200 dark:border-stone-700 rounded-xl p-3 text-xs text-stone-800 dark:text-stone-100 focus:outline-none focus:border-gold-500">
+            <option value="Gunshots / Security Threat">🔴 Gunshots / Armed Robbery / Security Threat</option>
+            <option value="Heavy Traffic / Gridlock">🚕 Heavy Traffic / Road Block / Gridlock</option>
+            <option value="Flooding / Drainage Overflow">🌧️ Severe Flooding / Weather Hazard</option>
+            <option value="Security Checkpoint / Delay">🛡️ Military / Police Checkpoint Delay</option>
+            <option value="Fire Outbreak">🔥 Fire Outbreak / Explosion</option>
+            <option value="General Alert">📢 General Community Alert</option>
+          </select>
+        </div>
+
+        <div>
+          <div class="flex justify-between items-center mb-1">
+            <label class="block text-xs font-bold text-stone-700 dark:text-stone-300">Location in Rivers State</label>
+            <button type="button" id="detectLocationBtn" class="text-[10px] text-gold-700 dark:text-gold-400 font-bold hover:underline flex items-center gap-1">
+              <i data-lucide="map-pin" class="w-3 h-3"></i> Auto-Fill Area
+            </button>
+          </div>
+          <input id="modalLocation" type="text" required placeholder="e.g. Rumuokoro Flyover, Garrison, Ada George, GRA" class="w-full bg-marble-50 dark:bg-stone-800 border border-gold-200 dark:border-stone-700 rounded-xl p-3 text-xs text-stone-800 dark:text-stone-100 focus:outline-none focus:border-gold-500" />
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-stone-700 dark:text-stone-300 mb-1">Detailed Situation Summary</label>
+          <textarea id="modalDescription" rows="3" required placeholder="Describe what is happening, affected routes, and safe alternative directions for commuters..." class="w-full bg-marble-50 dark:bg-stone-800 border border-gold-200 dark:border-stone-700 rounded-xl p-3 text-xs text-stone-800 dark:text-stone-100 focus:outline-none focus:border-gold-500"></textarea>
+        </div>
+
+        <div class="pt-2 flex justify-end gap-3">
+          <button type="button" id="cancelModalBtn" class="px-4 py-2.5 rounded-xl border border-stone-200 dark:border-stone-700 text-xs font-bold text-stone-600 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800">Cancel</button>
+          <button type="submit" id="submitIncidentBtn" class="px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs shadow-md flex items-center gap-2 cursor-pointer">
+            <i data-lucide="send" class="w-4 h-4"></i> Broadcast Alert
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+ <footer class="mt-12 pt-8 border-t border-gold-200/80 dark:border-stone-800 text-center text-xs text-stone-500 dark:text-stone-400 space-y-2">
+      <p class="font-semibold text-stone-700 dark:text-stone-300">ZALIA • Maritime & Highway Intelligence Portal</p>
+      <p>Providing real-time surveillance, waterway escort requests & emergency tactical dispatch across Rivers State.</p>
+      <p class="text-[10px] text-stone-400 mt-4">© 2026 Zalia Security Systems. All rights reserved.</p>
+    </footer>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { 
+      getFirestore, 
+      collection, 
+      addDoc, 
+      query, 
+      where, 
+      orderBy, 
+      Timestamp,
+      onSnapshot 
+    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    if (window.lucide) {
+      window.lucide.createIcons();
+    }
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDpPyV0n_NS3x72LBNQ6OTuwgXOzmneNKg",
+      authDomain: "adelias-zaliaproject.firebaseapp.com",
+      projectId: "adelias-zaliaproject",
+      storageBucket: "adelias-zaliaproject.firebasestorage.app",
+      messagingSenderId: "1030386427394",
+      appId: "1:1030386427394:web:a66775a8f1db4498b5a91b",
+      measurementId: "G-46ZNZ21XQD"
+    };
+
+    let db = null;
+    try {
+      const app = initializeApp(firebaseConfig);
+      db = getFirestore(app);
+    } catch (e) {
+      console.warn("Firebase Notice:", e);
+    }
+
+    const incidentsList = document.getElementById('incidentsList');
+    const reportModal = document.getElementById('reportModal');
+    let rawIncidents = [];
+    let verifiedIncidents = [];
+    let activeFilter = 'all';
+    let initialLoadComplete = false;
+
+    if ("Notification" in window && Notification.permission !== "granted") {
+      Notification.requestPermission();
+    }
+
+    const openModal = () => reportModal.classList.remove('hidden');
+    const closeModal = () => reportModal.classList.add('hidden');
+
+    document.getElementById('openReportModalBtn')?.addEventListener('click', openModal);
+    document.getElementById('mobileReportBtn')?.addEventListener('click', openModal);
+    document.getElementById('closeModalBtn')?.addEventListener('click', closeModal);
+    document.getElementById('cancelModalBtn')?.addEventListener('click', closeModal);
+
+    document.getElementById('detectLocationBtn')?.addEventListener('click', () => {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition((pos) => {
+          document.getElementById('modalLocation').value = `Port Harcourt Central (GPS Tagged: ${pos.coords.latitude.toFixed(3)}, ${pos.coords.longitude.toFixed(3)})`;
+        }, () => {
+          document.getElementById('modalLocation').value = "Port Harcourt, Rivers State";
+        });
+      }
+    });
+
+    function getBadgeStyle(type) {
+      const t = (type || '').toLowerCase();
+      if (t.includes('gun') || t.includes('robbery') || t.includes('threat') || t.includes('danger')) {
+        return 'bg-red-100 text-red-800 border-red-300 dark:bg-red-950 dark:text-red-300 dark:border-red-800';
+      }
+      if (t.includes('traffic') || t.includes('gridlock') || t.includes('delay')) {
+        return 'bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-950 dark:text-amber-300 dark:border-amber-800';
+      }
+      if (t.includes('flood') || t.includes('rain') || t.includes('drainage')) {
+        return 'bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-950 dark:text-blue-300 dark:border-blue-800';
+      }
+      if (t.includes('checkpoint') || t.includes('police')) {
+        return 'bg-emerald-100 text-emerald-800 border-emerald-300 dark:bg-emerald-950 dark:text-emerald-300 dark:border-emerald-800';
+      }
+      return 'bg-stone-100 text-stone-800 border-stone-300 dark:bg-stone-800 dark:text-stone-200 dark:border-stone-700';
+    }
+
+    function triggerLiveBroadcastAlert(report) {
+      if ("Notification" in window && Notification.permission === "granted") {
+        new Notification(`🚨 ZALIA EMERGENCY BROADCAST`, {
+          body: `📍 ${report.location}: ${report.type.toUpperCase()} - ${report.description}`,
+          icon: "images/zaziimage.png"
+        });
+      }
+
+      const popup = document.createElement('div');
+      popup.className = "fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-md bg-red-900 text-white p-4 rounded-2xl shadow-2xl border-2 border-gold-400 transition-all animate-bounce";
+      popup.innerHTML = `
+        <div class="flex items-start justify-between gap-3">
+          <div class="space-y-1">
+            <p class="text-[10px] font-bold text-gold-300 uppercase tracking-wider flex items-center gap-1">
+              <i data-lucide="radio" class="w-3 h-3 text-red-400"></i> LIVE COMMUNITY BROADCAST
+            </p>
+            <p class="font-extrabold text-xs">📍 ${report.location} - ${report.type.toUpperCase()}</p>
+            <p class="text-xs text-red-100 leading-relaxed">${report.description}</p>
+          </div>
+          <button onclick="this.parentElement.parentElement.remove()" class="text-white hover:text-gold-300 font-bold text-xs bg-red-950 px-2 py-1 rounded-lg">✕</button>
+        </div>
+      `;
+      document.body.appendChild(popup);
+      if (window.lucide) window.lucide.createIcons();
+
+      setTimeout(() => { if (popup && popup.parentElement) popup.remove(); }, 10000);
+    }
+
+    function renderFeed() {
+      incidentsList.innerHTML = '';
+
+      const filtered = [...rawIncidents, ...verifiedIncidents].filter(item => {
+        if (activeFilter === 'all') return true;
+        const typeStr = (item.type || '').toLowerCase();
+        if (activeFilter === 'danger') return typeStr.includes('gun') || typeStr.includes('robbery') || typeStr.includes('threat');
+        if (activeFilter === 'traffic') return typeStr.includes('traffic') || typeStr.includes('gridlock');
+        if (activeFilter === 'flood') return typeStr.includes('flood');
+        if (activeFilter === 'checkpoint') return typeStr.includes('checkpoint');
+        return true;
+      });
+
+      if (filtered.length === 0) {
+        incidentsList.innerHTML = `
+          <div class="p-8 bg-white dark:bg-stone-900 border border-gold-200 dark:border-stone-800 rounded-3xl text-center space-y-2">
+            <i data-lucide="shield-check" class="w-8 h-8 text-emerald-500 mx-auto"></i>
+            <p class="font-bold text-xs text-stone-800 dark:text-stone-200">No active incidents matching selected filter.</p>
+            <p class="text-[11px] text-stone-400">All routes clear in this category across Port Harcourt.</p>
+          </div>`;
+        if (window.lucide) window.lucide.createIcons();
+        return;
+      }
+
+      filtered.forEach((data) => {
+        const timeStr = data.timestamp ? (data.timestamp.toDate ? data.timestamp.toDate() : new Date(data.timestamp)).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "Recent";
+        const badgeClasses = getBadgeStyle(data.type);
+
+        const card = document.createElement('div');
+        card.className = "bg-white dark:bg-stone-900 border border-gold-200 dark:border-stone-800 p-4 sm:p-5 rounded-3xl text-sm text-stone-800 dark:text-stone-200 shadow-2xs flex flex-col sm:flex-row justify-between sm:items-center gap-3 transition hover:border-gold-300 dark:hover:border-stone-700 hover:shadow-xs";
+        card.innerHTML = `
+          <div class="space-y-1.5">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="text-[9px] font-bold px-2.5 py-0.5 rounded-md border uppercase ${badgeClasses}">
+                ${data.type || 'ALERT'}
+              </span>
+              <span class="font-extrabold text-stone-900 dark:text-stone-100 text-xs flex items-center gap-1">
+                <i data-lucide="map-pin" class="w-3.5 h-3.5 text-gold-600"></i> ${data.location}
+              </span>
+            </div>
+            <p class="text-xs text-stone-600 dark:text-stone-400 font-normal leading-relaxed">${data.description}</p>
+            ${data.source ? `<a href="${data.url || '#'}" target="_blank" rel="noopener noreferrer" class="text-[10px] font-bold text-gold-700 dark:text-gold-300">Verified source: ${data.source}</a>` : '<span class="text-[10px] font-semibold text-stone-400">Community report - verify before acting</span>'}
+          </div>
+          <div class="text-[10px] font-mono font-bold text-stone-400 shrink-0 bg-marble-100 dark:bg-stone-800 px-3 py-1.5 rounded-xl border border-gold-200 dark:border-stone-700 self-end sm:self-center flex items-center gap-1">
+            <i data-lucide="clock" class="w-3 h-3"></i> ${timeStr}
+          </div>
+        `;
+        incidentsList.appendChild(card);
+      });
+
+      if (window.lucide) window.lucide.createIcons();
+    }
+
+    document.querySelectorAll('.filter-chip').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        document.querySelectorAll('.filter-chip').forEach(c => {
+          c.className = 'filter-chip px-3.5 py-1.5 rounded-xl bg-white dark:bg-stone-900 text-stone-700 dark:text-stone-300 border border-gold-200 dark:border-stone-800';
+        });
+        e.currentTarget.className = 'filter-chip px-3.5 py-1.5 rounded-xl bg-gold-500 text-white border border-gold-600 shadow-xs';
+        activeFilter = e.currentTarget.getAttribute('data-filter');
+        renderFeed();
+      });
+    });
+
+    function subscribeToIncidents() {
+      if (!db) {
+        rawIncidents = [];
+        renderFeed();
+        loadVerifiedNigeriaReports();
+        return;
+      }
+
+      loadVerifiedNigeriaReports();
+
+      const sixHoursAgo = new Date(Date.now() - 6 * 60 * 60 * 1000);
+      const q = query(
+        collection(db, "incidents"),
+        where("timestamp", ">=", Timestamp.fromDate(sixHoursAgo)),
+        orderBy("timestamp", "desc")
+      );
+
+      onSnapshot(q, (snapshot) => {
+        snapshot.docChanges().forEach((change) => {
+          if (change.type === "added" && initialLoadComplete) {
+            triggerLiveBroadcastAlert(change.doc.data());
+          }
+        });
+
+        rawIncidents = [];
+        snapshot.forEach((doc) => {
+          rawIncidents.push(doc.data());
+        });
+
+        initialLoadComplete = true;
+        renderFeed();
+      }, (err) => {
+        console.warn("Real-time listener notice:", err);
+        // Fallback for missing Firestore index
+        if (err.message.includes("index")) {
+          const fallbackQ = query(collection(db, "incidents"));
+          onSnapshot(fallbackQ, (snapshot) => {
+            rawIncidents = [];
+            snapshot.forEach((doc) => rawIncidents.push(doc.data()));
+            renderFeed();
+          });
+        }
+      });
+    }
+
+    async function loadVerifiedNigeriaReports() {
+      const endpoint = 'https://api.reliefweb.int/v1/reports?appname=zalia-security&profile=list&preset=latest&slim=1&query[value]=Nigeria&limit=20';
+      try {
+        const response = await fetch(endpoint, { headers: { Accept: 'application/json' } });
+        if (!response.ok) throw new Error(`ReliefWeb returned ${response.status}`);
+        const payload = await response.json();
+        verifiedIncidents = (payload.data || []).map(item => ({
+          type: 'Verified national report',
+          location: 'Nigeria',
+          description: item.fields?.title || 'Verified report from ReliefWeb.',
+          source: 'ReliefWeb / UN OCHA',
+          url: item.fields?.url || 'https://reliefweb.int/country/nga',
+          timestamp: item.fields?.date?.created || new Date()
+        }));
+        renderFeed();
+      } catch (error) {
+        console.warn('Verified incident feed unavailable:', error);
+        incidentsList.innerHTML = `<div class="p-8 bg-white dark:bg-stone-900 border border-gold-200 dark:border-stone-800 rounded-3xl text-center space-y-2"><i data-lucide="wifi-off" class="w-8 h-8 text-gold-600 mx-auto"></i><p class="font-bold text-xs text-stone-800 dark:text-stone-200">Verified live reports are unavailable right now.</p><p class="text-[11px] text-stone-400">Check the trusted sources above or try again when connected.</p></div>`;
+        if (window.lucide) window.lucide.createIcons();
+      }
+    }
+
+    document.getElementById('incidentForm')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const type = document.getElementById('modalType').value;
+      const location = document.getElementById('modalLocation').value.trim();
+      const description = document.getElementById('modalDescription').value.trim();
+
+      if (!location || !description) return;
+
+      const payload = {
+        type,
+        location,
+        description,
+        timestamp: Timestamp.now()
+      };
+
+      if (db) {
+        try {
+          await addDoc(collection(db, "incidents"), payload);
+        } catch (err) {
+          console.warn("Could not push cloud incident:", err);
+        }
+      }
+
+      closeModal();
+      document.getElementById('incidentForm').reset();
+      alert("🚨 Incident broadcasted successfully! All users & Zazi AI updated.");
+    });
+
+    subscribeToIncidents();
+  </script>
+<script>
+  (function () {
+    function updateZaziNightState() {
+      const hour = new Date().getHours();
+      const isLate = hour >= 22 || hour < 6;
+      document.querySelectorAll('img[src*="zaziimage"]').forEach(avatar => {
+        const wrapper = avatar.parentElement;
+        wrapper.classList.add('zalia-sleepy-avatar-wrap');
+        avatar.classList.toggle('zalia-sleepy-avatar', isLate);
+        let badge = wrapper.querySelector('.zalia-sleepy-badge');
+        if (!badge) {
+          badge = document.createElement('span');
+          badge.className = 'zalia-sleepy-badge';
+          badge.textContent = '😴';
+          badge.setAttribute('aria-label', 'Zazi is sleepy');
+          wrapper.appendChild(badge);
+        }
+        badge.hidden = !isLate;
+      });
+    }
+    document.addEventListener('DOMContentLoaded', updateZaziNightState);
+    window.setInterval(updateZaziNightState, 60000);
+  }());
+</script>
+<script src="zazi-presence.js"></script>
+
+</body>
+</html>

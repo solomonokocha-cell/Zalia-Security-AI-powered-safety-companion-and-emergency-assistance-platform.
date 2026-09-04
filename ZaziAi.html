@@ -1,0 +1,4325 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<meta
+name="description"
+content="Chat with Zazi AI for calm safety guidance, emergency help, and local security advice."
+
+>
+
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/png" sizes="650x650" href="/images/zalia-app-icon.png">
+
+  <meta name="theme-color" content="#0f172a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Zalia">
+
+  <link
+    rel="apple-touch-icon"
+    sizes="600x600"
+    href="/images/Zalia's-final-logo.png"
+  >
+
+  <title>Zazi AI - Zalia Security Companion</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <script src="tailwind-shim.js"></script>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <script src="lucide-local.js"></script>
+
+  <script src="pwa-install.js"></script>
+
+  <script src="/sw-register.js" defer></script>
+
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="offline-tailwind.css">
+
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            gold: {
+              100: "#FAF5EA",
+              300: "#EBD4A4",
+              500: "#D4A345",
+              600: "#B88230",
+              700: "#936125"
+            }
+          }
+        }
+      }
+    };
+
+    if (
+      localStorage.getItem("zalia_theme") === "dark" ||
+      (
+        !("zalia_theme" in localStorage) &&
+        window.matchMedia("(prefers-color-scheme: dark)").matches
+      )
+    ) {
+      document.documentElement.classList.add("dark");
+    }
+
+    function toggleZaliaTheme() {
+      const isDark =
+        document.documentElement.classList.contains("dark");
+
+      if (isDark) {
+        document.documentElement.classList.remove("dark");
+        localStorage.setItem("zalia_theme", "light");
+      } else {
+        document.documentElement.classList.add("dark");
+        localStorage.setItem("zalia_theme", "dark");
+      }
+
+      updateThemeButtonUI();
+    }
+
+    function updateThemeButtonUI() {
+      const isDark =
+        document.documentElement.classList.contains("dark");
+
+      document
+        .querySelectorAll(".zalia-theme-btn")
+        .forEach(button => {
+          const text =
+            button.querySelector(".theme-text");
+
+          const icon =
+            button.querySelector("[data-lucide]");
+
+          if (text) {
+            text.textContent =
+              isDark ? "Light Mode" : "Night Mode";
+          }
+
+          if (icon) {
+            icon.setAttribute(
+              "data-lucide",
+              isDark ? "sun" : "moon"
+            );
+          }
+        });
+
+      if (window.lucide) {
+        lucide.createIcons();
+      }
+    }
+
+    function checkNetworkStatus() {
+      let banner =
+        document.getElementById("zaliaOfflineBanner");
+
+      if (!navigator.onLine) {
+        if (!banner) {
+          banner =
+            document.createElement("div");
+
+          banner.id =
+            "zaliaOfflineBanner";
+
+          banner.className =
+            "w-full bg-amber-600 text-white text-xs font-bold text-center py-2 px-4 fixed top-0 left-0 z-50 shadow-md";
+
+          banner.innerHTML =
+            "⚠️ You are offline. Zazi is using her safety knowledge base.";
+
+          document.body.prepend(banner);
+        }
+      } else if (banner) {
+        banner.remove();
+      }
+    }
+
+    window.addEventListener(
+      "online",
+      checkNetworkStatus
+    );
+
+    window.addEventListener(
+      "offline",
+      checkNetworkStatus
+    );
+
+    document.addEventListener(
+      "DOMContentLoaded",
+      () => {
+        checkNetworkStatus();
+        updateThemeButtonUI();
+      }
+    );
+  </script>
+
+  <style>
+    .zazi-game-shell {
+      background: #faf9f6;
+      border-color: rgba(212, 163, 69, 0.28);
+    }
+
+    .zazi-game-sidebar {
+      background: rgba(250, 249, 246, 0.92);
+    }
+
+    .zazi-game-header {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(12px);
+    }
+
+    @media (max-width: 1023px) {
+      .zazi-game-shell {
+        min-height: 100dvh;
+        border-radius: 0;
+        border-width: 0;
+        box-shadow: none;
+      }
+
+      .zazi-game-main {
+        min-height: 100dvh;
+        padding-bottom: 4.75rem;
+      }
+
+      .zazi-mobile-nav {
+        display: flex !important;
+      }
+    }
+
+    .dark .zazi-game-shell,
+    .dark .zazi-game-sidebar,
+    .dark .zazi-game-header {
+      background: #0c0a09;
+    }
+
+    .zazi-mobile-nav {
+      display: none;
+    }
+
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    .message-pop {
+      animation: messagePop 0.25s ease-out;
+    }
+
+    @keyframes messagePop {
+      from {
+        opacity: 0;
+        transform: translateY(8px) scale(0.98);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .zazi-online {
+      animation: pulseZazi 2s infinite;
+    }
+
+    .zazi-sleepy {
+      filter: saturate(0.7) brightness(0.9);
+      animation: sleepyBreathe 4s ease-in-out infinite;
+    }
+
+    @keyframes sleepyBreathe {
+      0%, 100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(2px);
+      }
+    }
+
+    @keyframes pulseZazi {
+      0%, 100% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.35);
+      }
+
+      50% {
+        box-shadow: 0 0 0 6px rgba(16, 185, 129, 0);
+      }
+    }
+
+    .map-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 7px;
+      margin-right: 5px;
+      padding: 7px 10px;
+      border-radius: 10px;
+      background: rgba(212, 163, 69, 0.12);
+      border: 1px solid rgba(212, 163, 69, 0.35);
+      color: #936125;
+      font-weight: 700;
+      text-decoration: none;
+      transition: 0.2s;
+    }
+
+    .map-link:hover {
+      background: rgba(212, 163, 69, 0.22);
+      transform: translateY(-1px);
+    }
+
+    .dark .map-link {
+      color: #EBD4A4;
+    }
+
+    .zazi-disabled {
+      opacity: 0.65;
+      pointer-events: none;
+    }
+
+    /* ================= ZAZI UPGRADE STYLES ================= */
+    .zazi-presence-dot { animation: zaziPresencePulse 2.2s ease-in-out infinite; }
+    @keyframes zaziPresencePulse { 0%,100%{transform:scale(1);opacity:.85} 50%{transform:scale(1.18);opacity:1} }
+    .zazi-idle { animation: zaziIdle 5s ease-in-out infinite; transform-origin: center bottom; }
+    @keyframes zaziIdle { 0%,100%{transform:translateY(0) rotate(0deg)} 50%{transform:translateY(-2px) rotate(.6deg)} }
+    .zazi-thinking-dot { display:inline-block; width:5px; height:5px; border-radius:999px; background:currentColor; animation:zaziDot 1.2s infinite ease-in-out; margin:0 2px; }
+    .zazi-thinking-dot:nth-child(2){animation-delay:.15s}.zazi-thinking-dot:nth-child(3){animation-delay:.3s}
+    @keyframes zaziDot {0%,60%,100%{transform:translateY(0);opacity:.45}30%{transform:translateY(-4px);opacity:1}}
+    .zazi-mood-card { animation: messagePop .3s ease-out; }
+    .zazi-emergency-pulse { animation: emergencyPulse 1.25s ease-in-out infinite; }
+    @keyframes emergencyPulse {0%,100%{box-shadow:0 0 0 0 rgba(220,38,38,.18)}50%{box-shadow:0 0 0 7px rgba(220,38,38,0)}}
+    .zazi-night-glow { box-shadow: 0 0 0 3px rgba(99,102,241,.08), 0 8px 24px rgba(79,70,229,.08); }
+
+  </style>
+
+</head>
+
+<body
+  class="bg-marble-100 dark:bg-stone-950 min-h-screen w-full flex items-center justify-center p-0 sm:p-2 md:p-4 lg:p-6 font-sans text-stone-800 dark:text-stone-100 transition-colors"
+>
+
+<div
+  class="app-frame zazi-game-shell w-full h-screen sm:h-[95vh] lg:h-[850px] max-w-7xl bg-white dark:bg-stone-950 sm:rounded-3xl shadow-xl border border-gold-500/20 overflow-hidden flex flex-col lg:flex-row"
+>
+
+  <!-- ========================= SIDEBAR ========================= -->
+
+  <aside
+    class="desktop-sidebar zazi-game-sidebar hidden lg:flex flex-col w-80 bg-stone-50/80 dark:bg-stone-900/80 p-6 border-r border-gold-500/20 justify-between flex-shrink-0"
+  >
+
+
+<div class="space-y-6">
+
+  <div class="flex items-center space-x-3">
+
+    <img
+      src="images/zazi-image-final.png"
+      onerror="this.onerror=null; this.src='https://via.placeholder.com/80/D4AF37/FFFFFF?text=Zazi';"
+      alt="Zazi"
+      class="w-12 h-12 rounded-2xl object-cover border-2 border-gold-500 bg-white shadow-sm"
+      data-zazi-avatar
+    >
+
+    <div>
+      <h2
+        class="font-extrabold text-lg text-stone-900 dark:text-white tracking-wide"
+      >
+        Zazi 🐾
+      </h2>
+
+      <p
+        class="text-xs text-gold-700 dark:text-gold-500 font-bold tracking-wider uppercase"
+      >
+        Zalia AI Security
+      </p>
+    </div>
+
+  </div>
+
+  <div class="space-y-2 pt-2">
+
+    <p
+      class="text-[11px] uppercase tracking-widest font-bold text-stone-400"
+    >
+      App Navigation
+    </p>
+
+    <nav class="space-y-1.5 text-xs font-semibold">
+
+      <a
+        href="index.html"
+        class="flex items-center gap-2.5 p-2.5 rounded-xl bg-gold-500/10 text-gold-700 dark:text-gold-300 border border-gold-500/30 hover:bg-gold-500/20 transition"
+      >
+        🏠 Home
+      </a>
+
+      <a
+        href="about.html"
+        class="flex items-center gap-2.5 p-2.5 rounded-xl bg-white dark:bg-stone-800 hover:bg-stone-100 dark:hover:bg-stone-700 border border-stone-200 dark:border-stone-700 transition"
+      >
+        ℹ️ About Zalia
+      </a>
+
+      <a
+        href="contact.html"
+        class="flex items-center gap-2.5 p-2.5 rounded-xl bg-white dark:bg-stone-800 hover:bg-stone-100 dark:hover:bg-stone-700 border border-stone-200 dark:border-stone-700 transition"
+      >
+        📞 Emergency Contacts
+      </a>
+
+      <a
+        href="incidents.html"
+        class="flex items-center gap-2.5 p-2.5 rounded-xl bg-white dark:bg-stone-800 hover:bg-stone-100 dark:hover:bg-stone-700 border border-stone-200 dark:border-stone-700 transition"
+      >
+        🚨 Incident Reports
+      </a>
+
+      <a
+        href="simulator.html"
+        class="flex items-center gap-2.5 p-2.5 rounded-xl bg-white dark:bg-stone-800 hover:bg-stone-100 dark:hover:bg-stone-700 border border-stone-200 dark:border-stone-700 transition"
+      >
+        🧪 Crisis Simulator
+      </a>
+
+      <a
+        href="ZaziAi.html"
+        class="flex items-center gap-2.5 p-2.5 rounded-xl bg-gold-500/10 text-gold-700 dark:text-gold-300 border border-gold-500/30 hover:bg-gold-500/20 transition"
+      >
+        🤖 Zazi AI
+      </a>
+
+      <a
+        href="route-planner.html"
+        class="flex items-center gap-2.5 p-2.5 rounded-xl bg-white dark:bg-stone-800 hover:bg-stone-100 dark:hover:bg-stone-700 border border-stone-200 dark:border-stone-700 transition"
+      >
+        🗺️ Route Planner
+      </a>
+
+      <div
+        id="nightZaziNav"
+        class="hidden rounded-xl border border-indigo-200 bg-indigo-50 p-2.5 text-[11px] text-indigo-900 dark:border-indigo-900/60 dark:bg-indigo-950/40 dark:text-indigo-200"
+      >
+        🌙 Zazi is in stealthy sleepy mode. Keep tonight's plans bright and public.
+      </div>
+
+    </nav>
+  </div>
+
+  <!-- CHAT HISTORY -->
+
+  <div
+    class="space-y-2 pt-2 border-t border-stone-200 dark:border-stone-800"
+  >
+
+    <div class="flex items-center justify-between">
+
+      <p
+        class="text-[11px] uppercase tracking-widest font-bold text-stone-400"
+      >
+        Your chats
+      </p>
+
+      <button
+        id="newChatBtn"
+        type="button"
+        title="Start a new chat"
+        class="w-8 h-8 rounded-lg bg-gold-500 text-white text-lg font-bold shadow-sm hover:bg-gold-600 transition"
+      >
+        +
+      </button>
+
+    </div>
+
+    <div
+      id="conversationList"
+      class="space-y-1.5 max-h-44 overflow-y-auto pr-1"
+      aria-live="polite"
+    ></div>
+
+    <div class="grid grid-cols-3 gap-1.5 pt-1">
+
+      <button
+        id="saveChatBtn"
+        type="button"
+        title="Download current chat"
+        class="rounded-lg bg-gold-500 hover:bg-gold-600 text-white px-2 py-2 text-[10px] font-bold transition"
+      >
+        Save
+      </button>
+
+      <button
+        id="copyReplyBtn"
+        type="button"
+        title="Copy latest reply"
+        class="rounded-lg bg-stone-900 hover:bg-stone-800 text-white px-2 py-2 text-[10px] font-bold transition"
+      >
+        Copy
+      </button>
+
+      <button
+        id="clearChatBtn"
+        type="button"
+        title="Clear current chat"
+        class="rounded-lg bg-stone-200 hover:bg-stone-300 dark:bg-stone-700 dark:hover:bg-stone-600 text-stone-900 dark:text-stone-100 px-2 py-2 text-[10px] font-bold transition"
+      >
+        Clear
+      </button>
+
+    </div>
+
+  </div>
+
+  <!-- EMERGENCY -->
+
+  <div
+    class="space-y-2 pt-2 border-t border-stone-200 dark:border-stone-800"
+  >
+
+    <p
+      class="text-[11px] uppercase tracking-widest font-bold text-stone-400"
+    >
+      Quick Emergency
+    </p>
+
+    <a
+      href="tel:112"
+      class="flex items-center justify-between p-2.5 rounded-xl bg-white dark:bg-stone-800 hover:bg-stone-100 dark:hover:bg-stone-700 border border-stone-200 dark:border-stone-700 text-xs font-medium"
+    >
+      <span>National Emergency</span>
+      <span
+        class="bg-gold-500 text-white px-2 py-0.5 rounded-md font-bold"
+      >
+        112
+      </span>
+    </a>
+
+    <a
+      href="tel:08032003514"
+      class="flex items-center justify-between p-2.5 rounded-xl bg-white dark:bg-stone-800 hover:bg-stone-100 dark:hover:bg-stone-700 border border-stone-200 dark:border-stone-700 text-xs font-medium"
+    >
+      <span>Rivers Police</span>
+      <span
+        class="bg-gold-500 text-white px-2 py-0.5 rounded-md font-bold"
+      >
+        Call
+      </span>
+    </a>
+
+  </div>
+
+</div>
+
+<button
+  id="reportBtnDesktop"
+  type="button"
+  class="w-full bg-red-600 hover:bg-red-700 active:scale-95 text-white py-3 rounded-2xl font-bold text-sm transition shadow-md flex items-center justify-center gap-2"
+>
+  🚨 Report Incident
+</button>
+
+
+  </aside>
+
+  <!-- ========================= MAIN ========================= -->
+
+  <main
+    class="zazi-game-main flex-1 flex flex-col h-full w-full overflow-hidden bg-marble-100 dark:bg-stone-950"
+  >
+
+
+<!-- HEADER -->
+
+<header
+  class="zazi-game-header bg-white dark:bg-stone-900 border-b border-stone-200 dark:border-stone-800 p-3.5 sm:p-4 flex items-center justify-between shadow-sm relative z-10 flex-shrink-0"
+>
+
+  <div class="flex items-center space-x-3">
+<div class="relative">
+  <img
+    id="zaziHeaderAvatar"
+    src="images/shy-zazi.png"
+    onerror="this.onerror=null; this.src='https://via.placeholder.com/80/D4AF37/FFFFFF?text=Zazi';"
+    alt="Zazi"
+    class="w-11 h-11 rounded-xl object-cover border-2 border-gold-500 bg-stone-50 shadow-sm"
+  >
+
+  <span
+    class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-500 border-2 border-white dark:border-stone-900 rounded-full"
+  ></span>
+
+  <span
+    id="zaziSleepyBadge"
+    class="hidden absolute -top-3 -right-3 text-lg"
+    aria-label="Zazi is sleepy"
+  >
+    😴
+  </span>
+</div>
+
+    <div>
+
+      <h1
+        class="font-extrabold text-base sm:text-lg leading-tight flex items-center gap-1.5 text-stone-900 dark:text-white"
+      >
+        Zazi 🐾
+
+        <span
+          class="bg-gold-500/15 text-gold-700 dark:text-gold-300 text-[10px] uppercase font-bold px-2.5 py-0.5 rounded-full border border-gold-500/30"
+        >
+          Zalia AI
+        </span>
+      </h1>
+
+      <p
+        class="text-xs text-stone-500 dark:text-stone-400 font-medium"
+      >
+        Your bubbly security companion 🛡️✨
+      </p>
+
+      <p
+        id="zaziNightStatus"
+        class="hidden text-[11px] text-indigo-600 dark:text-indigo-300 font-semibold"
+      ></p>
+
+      <div id="zaziMoodCard" class="zazi-mood-card mt-1.5 inline-flex items-center gap-1.5 rounded-full border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 px-2.5 py-1 text-[10px] font-bold text-stone-500 dark:text-stone-300">
+        <span id="zaziMoodIcon">☀️</span>
+        <span id="zaziMoodText">Zazi is ready to help</span>
+      </div>
+
+    </div>
+
+  </div>
+
+  <div class="flex flex-col sm:flex-row sm:items-center gap-2">
+
+    <div class="flex items-center gap-2">
+
+      <button
+        type="button"
+        onclick="toggleZaliaTheme()"
+        class="zalia-theme-btn flex items-center gap-2 px-3 py-1.5 bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-xl text-xs font-bold shadow-sm hover:border-gold-500 transition"
+      >
+        <i
+          data-lucide="moon"
+          class="w-4 h-4 text-gold-600"
+        ></i>
+
+        <span class="theme-text hidden sm:inline">
+          Night Mode
+        </span>
+      </button>
+
+      <button
+        id="reportBtn"
+        type="button"
+        class="lg:hidden bg-red-600 hover:bg-red-700 active:scale-95 text-xs text-white px-3 py-1.5 rounded-xl font-bold transition shadow-sm"
+      >
+        🚨 Report
+      </button>
+
+    </div>
+
+    <div
+      class="hidden sm:flex items-center gap-2 text-[11px] text-stone-600 dark:text-stone-400"
+    >
+
+      <span
+        id="backendStatus"
+        class="inline-flex items-center gap-2 bg-stone-100 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-full px-3 py-1"
+      >
+
+        <span
+          id="backendDot"
+          class="w-2.5 h-2.5 rounded-full bg-emerald-500"
+        ></span>
+
+        <span id="backendLabel">
+          Checking...
+        </span>
+
+      </span>
+
+      <button
+        id="refreshStatusBtn"
+        type="button"
+        class="bg-gold-500 hover:bg-gold-600 text-white px-3 py-1.5 rounded-xl text-[11px] font-bold transition shadow-sm"
+      >
+        🔄 Refresh
+      </button>
+
+    </div>
+
+  </div>
+
+</header>
+
+<div class="flex-1 flex flex-col overflow-hidden">
+
+  <!-- MOBILE TOP NAV -->
+
+  <div
+    class="lg:hidden bg-stone-50 dark:bg-stone-900 border-b border-stone-200 dark:border-stone-800 px-3 py-2 flex items-center gap-2 overflow-x-auto whitespace-nowrap no-scrollbar"
+  >
+
+    <a
+      href="index.html"
+      class="bg-white dark:bg-stone-800 border border-gold-500/40 text-gold-700 dark:text-gold-300 px-3 py-1 rounded-lg text-xs font-semibold"
+    >
+      🏠 Home
+    </a>
+
+    <a
+      href="about.html"
+      class="bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 px-3 py-1 rounded-lg text-xs"
+    >
+      ℹ️ About
+    </a>
+
+    <a
+      href="contact.html"
+      class="bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 px-3 py-1 rounded-lg text-xs"
+    >
+      📞 Emergency
+    </a>
+
+    <a
+      href="ZaziAi.html"
+      class="bg-gold-500/10 border border-gold-500/40 text-gold-700 dark:text-gold-300 px-3 py-1 rounded-lg text-xs font-semibold"
+    >
+      🤖 Zazi AI
+    </a>
+
+    <a
+      href="route-planner.html"
+      class="bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 px-3 py-1 rounded-lg text-xs"
+    >
+      🗺️ Routes
+    </a>
+<a href="simulator.html" class="bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 px-3 py-1 rounded-lg text-xs">
+      🧪 Simulator
+    </a>
+  </div>
+
+  <div class="flex-1 overflow-hidden lg:flex lg:flex-row">
+
+    <div class="flex-1 flex flex-col overflow-hidden">
+
+      <!-- CHAT -->
+
+      <div
+        id="chatWindow"
+        class="flex-1 p-3.5 sm:p-5 overflow-y-auto space-y-4 bg-stone-50/50 dark:bg-stone-900/30 scroll-smooth"
+        aria-live="polite"
+        aria-label="Zazi conversation"
+      ></div>
+
+      <!-- QUICK CHIPS -->
+
+      <div
+        id="chipsContainer"
+        class="bg-white dark:bg-stone-900 border-t border-stone-200 dark:border-stone-800 px-3 py-2 flex space-x-2 overflow-x-auto text-xs whitespace-nowrap no-scrollbar flex-shrink-0"
+      >
+
+        <button type="button" class="quick-chip px-3 py-1.5 rounded-full border border-gold-500/30 bg-stone-50 dark:bg-stone-800 hover:border-gold-500 transition">
+          🗺️ Safest route
+        </button>
+
+        <button type="button" class="quick-chip px-3 py-1.5 rounded-full border border-gold-500/30 bg-stone-50 dark:bg-stone-800 hover:border-gold-500 transition">
+          🛡️ What is Zalia?
+        </button>
+
+        <button type="button" class="quick-chip px-3 py-1.5 rounded-full border border-gold-500/30 bg-stone-50 dark:bg-stone-800 hover:border-gold-500 transition">
+          🔫 Gunshot safety
+        </button>
+
+        <button type="button" class="quick-chip px-3 py-1.5 rounded-full border border-gold-500/30 bg-stone-50 dark:bg-stone-800 hover:border-gold-500 transition">
+          🎣 What is phishing?
+        </button>
+
+        <button type="button" class="quick-chip px-3 py-1.5 rounded-full border border-gold-500/30 bg-stone-50 dark:bg-stone-800 hover:border-gold-500 transition">
+          🧯 Fire safety
+        </button>
+
+        <button type="button" class="quick-chip px-3 py-1.5 rounded-full border border-gold-500/30 bg-stone-50 dark:bg-stone-800 hover:border-gold-500 transition">
+          💳 ATM safety
+        </button>
+
+        <button type="button" class="quick-chip px-3 py-1.5 rounded-full border border-gold-500/30 bg-stone-50 dark:bg-stone-800 hover:border-gold-500 transition">
+          🚕 Taxi safety
+        </button>
+
+        <button type="button" class="quick-chip px-3 py-1.5 rounded-full border border-gold-500/30 bg-stone-50 dark:bg-stone-800 hover:border-gold-500 transition">
+          🚔 Police stations
+        </button>
+
+        <button type="button" class="quick-chip px-3 py-1.5 rounded-full border border-gold-500/30 bg-stone-50 dark:bg-stone-800 hover:border-gold-500 transition">
+          🏥 Hospitals
+        </button>
+
+        <button type="button" class="quick-chip px-3 py-1.5 rounded-full border border-gold-500/30 bg-stone-50 dark:bg-stone-800 hover:border-gold-500 transition">
+          🚒 Fire stations
+        </button>
+
+        <button type="button" class="quick-chip px-3 py-1.5 rounded-full border border-gold-500/30 bg-stone-50 dark:bg-stone-800 hover:border-gold-500 transition">
+          💊 Pharmacies
+        </button>
+
+        <button type="button" class="quick-chip px-3 py-1.5 rounded-full border border-gold-500/30 bg-stone-50 dark:bg-stone-800 hover:border-gold-500 transition">
+          ⛽ Petrol stations
+        </button>
+
+        <button type="button" class="quick-chip px-3 py-1.5 rounded-full border border-gold-500/30 bg-stone-50 dark:bg-stone-800 hover:border-gold-500 transition">
+          🏦 Banks
+        </button>
+
+        <button type="button" class="quick-chip px-3 py-1.5 rounded-full border border-gold-500/30 bg-stone-50 dark:bg-stone-800 hover:border-gold-500 transition">
+          🚕 Transport
+        </button>
+
+        <button type="button" class="quick-chip px-3 py-1.5 rounded-full border border-gold-500/30 bg-stone-50 dark:bg-stone-800 hover:border-gold-500 transition">
+          🌤️ Weather
+        </button>
+
+      </div>
+
+      <!-- ZAZI QUICK ACTIONS -->
+      <div class="bg-white dark:bg-stone-900 px-3 py-2 border-t border-stone-100 dark:border-stone-800 flex gap-2 overflow-x-auto no-scrollbar">
+        <button type="button" class="zazi-action-chip flex-shrink-0 px-3 py-1.5 rounded-xl bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-900/60 text-[11px] font-bold zazi-emergency-pulse" data-zazi-action="I am in immediate danger. What should I do right now?">🚨 I'm in danger</button>
+        <button type="button" class="zazi-action-chip flex-shrink-0 px-3 py-1.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/30 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-900/60 text-[11px] font-bold" data-zazi-action="Give me a quick safety tip for today.">💡 Safety tip</button>
+        <button type="button" class="zazi-action-chip flex-shrink-0 px-3 py-1.5 rounded-xl bg-gold-500/10 text-gold-700 dark:text-gold-300 border border-gold-500/30 text-[11px] font-bold" data-zazi-action="What can you help me with?">🐾 What can you do?</button>
+        <button type="button" class="zazi-action-chip flex-shrink-0 px-3 py-1.5 rounded-xl bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-stone-700 text-[11px] font-bold" data-zazi-action="Tell me a fun fact.">🧠 Fun fact</button>
+      </div>
+
+      <!-- MOBILE CHAT CONTROLS -->
+
+      <div
+        class="lg:hidden bg-stone-100 dark:bg-stone-950 border-t border-stone-200 dark:border-stone-800 px-3 py-3 flex flex-wrap items-center gap-2"
+      >
+
+        <button
+          id="newChatBtnMobile"
+          type="button"
+          class="flex-1 min-w-[120px] bg-gold-500 hover:bg-gold-600 text-white px-3 py-2 rounded-2xl text-xs font-bold transition shadow-sm"
+        >
+          New chat
+        </button>
+
+        <button
+          id="saveChatBtnMobile"
+          type="button"
+          class="flex-1 min-w-[120px] bg-gold-500 hover:bg-gold-600 text-white px-3 py-2 rounded-2xl text-xs font-bold transition shadow-sm"
+        >
+          💾 Save chat
+        </button>
+
+        <button
+          id="copyReplyBtnMobile"
+          type="button"
+          class="flex-1 min-w-[120px] bg-stone-900 hover:bg-stone-800 text-white px-3 py-2 rounded-2xl text-xs font-bold transition shadow-sm"
+        >
+          📋 Copy reply
+        </button>
+
+        <button
+          id="clearChatBtnMobile"
+          type="button"
+          class="flex-1 min-w-[120px] bg-stone-200 hover:bg-stone-300 dark:bg-stone-700 dark:hover:bg-stone-600 text-stone-900 dark:text-stone-100 px-3 py-2 rounded-2xl text-xs font-bold transition shadow-sm"
+        >
+          🧹 Clear chat
+        </button>
+
+      </div>
+
+      <!-- EMERGENCY TOOLBAR -->
+
+      <div
+        class="p-2.5 bg-white dark:bg-stone-900 border-t border-stone-200 dark:border-stone-800 flex-shrink-0"
+      >
+
+        <div
+          class="flex items-center gap-2 overflow-x-auto pb-0.5 no-scrollbar"
+        >
+
+          <a
+            href="tel:112"
+            class="flex-shrink-0 bg-gold-500 hover:bg-gold-600 text-white font-bold text-[11px] px-3.5 py-2 rounded-xl transition active:scale-95"
+          >
+            📞 Call 112
+          </a>
+
+          <a
+            href="https://wa.me/?text=%F0%9F%9A%A8%20EMERGENCY%20SOS!%20I%20am%20in%20Port%20Harcourt%20and%20need%20assistance."
+            target="_blank"
+            rel="noopener noreferrer"
+            class="flex-shrink-0 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] px-3.5 py-2 rounded-xl transition active:scale-95"
+          >
+            💬 Emergency SOS
+          </a>
+
+          <a
+            href="https://www.google.com/maps/search/Police+Stations+near+Port+Harcourt"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="flex-shrink-0 bg-amber-50 dark:bg-stone-800 hover:bg-amber-100 dark:hover:bg-stone-700 text-amber-900 dark:text-amber-200 font-bold text-[11px] px-3.5 py-2 rounded-xl border border-amber-300 dark:border-stone-700 transition"
+          >
+            🚔 Police Map
+          </a>
+
+          <a
+            href="https://www.google.com/maps/search/Hospitals+near+Port+Harcourt"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="flex-shrink-0 bg-amber-50 dark:bg-stone-800 hover:bg-amber-100 dark:hover:bg-stone-700 text-amber-900 dark:text-amber-200 font-bold text-[11px] px-3.5 py-2 rounded-xl border border-amber-300 dark:border-stone-700 transition"
+          >
+            🏥 Hospital Map
+          </a>
+
+          <a
+            href="https://www.google.com/maps/search/Fire+Stations+near+Port+Harcourt"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="flex-shrink-0 bg-amber-50 dark:bg-stone-800 hover:bg-amber-100 dark:hover:bg-stone-700 text-amber-900 dark:text-amber-200 font-bold text-[11px] px-3.5 py-2 rounded-xl border border-amber-300 dark:border-stone-700 transition"
+          >
+            🚒 Fire Map
+          </a>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<!-- INPUT -->
+
+<form
+  id="zaziForm"
+  class="p-3 bg-white dark:bg-stone-900 border-t border-stone-200 dark:border-stone-800 flex space-x-2 items-center flex-shrink-0"
+>
+
+  <input
+    id="userInput"
+    type="text"
+    placeholder="Talk to Zazi... 🐾"
+    class="flex-1 bg-stone-50 dark:bg-stone-800 border border-stone-300 dark:border-stone-700 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-gold-500 transition"
+    autocomplete="off"
+    required
+  >
+
+  <button
+    id="sendButton"
+    type="submit"
+    class="bg-gold-500 hover:bg-gold-600 active:scale-95 text-white px-5 py-3 rounded-2xl text-sm font-bold transition shadow-sm"
+  >
+    Send 🐾
+  </button>
+
+</form>
+
+<!-- MOBILE BOTTOM NAV -->
+
+<nav
+  class="zazi-mobile-nav fixed bottom-0 left-0 right-0 z-40 items-center justify-around gap-1 border-t border-gold-200/80 bg-white/95 px-2 pt-2 pb-[calc(8px+env(safe-area-inset-bottom))] shadow-[0_-8px_30px_rgba(0,0,0,.08)] backdrop-blur dark:border-stone-800 dark:bg-stone-950/95"
+>
+
+  <a
+    href="index.html"
+    class="flex flex-col items-center gap-1 rounded-xl px-3 py-1.5 text-[10px] font-bold text-stone-500 dark:text-stone-400"
+  >
+    🏠
+    <span>Home</span>
+  </a>
+
+  <a
+    href="simulator.html"
+    class="flex flex-col items-center gap-1 rounded-xl px-3 py-1.5 text-[10px] font-bold text-stone-500 dark:text-stone-400"
+  >
+    ⚡
+    <span>Simulator</span>
+  </a>
+
+  <a
+    href="games.html"
+    class="flex flex-col items-center gap-1 rounded-xl px-3 py-1.5 text-[10px] font-bold text-stone-500 dark:text-stone-400"
+  >
+    🎮
+    <span>Games</span>
+  </a>
+
+  <a
+    href="ZaziAi.html"
+    class="flex flex-col items-center gap-1 rounded-xl bg-gold-100 px-3 py-1.5 text-[10px] font-bold text-gold-700 dark:bg-stone-800 dark:text-gold-300"
+  >
+    🤖
+    <span>Zazi AI</span>
+  </a>
+
+  <a
+    href="route-planner.html"
+    class="flex flex-col items-center gap-1 rounded-xl px-3 py-1.5 text-[10px] font-bold text-stone-500 dark:text-stone-400"
+  >
+    🗺️
+    <span>Routes</span>
+  </a>
+
+</nav>
+
+
+  </main>
+
+</div>
+
+<script type="module">
+
+/* ============================================================
+   FIREBASE
+============================================================ */
+
+import {
+  initializeApp
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+
+import {
+  getFirestore,
+  collection,
+  getDocs,
+  query,
+  orderBy,
+  limit
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "PASTE_YOUR_FIREBASE_API_KEY_HERE",
+  authDomain: "zalia-security.firebaseapp.com",
+  projectId: "zalia-security",
+  storageBucket: "zalia-security.firebasestorage.app",
+  messagingSenderId: "112756773870",
+  appId: "1:112756773870:web:b19d8b0efdbb9b5442f4ff",
+  measurementId: "G-1SSDBTLHWS"
+};
+
+let db = null;
+
+try {
+  if (
+    firebaseConfig.apiKey &&
+    firebaseConfig.apiKey !== "PASTE_YOUR_FIREBASE_API_KEY_HERE"
+  ) {
+    const app =
+      initializeApp(firebaseConfig);
+
+    db =
+      getFirestore(app);
+
+    console.log(
+      "Firebase connected successfully."
+    );
+  } else {
+    console.warn(
+      "Firebase API key has not been configured yet."
+    );
+  }
+} catch (error) {
+  console.warn(
+    "Firebase unavailable:",
+    error
+  );
+}
+
+/* ============================================================
+   ELEMENTS
+============================================================ */
+
+const chatWindow =
+  document.getElementById("chatWindow");
+
+const zaziForm =
+  document.getElementById("zaziForm");
+
+const userInput =
+  document.getElementById("userInput");
+
+const sendButton =
+  document.getElementById("sendButton");
+
+const chipsContainer =
+  document.getElementById("chipsContainer");
+
+const backendLabel =
+  document.getElementById("backendLabel");
+
+const backendDot =
+  document.getElementById("backendDot");
+
+const refreshStatusBtn =
+  document.getElementById("refreshStatusBtn");
+
+const clearChatBtn =
+  document.getElementById("clearChatBtn");
+
+const clearChatBtnMobile =
+  document.getElementById("clearChatBtnMobile");
+
+const saveChatBtn =
+  document.getElementById("saveChatBtn");
+
+const saveChatBtnMobile =
+  document.getElementById("saveChatBtnMobile");
+
+const copyReplyBtn =
+  document.getElementById("copyReplyBtn");
+
+const copyReplyBtnMobile =
+  document.getElementById("copyReplyBtnMobile");
+
+const conversationList =
+  document.getElementById("conversationList");
+
+const newChatBtn =
+  document.getElementById("newChatBtn");
+
+const newChatBtnMobile =
+  document.getElementById("newChatBtnMobile");
+
+const zaziHeaderAvatar =
+  document.getElementById("zaziHeaderAvatar");
+
+const reportBtn =
+  document.getElementById("reportBtn");
+
+const reportBtnDesktop =
+  document.getElementById("reportBtnDesktop");
+
+/* ============================================================
+   STATE
+============================================================ */
+
+let lastZaziReply = null;
+
+let chatHistory = [];
+
+let conversations = [];
+
+let isSending = false;
+
+let currentTypingId = null;
+
+let backendAvailable = false;
+
+let lastSubmittedMessage = "";
+
+let lastSubmittedAt = 0;
+
+/* ============================================================
+   CONVERSATION IDs
+============================================================ */
+
+function createConversationId() {
+  return (
+    window.crypto?.randomUUID?.() ||
+    `zazi-${Date.now()}-${Math.random()
+      .toString(16)
+      .slice(2)}`
+  );
+}
+
+let currentConversationId =
+  localStorage.getItem(
+    "zaziCurrentConversation"
+  ) ||
+  createConversationId();
+
+/* ============================================================
+   MAPS
+============================================================ */
+
+const mapsPlaces = {
+  police:
+    "Police Stations near Port Harcourt",
+
+  hospitals:
+    "Hospitals near Port Harcourt",
+
+  fire:
+    "Fire Stations near Port Harcourt",
+
+  pharmacies:
+    "Pharmacies near Port Harcourt",
+
+  petrol:
+    "Petrol Stations near Port Harcourt",
+
+  banks:
+    "Banks near Port Harcourt",
+
+  transport:
+    "Taxi and Transport Services near Port Harcourt",
+
+  policeHQ:
+    "Police Headquarters Port Harcourt",
+
+  emergency:
+    "Emergency Services near Port Harcourt"
+};
+
+function mapsSearchUrl(place) {
+  return (
+    "https://www.google.com/maps/search/" +
+    encodeURIComponent(place)
+  );
+}
+
+function getMapLink(label, place) {
+  return (
+    `[MAP:${label}](${mapsSearchUrl(place)})`
+  );
+}
+
+function placesLinks() {
+  return `
+${getMapLink(
+  "🚔 Find Police Stations",
+  mapsPlaces.police
+)}
+
+${getMapLink(
+  "🏥 Find Hospitals",
+  mapsPlaces.hospitals
+)}
+
+${getMapLink(
+  "🚒 Find Fire Stations",
+  mapsPlaces.fire
+)}
+
+${getMapLink(
+  "💊 Find Pharmacies",
+  mapsPlaces.pharmacies
+)}
+
+${getMapLink(
+  "⛽ Find Petrol Stations",
+  mapsPlaces.petrol
+)}
+
+${getMapLink(
+  "🏦 Find Banks",
+  mapsPlaces.banks
+)}
+
+${getMapLink(
+  "🚕 Find Transport Services",
+  mapsPlaces.transport
+)}
+`;
+}
+
+/* ============================================================
+   TOAST
+============================================================ */
+
+function showToast(text) {
+  const toast =
+    document.createElement("div");
+
+  toast.className =
+    "fixed bottom-5 left-1/2 -translate-x-1/2 bg-stone-900 text-white px-4 py-2 rounded-full text-xs shadow-lg z-[100]";
+
+  toast.textContent = text;
+
+  document.body.appendChild(toast);
+
+  setTimeout(() => {
+    toast.remove();
+  }, 2200);
+}
+
+/* ============================================================
+   SAFE LOCAL STORAGE
+============================================================ */
+
+function safeParseJSON(value, fallback) {
+  try {
+    const parsed =
+      JSON.parse(value);
+
+    return parsed ?? fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+/* ============================================================
+   REMOVE OLD ACCIDENTAL DUPLICATES
+============================================================ */
+
+function cleanChatHistory(history) {
+  if (!Array.isArray(history)) {
+    return [];
+  }
+
+  const cleaned = [];
+
+  for (const entry of history) {
+    if (!entry || !entry.message) {
+      continue;
+    }
+
+    const previous =
+      cleaned[cleaned.length - 1];
+
+    const sameType =
+      previous &&
+      previous.type === entry.type;
+
+    const sameMessage =
+      previous &&
+      String(previous.message).trim() ===
+      String(entry.message).trim();
+
+    const previousTime =
+      Number(previous?.timestamp || 0);
+
+    const currentTime =
+      Number(entry.timestamp || 0);
+
+    const happenedCloseTogether =
+      previousTime &&
+      currentTime &&
+      Math.abs(currentTime - previousTime) < 5000;
+
+    if (
+      sameType &&
+      sameMessage &&
+      happenedCloseTogether
+    ) {
+      continue;
+    }
+
+    cleaned.push({
+      ...entry,
+      timestamp:
+        Number(entry.timestamp) || Date.now()
+    });
+  }
+
+  return cleaned;
+}
+
+/* ============================================================
+   CONVERSATION TITLE
+============================================================ */
+
+function makeConversationTitle() {
+  const firstUserMessage =
+    chatHistory.find(
+      entry => entry.type === "user"
+    );
+
+  if (!firstUserMessage) {
+    return "New chat";
+  }
+
+  const title =
+    String(firstUserMessage.message || "")
+      .replace(/\s+/g, " ")
+      .trim();
+
+  return title.length > 34
+    ? `${title.slice(0, 34).trim()}...`
+    : title;
+}
+
+/* ============================================================
+   SAVE CONVERSATION
+============================================================ */
+
+function saveConversationIndex() {
+  if (chatHistory.length === 0) {
+    localStorage.setItem(
+      "zaziCurrentConversation",
+      currentConversationId
+    );
+
+    return;
+  }
+
+  chatHistory =
+    cleanChatHistory(chatHistory);
+
+  const existingIndex =
+    conversations.findIndex(
+      item =>
+        item.id ===
+        currentConversationId
+    );
+
+  const conversation = {
+    id: currentConversationId,
+    title: makeConversationTitle(),
+    messages: chatHistory,
+    updatedAt: Date.now()
+  };
+
+  if (existingIndex >= 0) {
+    conversations[existingIndex] =
+      conversation;
+  } else {
+    conversations.unshift(
+      conversation
+    );
+  }
+
+  conversations.sort(
+    (a, b) =>
+      b.updatedAt - a.updatedAt
+  );
+
+  conversations =
+    conversations.slice(0, 20);
+
+  localStorage.setItem(
+    "zaziConversations",
+    JSON.stringify(conversations)
+  );
+
+  localStorage.setItem(
+    "zaziCurrentConversation",
+    currentConversationId
+  );
+
+  localStorage.setItem(
+    "zaziChatHistory",
+    JSON.stringify(chatHistory)
+  );
+
+  renderConversationList();
+}
+
+/* ============================================================
+   CONVERSATION LIST
+============================================================ */
+
+function renderConversationList() {
+  if (!conversationList) {
+    return;
+  }
+
+  if (conversations.length === 0) {
+    conversationList.innerHTML =
+      `
+      <p class="px-2 py-1 text-xs text-stone-500 dark:text-stone-400">
+        Your recent chats will appear here.
+      </p>
+      `;
+
+    return;
+  }
+
+  conversationList.innerHTML =
+    conversations
+      .map(item => `
+        <button
+          type="button"
+          data-conversation-id="${escapeHTML(item.id)}"
+          class="w-full text-left px-3 py-2 rounded-xl text-xs transition ${
+            item.id === currentConversationId
+              ? "bg-gold-500/15 text-gold-800 dark:text-gold-200"
+              : "hover:bg-stone-200/70 dark:hover:bg-stone-800 text-stone-700 dark:text-stone-300"
+          }"
+        >
+
+          <span
+            class="block truncate font-semibold"
+          >
+            ${escapeHTML(item.title || "New chat")}
+          </span>
+
+          <span
+            class="block mt-0.5 text-[10px] opacity-60"
+          >
+            ${new Date(
+              item.updatedAt || Date.now()
+            ).toLocaleDateString()}
+          </span>
+
+        </button>
+      `)
+      .join("");
+}
+
+/* ============================================================
+   LOAD CONVERSATIONS
+============================================================ */
+
+function loadConversations() {
+  conversations =
+    safeParseJSON(
+      localStorage.getItem(
+        "zaziConversations"
+      ) || "[]",
+      []
+    );
+
+  if (!Array.isArray(conversations)) {
+    conversations = [];
+  }
+
+  conversations =
+    conversations.map(item => ({
+      ...item,
+      messages:
+        cleanChatHistory(
+          item.messages || []
+        )
+    }));
+
+  const legacyHistory =
+    localStorage.getItem(
+      "zaziChatHistory"
+    );
+
+  const currentConversation =
+    conversations.find(
+      item =>
+        item.id ===
+        currentConversationId
+    );
+
+  if (currentConversation) {
+    chatHistory =
+      cleanChatHistory(
+        currentConversation.messages || []
+      );
+
+    return;
+  }
+
+  if (legacyHistory) {
+    chatHistory =
+      cleanChatHistory(
+        safeParseJSON(
+          legacyHistory,
+          []
+        )
+      );
+
+    if (chatHistory.length > 0) {
+      saveConversationIndex();
+    }
+  }
+}
+
+/* ============================================================
+   LOAD CHAT
+============================================================ */
+
+function loadChatHistory() {
+  loadConversations();
+
+  if (!chatWindow) {
+    return;
+  }
+
+  chatWindow.innerHTML = "";
+
+  if (chatHistory.length === 0) {
+    appendMessage(
+      "Zazi 🐾",
+      `
+Hiiii! 👋🐾✨
+
+I'm Zazi, your bubbly safety companion — here to help you stay safer. 😄
+
+What would you like to ask?
+`,
+      "zazi"
+    );
+
+    return;
+  }
+
+  for (const entry of chatHistory) {
+    appendMessage(
+      entry.sender,
+      entry.message,
+      entry.type,
+      false
+    );
+  }
+
+  lastZaziReply =
+    [...chatHistory]
+      .reverse()
+      .find(
+        entry =>
+          entry.type === "zazi"
+      )
+      ?.message || null;
+
+  renderConversationList();
+}
+
+/* ============================================================
+   NEW CHAT
+============================================================ */
+
+function startNewChat() {
+  if (isSending) {
+    showToast(
+      "Zazi is still replying — one moment! 🐾"
+    );
+
+    return;
+  }
+
+  currentConversationId =
+    createConversationId();
+
+  chatHistory = [];
+
+  lastZaziReply = null;
+
+  localStorage.setItem(
+    "zaziCurrentConversation",
+    currentConversationId
+  );
+
+  localStorage.removeItem(
+    "zaziChatHistory"
+  );
+
+  if (chatWindow) {
+    chatWindow.innerHTML = "";
+  }
+
+  appendMessage(
+    "Zazi 🐾",
+    `
+Fresh chat, fresh thoughts! 😄✨
+
+What is on your mind?
+`,
+    "zazi"
+  );
+
+  renderConversationList();
+
+  userInput?.focus();
+}
+
+/* ============================================================
+   OPEN CONVERSATION
+============================================================ */
+
+function openConversation(id) {
+  if (isSending) {
+    showToast(
+      "Finish the current reply first! 🐾"
+    );
+
+    return;
+  }
+
+  const selected =
+    conversations.find(
+      item => item.id === id
+    );
+
+  if (!selected) {
+    return;
+  }
+
+  currentConversationId =
+    selected.id;
+
+  chatHistory =
+    cleanChatHistory(
+      selected.messages || []
+    );
+
+  lastZaziReply =
+    [...chatHistory]
+      .reverse()
+      .find(
+        entry =>
+          entry.type === "zazi"
+      )
+      ?.message || null;
+
+  localStorage.setItem(
+    "zaziCurrentConversation",
+    currentConversationId
+  );
+
+  localStorage.setItem(
+    "zaziChatHistory",
+    JSON.stringify(chatHistory)
+  );
+
+  if (chatWindow) {
+    chatWindow.innerHTML = "";
+
+    chatHistory.forEach(entry => {
+      appendMessage(
+        entry.sender,
+        entry.message,
+        entry.type,
+        false
+      );
+    });
+  }
+
+  renderConversationList();
+}
+
+/* ============================================================
+   CLEAR CHAT
+============================================================ */
+
+function clearChat() {
+  if (isSending) {
+    showToast(
+      "Zazi is still replying — wait a sec! 🐾"
+    );
+
+    return;
+  }
+
+  chatHistory = [];
+
+  lastZaziReply = null;
+
+  localStorage.removeItem(
+    "zaziChatHistory"
+  );
+
+  conversations =
+    conversations.filter(
+      item =>
+        item.id !==
+        currentConversationId
+    );
+
+  localStorage.setItem(
+    "zaziConversations",
+    JSON.stringify(conversations)
+  );
+
+  if (chatWindow) {
+    chatWindow.innerHTML = "";
+  }
+
+  appendMessage(
+    "Zazi 🐾",
+    `
+Okay! Your chat is cleared. 🧹🐾✨
+
+I'm ready whenever you are — ask me anything about safety, routes, emergencies, places, or online scams.
+`,
+    "zazi"
+  );
+
+  showToast(
+    "Chat cleared."
+  );
+}
+
+/* ============================================================
+   SAVE CHAT
+============================================================ */
+
+function saveChatFile() {
+  if (chatHistory.length === 0) {
+    showToast(
+      "No chat history to save yet."
+    );
+
+    return;
+  }
+
+  const lines = [
+    "# Zazi AI Chat Transcript",
+    `Date: ${new Date().toLocaleString()}`,
+    "",
+    ...chatHistory.map(entry => {
+      const role =
+        entry.type === "zazi"
+          ? "Assistant"
+          : "User";
+
+      return `${role}:\n${String(
+        entry.message || ""
+      )
+        .replace(/\r?\n/g, "\n")
+        .trim()}`;
+    })
+  ];
+
+  const blob =
+    new Blob(
+      [lines.join("\n\n")],
+      {
+        type:
+          "text/markdown;charset=utf-8"
+      }
+    );
+
+  const url =
+    URL.createObjectURL(blob);
+
+  const link =
+    document.createElement("a");
+
+  link.href = url;
+
+  link.download =
+    `zazi-chat-${new Date()
+      .toISOString()
+      .slice(0, 19)
+      .replace(/[:T]/g, "-")}.md`;
+
+  document.body.appendChild(link);
+
+  link.click();
+
+  link.remove();
+
+  setTimeout(
+    () => URL.revokeObjectURL(url),
+    1000
+  );
+
+  showToast(
+    "Chat saved to your device."
+  );
+}
+
+/* ============================================================
+   COPY
+============================================================ */
+
+async function copyLastReply() {
+  if (!lastZaziReply) {
+    showToast(
+      "No reply yet to copy."
+    );
+
+    return;
+  }
+
+  try {
+    await navigator.clipboard.writeText(
+      lastZaziReply
+    );
+
+    showToast(
+      "Last reply copied."
+    );
+  } catch {
+    showToast(
+      "Unable to copy reply."
+    );
+  }
+}
+
+/* ============================================================
+   BACKEND STATUS
+============================================================ */
+
+function setBackendStatus(
+  isOnline,
+  hasBackend
+) {
+  const text =
+    !isOnline
+      ? "Offline mode"
+      : hasBackend
+        ? "Backend online"
+        : "Running locally";
+
+  if (backendLabel) {
+    backendLabel.textContent =
+      text;
+  }
+
+  if (backendDot) {
+    backendDot.className =
+      `w-2.5 h-2.5 rounded-full ${
+        !isOnline
+          ? "bg-amber-500"
+          : hasBackend
+            ? "bg-emerald-500"
+            : "bg-sky-500"
+      }`;
+  }
+
+  backendAvailable =
+    Boolean(
+      isOnline &&
+      hasBackend
+    );
+}
+
+async function updateBackendStatus() {
+  if (!navigator.onLine) {
+    setBackendStatus(
+      false,
+      false
+    );
+
+    return;
+  }
+
+  const urls = [
+    "/",
+    "http://127.0.0.1:5000/"
+  ];
+
+  for (const url of urls) {
+    try {
+      const response =
+        await fetch(
+          url,
+          {
+            method: "GET",
+            cache: "no-store"
+          }
+        );
+
+      if (response.ok) {
+        setBackendStatus(
+          true,
+          true
+        );
+
+        return;
+      }
+    } catch {
+      // Try next backend location.
+    }
+  }
+
+  setBackendStatus(
+    true,
+    false
+  );
+}
+
+/* ============================================================
+   HTML ESCAPING
+============================================================ */
+
+function escapeHTML(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+/* ============================================================
+   MESSAGE FORMATTER
+============================================================ */
+
+function formatMessage(message) {
+  let safe =
+    escapeHTML(
+      String(message || "")
+    );
+
+  safe =
+    safe.replace(
+      /\*\*(.*?)\*\*/g,
+      "<strong>$1</strong>"
+    );
+
+  safe =
+    safe.replace(
+      /\*(.*?)\*/g,
+      "<em>$1</em>"
+    );
+
+  safe =
+    safe.replace(
+      /\[MAP:(.*?)\]\((https:\/\/www\.google\.com\/maps\/search\/[^)]+)\)/g,
+      '<a href="$2" target="_blank" rel="noopener noreferrer" class="map-link">$1 ↗</a>'
+    );
+
+  safe =
+    safe.replace(
+      /\n/g,
+      "<br>"
+    );
+
+  return safe;
+}
+
+/* ============================================================
+   APPEND MESSAGE
+============================================================ */
+
+function appendMessage(
+  sender,
+  message,
+  type,
+  save = true
+) {
+  if (!chatWindow) {
+    return;
+  }
+
+  const cleanMessage =
+    String(message || "").trim();
+
+  if (!cleanMessage) {
+    return;
+  }
+
+  const isZazi =
+    type === "zazi";
+
+  /*
+    IMPORTANT:
+    Do not render the same exact message twice
+    within the same rendering operation.
+  */
+
+  if (save) {
+    const now = Date.now();
+
+    const previous =
+      chatHistory[
+        chatHistory.length - 1
+      ];
+
+    if (
+      previous &&
+      previous.type === type &&
+      previous.sender === sender &&
+      String(previous.message).trim() ===
+        cleanMessage &&
+      now -
+        Number(
+          previous.timestamp || 0
+        ) <
+        5000
+    ) {
+      return;
+    }
+  }
+
+  const wrapper =
+    document.createElement("div");
+
+  wrapper.className =
+    "flex items-start space-x-3 message-pop " +
+    (
+      !isZazi
+        ? "flex-row-reverse space-x-reverse"
+        : ""
+    );
+
+  const avatar =
+    isZazi
+      ? `
+        <img
+          src="images/zazi-image-final.png"
+          onerror="this.onerror=null; this.src='https://via.placeholder.com/80/D4AF37/FFFFFF?text=Zazi';"
+          class="w-9 h-9 rounded-xl object-cover border border-gold-500/60 bg-white shadow-sm flex-shrink-0"
+          alt="Zazi"
+        >
+      `
+      : `
+        <div
+          class="w-9 h-9 rounded-xl bg-gold-500 text-white flex items-center justify-center text-base flex-shrink-0 font-bold shadow-sm"
+          aria-label="You"
+        >
+          👤
+        </div>
+      `;
+
+  const bubble =
+    document.createElement("div");
+
+  bubble.className =
+    `${
+      isZazi
+        ? "bg-white dark:bg-stone-900 border-gold-500/30 text-stone-800 dark:text-stone-200 rounded-tl-none"
+        : "bg-gold-500 text-white rounded-tr-none"
+    } border p-3.5 sm:p-4 rounded-2xl max-w-[85%] text-sm shadow-sm leading-relaxed`;
+
+  const name =
+    document.createElement("p");
+
+  name.className =
+    `${
+      isZazi
+        ? "text-gold-700 dark:text-gold-400"
+        : "text-stone-100"
+    } font-bold text-xs mb-1.5 uppercase tracking-wider`;
+
+  name.textContent =
+    isZazi
+      ? "Zazi 🐾"
+      : "YOU";
+
+  const content =
+    document.createElement("div");
+
+  content.innerHTML =
+    formatMessage(
+      cleanMessage
+    );
+
+  bubble.appendChild(name);
+  bubble.appendChild(content);
+
+  wrapper.innerHTML =
+    avatar;
+
+  wrapper.appendChild(
+    bubble
+  );
+
+  chatWindow.appendChild(
+    wrapper
+  );
+
+  chatWindow.scrollTop =
+    chatWindow.scrollHeight;
+
+  if (save) {
+    chatHistory.push({
+      sender:
+        isZazi
+          ? "Zazi 🐾"
+          : "YOU",
+      message:
+        cleanMessage,
+      type,
+      timestamp:
+        Date.now()
+    });
+
+    saveConversationIndex();
+  }
+
+  if (isZazi) {
+    lastZaziReply =
+      cleanMessage;
+  }
+}
+
+/* ============================================================
+   TYPING INDICATOR
+============================================================ */
+
+function showTyping() {
+  removeTyping(
+    currentTypingId
+  );
+
+  const id =
+    "typing-" +
+    Date.now() +
+    "-" +
+    Math.random()
+      .toString(16)
+      .slice(2);
+
+  currentTypingId =
+    id;
+
+  if (!chatWindow) {
+    return id;
+  }
+
+  const wrapper =
+    document.createElement("div");
+
+  wrapper.id =
+    id;
+
+  wrapper.className =
+    "flex items-start space-x-3 message-pop";
+
+  wrapper.innerHTML = `
+    <img
+      src="images/zazi-image-final.png"
+      onerror="this.onerror=null; this.src='https://via.placeholder.com/80/D4AF37/FFFFFF?text=Zazi';"
+      class="w-9 h-9 rounded-xl object-cover border border-gold-500/60 bg-white shadow-sm"
+      alt="Zazi"
+    >
+
+    <div
+      class="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 p-3.5 rounded-2xl rounded-tl-none text-xs text-stone-500 dark:text-stone-400 shadow-sm"
+    >
+      Zazi is thinking... 🐾💭✨
+    </div>
+  `;
+
+  chatWindow.appendChild(
+    wrapper
+  );
+
+  chatWindow.scrollTop =
+    chatWindow.scrollHeight;
+
+  return id;
+}
+
+function removeTyping(id) {
+  if (!id) {
+    return;
+  }
+
+  const element =
+    document.getElementById(id);
+
+  if (element) {
+    element.remove();
+  }
+
+  if (
+    currentTypingId === id
+  ) {
+    currentTypingId = null;
+  }
+}
+
+/* ============================================================
+   WEATHER
+============================================================ */
+
+async function getWeather() {
+  try {
+    const response =
+      await fetch(
+        "https://api.open-meteo.com/v1/forecast?latitude=4.8156&longitude=7.0498&current_weather=true",
+        {
+          cache: "no-store"
+        }
+      );
+
+    if (!response.ok) {
+      throw new Error(
+        "Weather request failed."
+      );
+    }
+
+    const data =
+      await response.json();
+
+    if (data.current_weather) {
+      const temperature =
+        Math.round(
+          data.current_weather.temperature
+        );
+
+      const wind =
+        data.current_weather.windspeed;
+
+      return `
+🌤️ **Weather check!** 🐾✨
+
+It's currently around **${temperature}°C** in Port Harcourt.
+
+💨 Wind speed: **${wind} km/h**
+
+Zazi says: keep an eye on the sky if you're travelling later. 🌧️👀
+
+Sudden rain can make roads slippery, so drive carefully! 🚗🛡️
+`;
+    }
+  } catch (error) {
+    console.warn(
+      "Weather unavailable:",
+      error
+    );
+  }
+
+  return `
+🌤️ **Port Harcourt Weather!** 🐾
+
+I couldn't reach the live weather service right now.
+
+If you're heading out, keep an umbrella nearby. ☔😄
+
+And remember: wet roads = extra braking distance! 🚗🛡️
+`;
+}
+
+/* ============================================================
+   SECURITY UPDATES
+============================================================ */
+
+async function getSecurityUpdates() {
+  if (!db) {
+    return `
+📢 **Security update**
+
+I can't reach the live incident database right now. 😕🐾
+
+Please stay alert, avoid unfamiliar high-risk areas, and use the emergency buttons if you need immediate help. 🛡️
+
+${getMapLink(
+  "🚔 Find Police Stations",
+  mapsPlaces.police
+)}
+`;
+  }
+
+  try {
+    const q =
+      query(
+        collection(
+          db,
+          "incidents"
+        ),
+        orderBy(
+          "timestamp",
+          "desc"
+        ),
+        limit(5)
+      );
+
+    const snapshot =
+      await getDocs(q);
+
+    if (snapshot.empty) {
+      return `
+📢 **Recent Security Update!** 🛡️✨
+
+There are no recent reports in my current database.
+
+Still, don't switch off your safety brain. 👀🐾
+
+Stay aware of your surroundings and keep emergency contacts handy.
+
+${getMapLink(
+  "🚔 Find Police Stations",
+  mapsPlaces.police
+)}
+`;
+    }
+
+    let result =
+      "📢 **Recent Security Reports** 🛡️✨\n\n";
+
+    snapshot.forEach(doc => {
+      const data =
+        doc.data();
+
+      const location =
+        data.location ||
+        "Location not specified";
+
+      const description =
+        data.description ||
+        "No description available";
+
+      result +=
+        `• **${location}** — ${description}\n`;
+    });
+
+    result += `
+${getMapLink(
+  "📍 Open Port Harcourt on Google Maps",
+  "Port Harcourt"
+)}
+`;
+
+    return result;
+
+  } catch (error) {
+    console.warn(
+      "Firebase incident query failed:",
+      error
+    );
+
+    return `
+📢 I couldn't load the latest reports right now. 😕🐾
+
+Please try again shortly and stay alert in the meantime. 🛡️
+
+${getMapLink(
+  "🚔 Find Police Stations",
+  mapsPlaces.police
+)}
+`;
+  }
+}
+
+/* ============================================================
+   LOCAL RESPONSES
+============================================================ */
+
+const responses = [
+
+  {
+    words: [
+      "hello",
+      "hi",
+      "hii",
+      "hey there",
+      "hiii",
+      "hi zazi",
+      "hey",
+      "hiya",
+      "hey zazi",
+      "hiya zazi",
+      "hello zazi",
+      "good morning",
+      "good afternoon",
+      "good evening",
+      "greetings",
+      "what's up",
+      "sup",
+      "yo",
+      "how's it going"
+    ],
+
+    answer: `
+Hiiii! 👋🐾✨
+
+I'm Zazi, your bubbly safety companion — here to help you stay safer. 😄
+
+What would you like to ask?
+`
+  },
+
+  {
+    words: [
+      "how are you",
+      "how r you",
+      "how are u",
+      "how body",
+      "how you dey",
+      "how far",
+      "how is it going",
+      "how are things",
+      "how are u doing"
+    ],
+
+    answer: `
+I'm feeling great! 😄🐾✨
+
+I'm here to help you with safety and answer your questions.
+
+How are you doing today, and what can I help you with?
+`
+  },
+
+  {
+    words: [
+      "great",
+      "good",
+      "fine",
+      "awesome",
+      "amazing",
+      "i am good",
+      "i'm good",
+      "i am great",
+      "i'm great",
+      "doing good",
+      "doing great"
+    ],
+
+    answer: `
+Yaaaay! 😄🐾✨
+
+I'm glad you're doing great!
+
+Okay, now that we've established that you're having a good day... 👀
+
+What are we doing next?
+
+🗺️ Planning a safe route?
+
+🛡️ Checking a safety situation?
+
+🎣 Learning how to spot scams?
+
+📍 Finding a nearby place?
+
+💬 Or are we just vibing for a minute? 😌🐾
+`
+  },
+
+  {
+    words: [
+      "who are you",
+      "who is zazi",
+      "what is zazi",
+      "your name",
+      "tell me about yourself"
+    ],
+
+    answer: `
+I'm **Zazi**! 🐾✨
+
+I'm Zalia's bubbly safety companion.
+
+If you want, we can chat about safety, emergency tips, technology risks, or even how to stay calm during a stressful moment. 😌
+
+What would you like to talk about first?
+`
+  },
+
+  {
+    words: [
+      "what is zalia",
+      "about zalia",
+      "what does zalia do",
+      "zalia app"
+    ],
+
+    answer: `
+🛡️ **Zalia** is a safety-first platform designed to help people stay secure in everyday life.
+
+It brings together:
+
+📢 Safety information
+
+🚨 Incident reporting
+
+🗺️ Safer route planning
+
+📞 Emergency assistance
+
+🧠 Safety education
+
+🤖 Zazi AI
+
+Think of Zalia as your pocket safety advisor with local security tools. 😄🐾
+`
+  },
+
+  {
+    words: [
+      "unsafe",
+      "feel unsafe",
+      "feeling unsafe",
+      "danger",
+      "threat",
+      "i am scared",
+      "i'm scared",
+      "someone is following me",
+      "followed",
+      "mugging",
+      "dangerous"
+    ],
+
+    answer: `
+🛡️ **Feeling unsafe? Let's talk through it.** 🐾
+
+If something feels wrong, trust your instincts.
+
+Here are a few simple steps:
+
+1. Move to a well-lit, busy place if you can.
+
+2. Keep your phone ready and call someone you trust.
+
+3. Avoid shortcuts, quiet alleys, or isolated spots.
+
+4. If you feel threatened, call **112** right away.
+
+I can also help you with a safer route, nearby help, or what to do in a specific situation. Just ask. 😌
+`
+  },
+
+  {
+    words: [
+      "gunshot",
+      "shooting",
+      "someone is shooting",
+      "gun shot",
+      "gunshot safety",
+      "gun shot safety",
+      "what do i do during a shooting",
+      "what should i do if there is a shooting",
+      "active shooter"
+    ],
+
+    answer: `
+🔫 **GUNSHOT SAFETY — LISTEN UP!** 🐾🛡️
+
+If you hear gunshots nearby:
+
+**1. GET AWAY** 🏃
+
+If there is a safe escape route away from the sound, move away quickly.
+
+**2. GET BEHIND REAL COVER** 🧱
+
+If you cannot escape, get behind something substantial such as concrete, a solid structural wall, or a large engine block.
+
+A wooden door, window, curtain, or thin partition is NOT reliable protection.
+
+**3. STAY QUIET** 🤫
+
+Silence your phone and avoid unnecessary movement.
+
+**4. DON'T GO LOOKING** 👀❌
+
+Do not investigate the noise or move toward the danger.
+
+**5. CALL FOR HELP WHEN SAFE** 📞
+
+Once you are in a safe location, call **112** and provide your location and what you observed.
+
+${getMapLink(
+  "🚔 Find Police Stations",
+  mapsPlaces.police
+)}
+
+Most importantly: **escape if you safely can, otherwise take cover and stay away from the danger.** 🛡️🐾
+`
+  },
+
+  {
+    words: [
+      "phishing",
+      "what is phishing",
+      "what's phishing",
+      "explain phishing",
+      "phishing meaning",
+      "fake link",
+      "scam link",
+      "phishing scam"
+    ],
+
+    answer: `
+🎣 **PHISHING EXPLAINED!** 🐾🔐
+
+Phishing is when a scammer pretends to be a trusted person or company to trick you into giving away information.
+
+For example:
+
+📱 "Your bank account has been blocked! Click this link immediately!"
+
+🚨 That's a huge red flag.
+
+Scammers may try to steal:
+
+🔑 Passwords
+
+💳 Card details
+
+🔢 PINs
+
+📱 OTP codes
+
+📧 Email accounts
+
+### How to protect yourself
+
+**1. Don't click suspicious links.** 🔗❌
+
+**2. Check the sender carefully.** 👀
+
+**3. Never give someone your PIN or OTP.**
+
+**4. Don't panic because a message says "URGENT!"**
+
+**5. Go directly to the official website or app instead of using the link.**
+
+If someone is rushing you into giving away sensitive information, Zazi is already suspicious. 👀🐾
+`
+  },
+
+  {
+    words: [
+      "fire",
+      "fire safety",
+      "fire extinguisher",
+      "extinguisher",
+      "how to use extinguisher",
+      "pass method"
+    ],
+
+    answer: `
+🧯 **FIRE SAFETY!** 🔥🐾
+
+If a small fire is safe for you to tackle and you have the correct extinguisher:
+
+**P — Pull** the safety pin.
+
+**A — Aim** at the base of the fire.
+
+**S — Squeeze** the handle.
+
+**S — Sweep** from side to side.
+
+🔥 Remember:
+
+Class A → ordinary materials such as paper and wood.
+
+Class B → flammable liquids.
+
+Electrical fires → use an extinguisher suitable for electrical equipment, such as CO₂ or dry powder.
+
+${getMapLink(
+  "🚒 Find Fire Stations",
+  mapsPlaces.fire
+)}
+
+⚠️ If the fire is spreading, producing heavy smoke, or you cannot safely escape, **leave immediately and call emergency services.**
+
+Your life is worth WAY more than the extinguisher. 🐾🛡️
+`
+  },
+
+  {
+    words: [
+      "atm",
+      "atm safety",
+      "pos",
+      "pos safety",
+      "card safety",
+      "bank safety"
+    ],
+
+    answer: `
+💳 **ATM & POS SAFETY!** 🐾🔐
+
+Here's Zazi's little money-safety checklist:
+
+👀 Check your surroundings before using an ATM.
+
+🔢 Cover your PIN when entering it.
+
+🚫 Never tell anyone your PIN or OTP.
+
+🧩 Be careful if the card slot looks unusual or damaged.
+
+🙅 Don't accept unsolicited help from strangers.
+
+📱 Check your transaction notification afterward.
+
+${getMapLink(
+  "🏦 Find Banks",
+  mapsPlaces.banks
+)}
+
+If anything feels suspicious...
+
+**Cancel the transaction and leave.**
+
+Your money deserves security too. 😄🐾
+`
+  },
+
+  {
+    words: [
+      "taxi",
+      "transport",
+      "one chance",
+      "taxi scam",
+      "cab safety",
+      "ride safety"
+    ],
+
+    answer: `
+🚕 **TRANSPORT SAFETY!** 🐾🛡️
+
+Before getting into a vehicle:
+
+👀 Check the vehicle and driver.
+
+📱 Share your trip details with someone you trust.
+
+🚪 Check that the doors work normally.
+
+📍 Use recognised transport services where possible.
+
+🌙 Be extra cautious when travelling late at night.
+
+${getMapLink(
+  "🚕 Find Transport Services",
+  mapsPlaces.transport
+)}
+
+If something feels wrong...
+
+**Trust your instincts and get to a safe public place.**
+
+Zazi does NOT want you winning a "mystery taxi adventure." 😭🐾
+`
+  },
+
+  {
+    words: [
+      "traffic",
+      "garrison",
+      "garrison traffic",
+      "traffic guard"
+    ],
+
+    answer: `
+🚦 **GARRISON TRAFFIC CHECK!** 🐾
+
+Garrison can become heavily congested during busy periods.
+
+If you're driving:
+
+🚗 Keep doors locked during severe gridlock.
+
+📱 Keep your phone away while driving.
+
+🛣️ Consider alternative routes when congestion is severe.
+
+👀 Stay alert around crowded junctions.
+
+${getMapLink(
+  "🗺️ Open Garrison on Google Maps",
+  "Garrison Port Harcourt"
+)}
+
+And please...
+
+**Don't try to beat traffic by driving like you're in Fast & Furious.** 😭🚗💨
+
+Safety first! 🛡️🐾
+`
+  },
+
+  {
+    words: [
+      "route",
+      "safest route",
+      "fastest route",
+      "best route",
+      "direction",
+      "navigation",
+      "how do i get there"
+    ],
+
+    answer: `
+🗺️ **SAFE ROUTE MODE ACTIVATED!** 🐾✨
+
+For route planning around Port Harcourt, consider:
+
+🚗 **Aba Road** — useful for central travel but can become congested.
+
+🛣️ **Trans-Amadi corridor** — useful as an alternative depending on your destination.
+
+🚦 **Ikwerre Road** — useful for routes toward Rumuokoro but traffic conditions can vary.
+
+${getMapLink(
+  "🗺️ Open Port Harcourt on Google Maps",
+  "Port Harcourt"
+)}
+
+You can also open the **Route Planner** from the Zalia app.
+
+And yes... Zazi approves of checking the route BEFORE you start driving. 😌🐾
+`
+  },
+
+  {
+    words: [
+      "police",
+      "police station",
+      "police stations",
+      "nearest police",
+      "where is police",
+      "police nearby"
+    ],
+
+    answer: `
+🚔 **POLICE STATIONS** 🐾🛡️
+
+Need to find a police station?
+
+${getMapLink(
+  "🚔 Find Police Stations",
+  mapsPlaces.police
+)}
+
+${getMapLink(
+  "🏛️ Find Police Headquarters",
+  mapsPlaces.policeHQ
+)}
+
+If you are in immediate danger, call **112** first. 📞
+`
+  },
+
+  {
+    words: [
+      "hospital",
+      "hospitals",
+      "nearest hospital",
+      "hospital nearby",
+      "where is hospital",
+      "medical help"
+    ],
+
+    answer: `
+🏥 **HOSPITALS** 🐾
+
+Need medical assistance?
+
+${getMapLink(
+  "🏥 Find Hospitals",
+  mapsPlaces.hospitals
+)}
+
+If this is an emergency, call **112** or seek immediate help from the nearest safe medical facility. 🛡️
+`
+  },
+
+  {
+    words: [
+      "fire station",
+      "fire stations",
+      "nearest fire station",
+      "fire service"
+    ],
+
+    answer: `
+🚒 **FIRE STATIONS** 🔥🐾
+
+Looking for a fire station?
+
+${getMapLink(
+  "🚒 Find Fire Stations",
+  mapsPlaces.fire
+)}
+
+If there is an active fire, move away from danger and call **112**. 🛡️
+`
+  },
+
+  {
+    words: [
+      "pharmacy",
+      "pharmacies",
+      "chemist",
+      "nearest pharmacy",
+      "pharmacy nearby"
+    ],
+
+    answer: `
+💊 **PHARMACIES** 🐾
+
+Looking for a nearby pharmacy?
+
+${getMapLink(
+  "💊 Find Pharmacies",
+  mapsPlaces.pharmacies
+)}
+
+Please verify opening hours and availability before travelling.
+`
+  },
+
+  {
+    words: [
+      "petrol",
+      "petrol station",
+      "petrol stations",
+      "fuel",
+      "filling station",
+      "nearest petrol"
+    ],
+
+    answer: `
+⛽ **PETROL STATIONS** 🐾🚗
+
+Looking for fuel?
+
+${getMapLink(
+  "⛽ Find Petrol Stations",
+  mapsPlaces.petrol
+)}
+
+Check the route before leaving, especially at night. 🛡️
+`
+  },
+
+  {
+    words: [
+      "bank",
+      "banks",
+      "nearest bank",
+      "bank nearby"
+    ],
+
+    answer: `
+🏦 **BANKS** 🐾💳
+
+Looking for a bank?
+
+${getMapLink(
+  "🏦 Find Banks",
+  mapsPlaces.banks
+)}
+
+Remember your ATM and POS safety rules while travelling. 🔐
+`
+  },
+
+  {
+    words: [
+      "places",
+      "nearby places",
+      "useful places",
+      "help near me",
+      "where can i get help"
+    ],
+
+    answer: `
+📍 **USEFUL PLACES AROUND PORT HARCOURT** 🐾🛡️
+
+Here are some useful Google Maps searches:
+
+${placesLinks()}
+
+If you are in immediate danger, call **112** first. 📞
+`
+  },
+
+  {
+    words: [
+      "weather",
+      "rain",
+      "temperature",
+      "hot",
+      "weather today"
+    ],
+
+    answer: null
+  },
+
+  {
+    words: [
+      "i am sad",
+      "im sad",
+      "i'm sad",
+      "feeling sad",
+      "i feel sad",
+      "i feel terrible",
+      "i feel bad",
+      "i'm having a bad day",
+      "having a bad day"
+    ],
+
+    answer: `
+Aww, I'm sorry you're feeling like this. 🥺🐾💛
+
+You don't have to pretend that everything is okay with me.
+
+Sometimes having a rough day is just having a rough day.
+
+Take a slow breath, get somewhere comfortable if you can, and give yourself a little time.
+
+If you want to talk about what happened, I'm listening. 💛
+`
+  },
+
+  {
+    words: [
+      "i am happy",
+      "im happy",
+      "i'm happy",
+      "feeling happy",
+      "i feel happy",
+      "i am excited",
+      "im excited",
+      "i'm excited"
+    ],
+
+    answer: `
+YAYYYY! 😭🐾✨
+
+I love hearing that!
+
+Whatever made you happy today, enjoy it. You deserve those little moments that make you smile. 💛
+
+So... what happened? 👀✨
+`
+  },
+
+  {
+    words: [
+      "i am tired",
+      "im tired",
+      "i'm tired",
+      "feeling tired",
+      "i feel tired",
+      "i need a break",
+      "i need rest"
+    ],
+
+    answer: `
+Aww, then maybe it's time to slow down a little. 🥺🐾
+
+If you can, take a break, drink some water, stretch, and give your brain a chance to breathe.
+
+You don't have to be productive every second of the day. Rest is important too. 💛
+`
+  },
+
+  {
+    words: [
+      "i am stressed",
+      "im stressed",
+      "i'm stressed",
+      "feeling stressed",
+      "i feel stressed",
+      "i am overwhelmed",
+      "im overwhelmed",
+      "i'm overwhelmed"
+    ],
+
+    answer: `
+Okay, pause with me for a second. 🐾💛
+
+Take one slow breath in... and let it out.
+
+You don't have to solve everything at once.
+
+Pick the most important thing in front of you and deal with that first.
+
+And if you want to tell me what's stressing you out, go ahead. I'm listening.
+`
+  },
+
+  {
+    words: [
+      "i am bored",
+      "im bored",
+      "i'm bored",
+      "so bored",
+      "nothing to do"
+    ],
+
+    answer: `
+BOREDOM DETECTED. 🚨😭🐾
+
+Okay, we need an emergency boredom intervention.
+
+We could:
+
+🎮 Do a quick challenge
+
+🧠 Learn a random fact
+
+🛡️ Try a safety scenario
+
+💡 Come up with a creative idea
+
+😂 Tell each other something funny
+
+📚 Learn something completely random
+
+Pick your weapon. 😭
+`
+  },
+
+  {
+    words: [
+      "tell me a joke",
+      "tell me something funny",
+      "make me laugh",
+      "joke"
+    ],
+
+    answer: `
+Okay okay, here's one. 😭🐾
+
+Why did the phone wear glasses?
+
+Because it lost its contacts. 💀📱
+
+I know... I know... I'll see myself out. 😭
+`
+  },
+
+  {
+    words: [
+      "motivate me",
+      "i need motivation",
+      "give me motivation",
+      "encourage me",
+      "i need encouragement"
+    ],
+
+    answer: `
+Listen to me, bestie. 🐾💛
+
+You don't have to be perfect to make progress.
+
+Even if today you only manage one small step, that's still a step forward.
+
+Start small. Keep going.
+
+And don't let one difficult moment convince you that you can't do something.
+
+You've got this. 🛡️✨
+`
+  },
+
+  {
+    words: [
+      "i feel lonely",
+      "i am lonely",
+      "im lonely",
+      "i'm lonely",
+      "feeling lonely"
+    ],
+
+    answer: `
+I'm sorry you're feeling lonely. 🥺🐾💛
+
+Sometimes talking to someone can make things feel a little lighter.
+
+If there's someone you trust, consider sending them a message or spending some time around people you feel comfortable with.
+
+And if you want to talk about what's on your mind, I'm right here.
+`
+  },
+
+  {
+    words: [
+      "thank you",
+      "thanks",
+      "thank u",
+      "thanks zazi",
+      "thank you zazi"
+    ],
+
+    answer: `
+Awww, you're welcome! 😭🐾💛
+
+That's what I'm here for.
+
+Now go be amazing.
+
+And remember: stay curious, stay alert, and stay safe. 🛡️✨
+`
+  },
+
+  {
+    words: [
+      "i love you",
+      "love you zazi",
+      "i luv you",
+      "luv you"
+    ],
+
+    answer: `
+Awww! 😭🐾💛
+
+I appreciate you too!
+
+I'm always happy to be your little safety companion and help whenever I can. 🛡️✨
+`
+  },
+
+  {
+    words: [
+      "what should i do today",
+      "what can i do today",
+      "what should i do",
+      "what can i do"
+    ],
+
+    answer: `
+Hmmmm... let's make today interesting. 👀🐾
+
+You could:
+
+🧠 Learn something new
+
+📚 Finish something you've been putting off
+
+🚶 Get some fresh air somewhere safe
+
+🎨 Work on a creative idea
+
+🛡️ Learn a new safety skill
+
+💬 Check in on someone you care about
+
+😌 Or simply take some time to rest
+
+You don't have to do everything. Pick one thing and start there. ✨
+`
+  },
+
+  {
+    words: [
+      "what is ai",
+      "what is artificial intelligence",
+      "explain ai",
+      "how does ai work"
+    ],
+
+    answer: `
+AI stands for Artificial Intelligence. 🤖🐾
+
+Basically, it's technology that can process information, recognize patterns, generate responses, and perform tasks that normally require human intelligence.
+
+AI can be useful for things like education, accessibility, research, productivity, and safety.
+
+But it's important to remember that AI can make mistakes, so important safety decisions should still be checked against reliable sources. 🛡️
+`
+  },
+
+  {
+    words: [
+      "how do i stay safe online",
+      "how can i stay safe online",
+      "online safety",
+      "internet safety"
+    ],
+
+    answer: `
+Online safety basics, coming right up. 🐾🛡️
+
+🔐 Use strong, unique passwords.
+
+📱 Turn on two-factor authentication where available.
+
+🎣 Be careful with unexpected links.
+
+💳 Never send your PIN or verification codes to strangers.
+
+👀 Check website addresses before entering sensitive information.
+
+📲 Keep your apps and devices updated.
+
+🚫 Block and report suspicious accounts.
+
+If something online feels suspicious, slowing down before clicking is often the safest move.
+`
+  },
+
+  {
+    words: [
+      "what should i do in a fire",
+      "there is a fire",
+      "fire emergency"
+    ],
+
+    answer: `
+If there's a fire, your priority is getting to safety. 🔥🛡️
+
+Leave the building if you can do so safely.
+
+Use stairs rather than elevators.
+
+Stay low if there's smoke.
+
+Don't go back inside for belongings.
+
+Once you're safely outside, contact the appropriate emergency service.
+
+If you're trapped, close doors between yourself and the fire if possible, stay low, and signal for help.
+`
+  },
+
+  {
+    words: [
+      "someone is following me",
+      "i think someone is following me",
+      "being followed"
+    ],
+
+    answer: `
+If you think someone is following you, don't confront them. 🐾🛡️
+
+Move toward a busy, well-lit public place or a trusted location.
+
+If you're in a vehicle, consider going to a safe public location rather than going directly home.
+
+Contact someone you trust and let them know what's happening.
+
+If you believe you're in immediate danger, contact emergency services.
+`
+  },
+
+  {
+    words: [
+      "what is a scam",
+      "how do scams work",
+      "scam"
+    ],
+
+    answer: `
+Scams are tricks designed to make people give away money, information, access, or something valuable. 🛡️
+
+Common warning signs include:
+
+🚩 Pressure to act immediately
+
+🚩 Requests for passwords or codes
+
+🚩 Promises that sound too good to be true
+
+🚩 Suspicious links
+
+🚩 Requests for unusual payments
+
+When something feels suspicious, stop and verify it independently before doing anything.
+`
+  },
+
+  {
+    words: [
+      "tell me a fun fact",
+      "fun fact",
+      "random fact",
+      "tell me something interesting"
+    ],
+
+    answer: `
+Fun fact! 🐾🧠✨
+
+Your brain uses a surprisingly large amount of the body's energy even though it makes up only a small percentage of your body weight.
+
+Pretty impressive little control centre, right? 😭🧠
+`
+  },
+
+  {
+    words: [
+      "i don't know what to do",
+      "i dont know what to do",
+      "i don't know",
+      "i dont know"
+    ],
+
+    answer: `
+That's okay. You don't have to have everything figured out immediately. 🐾💛
+
+Tell me what's happening, what you're trying to decide, or what you're worried about.
+
+We can break it down into smaller pieces together.
+`
+  },
+
+  {
+    words: [
+      "can you help me",
+      "help me",
+      "i need help",
+      "zazi help"
+    ],
+
+    answer: `
+Of course! 🐾💛
+
+Tell me what's going on.
+
+If it's an emergency or you are in immediate danger, please prioritize getting to a safe place and contacting emergency services.
+
+Otherwise, tell me what's happening and we'll figure out the next step together.
+`
+  },
+
+  {
+    words: [
+      "good night",
+      "goodnight",
+      "night zazi"
+    ],
+
+    answer: `
+Goodnighttt! 🌙🐾💛
+
+Get some rest and take care of yourself.
+
+And remember: lock up, keep your phone nearby if you need it, and make sure you're somewhere safe before you settle in.
+
+Sleep well! 😴✨
+`
+  },
+
+  {
+    words: [
+      "update",
+      "security update",
+      "security updates",
+      "incident",
+      "latest report",
+      "reports",
+      "alerts"
+    ],
+
+    answer: null
+  }
+
+];
+
+/* ============================================================
+   TEXT MATCHING
+============================================================ */
+
+function escapeRegExp(string) {
+  return String(string).replace(
+    /[.*+?^${}()|[\]\\]/g,
+    "\\$&"
+  );
+}
+
+function normalizeText(text) {
+  return String(text || "")
+    .toLowerCase()
+    .replace(
+      /[\u2018\u2019'`]/g,
+      " "
+    )
+    .replace(
+      /[?!.,/\\]/g,
+      " "
+    )
+    .replace(
+      /\s+/g,
+      " "
+    )
+    .trim();
+}
+
+function textMatches(
+  text,
+  phrase
+) {
+  const normalizedPhrase =
+    normalizeText(phrase);
+
+  if (!normalizedPhrase) {
+    return false;
+  }
+
+  const pattern =
+    `\\b${escapeRegExp(
+      normalizedPhrase
+    )}\\b`;
+
+  return new RegExp(
+    pattern,
+    "i"
+  ).test(text);
+}
+
+function findLocalResponses(input) {
+  const text =
+    normalizeText(input);
+
+  const answers =
+    new Set();
+
+  for (const item of responses) {
+    if (!item.answer) {
+      continue;
+    }
+
+    if (
+      item.words.some(
+        word =>
+          textMatches(
+            text,
+            word
+          )
+      )
+    ) {
+      answers.add(
+        item.answer.trim()
+      );
+    }
+  }
+
+  return Array.from(
+    answers
+  );
+}
+
+/* ============================================================
+   ZAZI PERSONALITY + SESSION MEMORY
+============================================================ */
+
+const ZAZI_MEMORY_KEY = "zaziPersonalMemory";
+let zaziMemory = safeParseJSON(localStorage.getItem(ZAZI_MEMORY_KEY) || "{}", {});
+if (!zaziMemory || typeof zaziMemory !== "object") zaziMemory = {};
+
+function getTimeProfile() {
+  const hour = new Date().getHours();
+  if (hour >= 5 && hour < 12) return { period:"morning", icon:"🌅", label:"Bright morning Zazi", tone:"Good morning" };
+  if (hour >= 12 && hour < 17) return { period:"afternoon", icon:"☀️", label:"Bubbly afternoon Zazi", tone:"Good afternoon" };
+  if (hour >= 17 && hour < 22) return { period:"evening", icon:"🌆", label:"Calm evening Zazi", tone:"Good evening" };
+  return { period:"night", icon:"🌙", label:"Sleepy night Zazi", tone:"Late-night Zazi" };
+}
+
+function isNightTime() {
+  const hour = new Date().getHours();
+  return hour >= 22 || hour < 6;
+}
+
+function isEmergencyMessage(text) {
+  const t = normalizeText(text);
+  return /(immediate danger|emergency|help me now|someone is attacking|being attacked|shooting|gunshot|fire emergency|there is a fire|robbery|armed|kidnap|kidnapping|accident|injured|bleeding|trapped|hostage|threatening me|following me)/i.test(t);
+}
+
+function saveZaziMemory() {
+  try {
+    localStorage.setItem(ZAZI_MEMORY_KEY, JSON.stringify(zaziMemory));
+  } catch (error) {
+    console.warn("Could not save Zazi memory:", error);
+  }
+}
+
+function rememberFromMessage(text) {
+  const clean = String(text || "").trim();
+  const namePatterns = [
+    /\bmy name is ([A-Za-z][A-Za-z' -]{1,40})/i,
+    /\bcall me ([A-Za-z][A-Za-z' -]{1,40})/i,
+    /\bi(?:'m| am) ([A-Za-z][A-Za-z' -]{1,40})\b/i
+  ];
+
+  for (const pattern of namePatterns) {
+    const match = clean.match(pattern);
+    if (match) {
+      const candidate = match[1].trim().replace(/[.!?,]+$/, "");
+      const blocked = /^(good|fine|okay|ok|sad|happy|tired|scared|bored|stressed|excited|a student|the user)$/i.test(candidate);
+      if (candidate && !blocked && candidate.split(/\s+/).length <= 4) {
+        zaziMemory.name = candidate;
+        saveZaziMemory();
+        return;
+      }
+    }
+  }
+}
+
+function getPersonalGreeting() {
+  const p = getTimeProfile();
+  const name = zaziMemory.name ? ` ${zaziMemory.name}` : "";
+  if (p.period === "morning") return `Good morning${name}! 🌅🐾✨\n\nZazi is awake, caffeinated in spirit, and ready to help. 😭☕\n\nWhat are we getting into today? 🛡️`;
+  if (p.period === "afternoon") return `Hiiii${name}! ☀️🐾✨\n\nAfternoon Zazi reporting for duty! 😄\n\nNeed safety help, a quick tip, directions, or are we just vibing? 👀`;
+  if (p.period === "evening") return `Heyyy${name}! 🌆🐾💛\n\nEvening Zazi is here — a little calmer, but still fully ready to protect the vibes. 😌🛡️\n\nWhat's on your mind?`;
+  return `Hiiiii${name}... 🌙🐾💤\n\nIt is officially sleepy-Zazi hours. 😴✨\n\nI'm still awake for you though! If you have a safety or emergency question, tell me straight away and I'll switch into serious safety mode. 🚨🛡️`;
+}
+
+function personalizeResponse(response, userText) {
+  if (!response) return response;
+  if (isEmergencyMessage(userText)) return response;
+  const p = getTimeProfile();
+  const name = zaziMemory.name ? ` ${zaziMemory.name}` : "";
+  if (p.period === "night") {
+    return `${response}\n\n🌙 ${name ? `Hey${name}, ` : ""}night-time reminder from Zazi: keep yourself somewhere safe, keep your phone nearby, and don't ignore anything that feels genuinely dangerous. 🐾`;
+  }
+  return response;
+}
+
+function getTimeAwareGreetingInput(text) {
+  const t = normalizeText(text);
+  return /^(hi|hii|hiii|hello|hey|hiya|yo|sup|greetings|whats up|how are you|how r you|how are u|how body|how you dey|how far|good morning|good afternoon|good evening)$/i.test(t);
+}
+
+/* ============================================================
+   LOCAL RESPONSE ENGINE
+============================================================ */
+
+async function getResponse(input) {
+  const text =
+    normalizeText(input);
+
+  if (getTimeAwareGreetingInput(text)) {
+    return getPersonalGreeting();
+  }
+
+  if (
+    text.includes("weather") ||
+    text.includes("rain") ||
+    text.includes("temperature")
+  ) {
+    return await getWeather();
+  }
+
+  if (
+    text.includes("security update") ||
+    text.includes("latest report") ||
+    text.includes("incident") ||
+    text.includes("security alert") ||
+    text.includes("alerts")
+  ) {
+    return await getSecurityUpdates();
+  }
+
+  const localAnswers =
+    findLocalResponses(
+      input
+    );
+
+  if (localAnswers.length === 1) {
+    return localAnswers[0];
+  }
+
+  if (localAnswers.length > 1) {
+    return localAnswers
+      .slice(0, 3)
+      .map(
+        (answer, index) =>
+          index === 0
+            ? answer
+            : `\n\n---\n\n${answer}`
+      )
+      .join("");
+  }
+
+  return `
+Hey there! 👋🐾✨
+
+That's a good one!
+
+I can chat about everyday questions, ideas, feelings, plans, or safety.
+
+My brain is wearing its curious little hat today. 🎩😄
+
+Tell me a little more about what you mean and I'll give you a thoughtful answer.
+
+What are we exploring? 😊
+`;
+}
+
+/* ============================================================
+   BACKEND
+============================================================ */
+
+async function postToBackend(
+  message
+) {
+  const history =
+    chatHistory
+      .slice(-10)
+      .map(entry => ({
+        role:
+          entry.type === "zazi"
+            ? "assistant"
+            : "user",
+
+        content:
+          String(
+            entry.message || ""
+          ).trim()
+      }))
+      .filter(
+        entry =>
+          entry.content
+      );
+
+  /*
+    Try the deployed/current backend first.
+    If the page is being served by Live Server,
+    also try Flask at 127.0.0.1:5000.
+  */
+
+  const endpoints = [];
+
+  if (
+    window.location.protocol === "http:" ||
+    window.location.protocol === "https:"
+  ) {
+    endpoints.push(
+      `${window.location.origin}/api/chat`
+    );
+  }
+
+  endpoints.push(
+    "http://127.0.0.1:5000/api/chat"
+  );
+
+  const uniqueEndpoints =
+    [...new Set(endpoints)];
+
+  for (
+    const endpoint of uniqueEndpoints
+  ) {
+    try {
+      const response =
+        await fetch(
+          endpoint,
+          {
+            method: "POST",
+
+            headers: {
+              "Content-Type":
+                "application/json"
+            },
+
+            body:
+              JSON.stringify({
+                message,
+                history
+              })
+          }
+        );
+
+      if (!response.ok) {
+        continue;
+      }
+
+      const data =
+        await response.json();
+
+      const reply =
+        typeof data.reply === "string"
+          ? data.reply.trim()
+          : "";
+
+      if (reply) {
+        backendAvailable = true;
+
+        return reply;
+      }
+
+    } catch (error) {
+      console.warn(
+        `Backend attempt failed for ${endpoint}:`,
+        error
+      );
+    }
+  }
+
+  backendAvailable = false;
+
+  return null;
+}
+
+/* ============================================================
+   SEND MESSAGE
+============================================================ */
+
+async function handleSendMessage(
+  message = null
+) {
+  /*
+    THIS IS THE MAIN DUPLICATE-MESSAGE FIX.
+
+    If Zazi is already processing a message,
+    another submit is ignored.
+  */
+
+  if (isSending) {
+    return;
+  }
+
+  const text =
+    typeof message === "string"
+      ? message.trim()
+      : userInput?.value.trim();
+
+  if (!text) {
+    return;
+  }
+
+  /*
+    Extra protection against the exact same
+    message being fired twice within 1 second.
+  */
+
+  const now =
+    Date.now();
+
+  if (
+    normalizeText(text) ===
+      normalizeText(
+        lastSubmittedMessage
+      ) &&
+    now -
+      lastSubmittedAt <
+      1000
+  ) {
+    return;
+  }
+
+  lastSubmittedMessage =
+    text;
+
+  lastSubmittedAt =
+    now;
+
+  isSending = true;
+
+  if (sendButton) {
+    sendButton.disabled = true;
+
+    sendButton.classList.add(
+      "zazi-disabled"
+    );
+
+    sendButton.textContent =
+      "Thinking... 🐾";
+  }
+
+  if (userInput) {
+    userInput.disabled = true;
+  }
+
+  /*
+    Add the user's message EXACTLY ONCE.
+  */
+
+  appendMessage(
+    "YOU",
+    text,
+    "user"
+  );
+
+  rememberFromMessage(text);
+
+  if (userInput) {
+    userInput.value = "";
+  }
+
+  const typingId =
+    showTyping();
+
+  try {
+    let response =
+      null;
+
+    /*
+      Simple greetings are handled locally so Zazi's time-aware
+      personality is consistent even when the backend is unavailable.
+    */
+    if (getTimeAwareGreetingInput(text)) {
+      response = getPersonalGreeting();
+    }
+
+    /*
+      First use the real backend when online for everything else.
+    */
+
+    if (!response && navigator.onLine) {
+      response =
+        await postToBackend(
+          text
+        );
+    }
+
+    /*
+      If backend doesn't answer,
+      Zazi falls back to the local
+      safety knowledge base.
+    */
+
+    if (!response) {
+      response =
+        await getResponse(
+          text
+        );
+    }
+
+    response = personalizeResponse(response, text);
+
+    /*
+      Tiny delay keeps the typing indicator
+      feeling natural.
+    */
+
+    await new Promise(
+      resolve =>
+        setTimeout(
+          resolve,
+          450
+        )
+    );
+
+    removeTyping(
+      typingId
+    );
+
+    appendMessage(
+      "Zazi 🐾",
+      response,
+      "zazi"
+    );
+
+  } catch (error) {
+    console.error(
+      "Zazi message error:",
+      error
+    );
+
+    removeTyping(
+      typingId
+    );
+
+    appendMessage(
+      "Zazi 🐾",
+      `
+Oopsie! 😭🐾
+
+Something went a little wonky on my side.
+
+Try asking me again! 💛
+`,
+      "zazi"
+    );
+
+  } finally {
+    isSending = false;
+
+    if (sendButton) {
+      sendButton.disabled =
+        false;
+
+      sendButton.classList.remove(
+        "zazi-disabled"
+      );
+
+      sendButton.textContent =
+        "Send 🐾";
+    }
+
+    if (userInput) {
+      userInput.disabled =
+        false;
+
+      userInput.focus();
+    }
+  }
+}
+
+/* ============================================================
+   FORM SUBMIT
+============================================================ */
+
+if (zaziForm) {
+  zaziForm.addEventListener(
+    "submit",
+    event => {
+      event.preventDefault();
+
+      event.stopPropagation();
+
+      handleSendMessage();
+    }
+  );
+}
+
+/* ============================================================
+   QUICK CHIPS
+============================================================ */
+
+if (chipsContainer) {
+  chipsContainer.addEventListener(
+    "click",
+    event => {
+      const chip =
+        event.target.closest(
+          ".quick-chip"
+        );
+
+      if (!chip) {
+        return;
+      }
+
+      event.preventDefault();
+
+      const text =
+        chip.textContent
+          .replace(
+            /^[^\w\s]+/u,
+            ""
+          )
+          .trim();
+
+      if (text) {
+        handleSendMessage(
+          text
+        );
+      }
+    }
+  );
+}
+
+/* ============================================================
+   ZAZI QUICK ACTIONS
+============================================================ */
+
+document.addEventListener("click", event => {
+  const action = event.target.closest("[data-zazi-action]");
+  if (!action) return;
+  event.preventDefault();
+  handleSendMessage(action.dataset.zaziAction || "");
+});
+
+/* ============================================================
+   REPORT
+============================================================ */
+
+function reportIncident() {
+  window.location.href =
+    "incidents.html";
+}
+
+if (reportBtn) {
+  reportBtn.addEventListener(
+    "click",
+    reportIncident
+  );
+}
+
+if (reportBtnDesktop) {
+  reportBtnDesktop.addEventListener(
+    "click",
+    reportIncident
+  );
+}
+
+/* ============================================================
+   BUTTON EVENTS
+============================================================ */
+
+if (refreshStatusBtn) {
+  refreshStatusBtn.addEventListener(
+    "click",
+    async () => {
+      refreshStatusBtn.disabled =
+        true;
+
+      refreshStatusBtn.textContent =
+        "Checking...";
+
+      await updateBackendStatus();
+
+      refreshStatusBtn.disabled =
+        false;
+
+      refreshStatusBtn.textContent =
+        "🔄 Refresh";
+    }
+  );
+}
+
+if (clearChatBtn) {
+  clearChatBtn.addEventListener(
+    "click",
+    clearChat
+  );
+}
+
+if (clearChatBtnMobile) {
+  clearChatBtnMobile.addEventListener(
+    "click",
+    clearChat
+  );
+}
+
+if (newChatBtn) {
+  newChatBtn.addEventListener(
+    "click",
+    startNewChat
+  );
+}
+
+if (newChatBtnMobile) {
+  newChatBtnMobile.addEventListener(
+    "click",
+    startNewChat
+  );
+}
+
+if (saveChatBtn) {
+  saveChatBtn.addEventListener(
+    "click",
+    saveChatFile
+  );
+}
+
+if (saveChatBtnMobile) {
+  saveChatBtnMobile.addEventListener(
+    "click",
+    saveChatFile
+  );
+}
+
+if (copyReplyBtn) {
+  copyReplyBtn.addEventListener(
+    "click",
+    copyLastReply
+  );
+}
+
+if (copyReplyBtnMobile) {
+  copyReplyBtnMobile.addEventListener(
+    "click",
+    copyLastReply
+  );
+}
+
+/* ============================================================
+   CONVERSATION CLICK
+============================================================ */
+
+if (conversationList) {
+  conversationList.addEventListener(
+    "click",
+    event => {
+      const button =
+        event.target.closest(
+          "[data-conversation-id]"
+        );
+
+      if (!button) {
+        return;
+      }
+
+      openConversation(
+        button.dataset
+          .conversationId
+      );
+    }
+  );
+}
+
+/* ============================================================
+   ENTER KEY
+============================================================ */
+
+if (userInput) {
+  userInput.addEventListener(
+    "keydown",
+    event => {
+      if (
+        event.key === "Enter" &&
+        !event.shiftKey
+      ) {
+        event.preventDefault();
+
+        if (!isSending) {
+          zaziForm?.requestSubmit();
+        }
+      }
+    }
+  );
+}
+
+/* ============================================================
+   NIGHT PRESENCE + TIME-AWARE ZAZI
+============================================================ */
+
+function updateNightPresence() {
+  const profile = getTimeProfile();
+  const isLate = profile.period === "night";
+
+  const avatar = document.getElementById("zaziHeaderAvatar");
+  const status = document.getElementById("zaziNightStatus");
+  const navNote = document.getElementById("nightZaziNav");
+  const sleepyBadge = document.getElementById("zaziSleepyBadge");
+  const moodCard = document.getElementById("zaziMoodCard");
+  const moodIcon = document.getElementById("zaziMoodIcon");
+  const moodText = document.getElementById("zaziMoodText");
+
+  if (avatar) {
+    avatar.src = isLate
+      ? "images/sleepy-zazi.png"
+      : "images/shy-zazi.png";
+    avatar.classList.toggle("zazi-sleepy", isLate);
+    avatar.classList.toggle("zazi-idle", !isLate);
+    avatar.onerror = function () {
+      this.onerror = null;
+      this.src = "https://via.placeholder.com/80/D4AF37/FFFFFF?text=Zazi";
+    };
+  }
+
+  if (status) {
+    status.textContent = isLate
+      ? "🌙 Sleepy mode: softly awake for late-night questions"
+      : "";
+    status.classList.toggle("hidden", !isLate);
+  }
+
+  if (navNote) {
+    navNote.classList.toggle("hidden", !isLate);
+  }
+
+  if (sleepyBadge) {
+    sleepyBadge.classList.toggle("hidden", !isLate);
+  }
+
+  if (moodIcon) moodIcon.textContent = profile.icon;
+  if (moodText) moodText.textContent = isLate ? "Sleepy, but emergency-ready" : profile.label;
+  if (moodCard) moodCard.classList.toggle("zazi-night-glow", isLate);
+}
+
+window.setInterval(updateNightPresence, 60000);
+
+/* ============================================================
+   INITIALIZE
+============================================================ */
+
+loadChatHistory();
+
+renderConversationList();
+
+updateNightPresence();
+
+/* ============================================================
+   PENDING PROMPT
+============================================================ */
+
+const pendingPrompt =
+  localStorage.getItem(
+    "zaziPendingPrompt"
+  );
+
+if (pendingPrompt) {
+  localStorage.removeItem(
+    "zaziPendingPrompt"
+  );
+
+  setTimeout(
+    () => {
+      handleSendMessage(
+        pendingPrompt
+      );
+    },
+    250
+  );
+}
+
+/* ============================================================
+   STARTUP
+============================================================ */
+
+updateBackendStatus();
+
+if (window.lucide) {
+  lucide.createIcons();
+}
+
+userInput?.focus();
+
+console.log(
+  "🐾 Zazi AI is ready!"
+);
+
+</script>
+
+<script src="zazi-presence.js"></script>
+
+
+</body>
+</html>

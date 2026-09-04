@@ -1,0 +1,1274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="description" content="Practice emergency scenarios safely with the Zalia crisis simulator and build confidence before real emergencies." />
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/png" sizes="650x650" href="/images/zalia-app-icon.png">
+  <meta name="theme-color" content="#0f172a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Zalia">
+  <link rel="apple-touch-icon" sizes="600x600" href="/images/Zalia's-final-logo.png">
+  <title>Zazi Crisis Simulator - Zalia Security</title>
+
+  <!-- Tailwind & Lucide Icons -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="tailwind-shim.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="lucide-local.js"></script>
+  <script src="pwa-install.js"></script>
+  <script src="/sw-register.js" defer></script>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="offline-tailwind.css" />
+
+  <!-- Universal Zalia Theme Engine -->
+  <script>
+    if (localStorage.getItem('zalia_theme') === 'dark' || (!('zalia_theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+
+    function toggleZaliaTheme() {
+      const isDark = document.documentElement.classList.contains('dark');
+      if (isDark) {
+        document.documentElement.classList.remove('dark');
+        localStorage.setItem('zalia_theme', 'light');
+      } else {
+        document.documentElement.classList.add('dark');
+        localStorage.setItem('zalia_theme', 'dark');
+      }
+      updateThemeButtonUI();
+    }
+
+    function updateThemeButtonUI() {
+      const isDark = document.documentElement.classList.contains('dark');
+      document.querySelectorAll('.zalia-theme-btn').forEach(btn => {
+        const text = btn.querySelector('.theme-text');
+        const icon = btn.querySelector('[data-lucide]');
+        if (text) text.textContent = isDark ? 'Light Mode' : 'Night Mode';
+        if (icon) icon.setAttribute('data-lucide', isDark ? 'sun' : 'moon');
+      });
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function checkNetworkStatus() {
+      let banner = document.getElementById('zaliaOfflineBanner');
+      if (!navigator.onLine) {
+        if (!banner) {
+          banner = document.createElement('div');
+          banner.id = 'zaliaOfflineBanner';
+          banner.className = 'w-full bg-amber-600 text-white text-xs font-bold text-center py-2 px-4 sticky top-0 z-50 flex items-center justify-center gap-2 shadow-md';
+          banner.innerHTML = `<span>⚠️ You are offline. Cached safety data active.</span>`;
+          document.body.prepend(banner);
+        }
+      } else {
+        if (banner) {
+          banner.remove();
+        }
+      }
+    }
+
+    window.addEventListener('online', checkNetworkStatus);
+    window.addEventListener('offline', checkNetworkStatus);
+    document.addEventListener('DOMContentLoaded', () => {
+      checkNetworkStatus();
+      updateThemeButtonUI();
+    });
+
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            gold: {
+              100: '#FAF4D3',
+              300: '#F3E5AB',
+              400: '#E6CA65',
+              500: '#D4AF37',
+              600: '#AA820A',
+              700: '#856404'
+            },
+            marble: { 50: '#FFFFFF', 100: '#FAF9F6', 200: '#F5F3EF' },
+            zalibg: '#FAFAFA'
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    @keyframes pulse-gold {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.4); }
+      50% { box-shadow: 0 0 0 12px rgba(212, 175, 55, 0); }
+    }
+    .pulse-gold { animation: pulse-gold 2s infinite; }
+  </style>
+</head>
+<body class="bg-stone-100 dark:bg-stone-950 min-h-screen w-full flex items-center justify-center p-0 sm:p-2 md:p-4 lg:p-6 font-sans text-stone-800 dark:text-stone-100 transition-colors duration-200">
+
+  <div class="app-frame w-full h-screen sm:h-[95vh] lg:h-[850px] max-w-7xl bg-white dark:bg-stone-900 sm:rounded-3xl shadow-xl border border-gold-500/20 overflow-hidden flex flex-col lg:flex-row transition-all">
+    
+    <!-- DESKTOP SIDEBAR PANEL -->
+    <div class="desktop-sidebar hidden lg:flex flex-col w-80 bg-stone-50/80 dark:bg-stone-900/80 text-stone-800 dark:text-stone-200 p-6 border-r border-gold-500/20 justify-between flex-shrink-0">
+      <div class="space-y-6">
+        <div class="flex items-center space-x-3">
+          <img src="images/zazi-image-final.png" onerror="this.onerror=null; this.src='https://via.placeholder.com/80/D4AF37/FFFFFF?text=Zazi';" alt="Zazi 🐾" class="w-12 h-12 rounded-2xl object-cover border-2 border-gold-500 bg-white shadow-sm" />
+          <div>
+            <h2 class="font-extrabold text-lg text-stone-900 dark:text-white tracking-wide flex items-center gap-1.5">
+              Zazi 🐾
+            </h2>
+            <p class="text-xs text-gold-700 dark:text-gold-400 font-bold tracking-wider uppercase">Crisis Simulator</p>
+          </div>
+        </div>
+
+        <!-- SIMULATION MODE WATERMARK -->
+        <div class="p-3 bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700/50 rounded-2xl text-xs space-y-1">
+          <div class="flex items-center gap-1.5 font-bold text-amber-900 dark:text-amber-300">
+            <span class="w-2.5 h-2.5 rounded-full bg-amber-500 animate-ping"></span>
+            TRAINING MODE ACTIVE
+          </div>
+          <p class="text-amber-800 dark:text-amber-400 text-[11px] leading-tight">
+            This is a safe sandbox. Responses do not trigger real emergency dispatches.
+          </p>
+        </div>
+
+        <div class="space-y-2 pt-1">
+          <p class="text-[11px] uppercase tracking-widest font-bold text-stone-400">Navigation</p>
+          <nav class="space-y-1.5 text-xs font-semibold">
+            <a href="index.html" class="flex items-center gap-2.5 p-2.5 rounded-xl bg-white dark:bg-stone-800 hover:bg-stone-100 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-200 border border-stone-200 dark:border-stone-700 transition">
+              <span>🏠</span> Home
+            </a>
+            <a href="simulator.html" class="flex items-center gap-2.5 p-2.5 rounded-xl bg-gold-500/10 text-gold-700 dark:text-gold-300 border border-gold-500/30 transition hover:bg-gold-500/20">
+              <span>⚡</span> Crisis Simulator
+            </a>
+            <a href="incidents.html" class="flex items-center gap-2.5 p-2.5 rounded-xl bg-white dark:bg-stone-800 hover:bg-stone-100 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-200 border border-stone-200 dark:border-stone-700 transition">
+              <span>🚨</span> Incident Reports
+            </a>
+            <a href="ZaziAi.html" class="flex items-center gap-2.5 p-2.5 rounded-xl bg-white dark:bg-stone-800 hover:bg-stone-100 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-200 border border-stone-200 dark:border-stone-700 transition">
+              <span>🤖</span> Zazi AI
+            </a>
+            <a href="about.html" class="flex items-center gap-2.5 p-2.5 rounded-xl bg-white dark:bg-stone-800 hover:bg-stone-100 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-200 border border-stone-200 dark:border-stone-700 transition">
+              <span>ℹ️</span> About
+            </a>
+            <a href="contact.html" class="flex items-center gap-2.5 p-2.5 rounded-xl bg-white dark:bg-stone-800 hover:bg-stone-100 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-200 border border-stone-200 dark:border-stone-700 transition">
+              <span>📞</span> Contact
+            </a>
+            <a href="route-planner.html" class="flex items-center gap-2.5 p-2.5 rounded-xl bg-white dark:bg-stone-800 hover:bg-stone-100 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-200 border border-stone-200 dark:border-stone-700 transition">
+              <span>🗺</span> Route Planner
+
+            </a>
+            <a href="safetyacademy.html" class="flex items-center gap-2.5 p-2.5 rounded-xl bg-white dark:bg-stone-800 hover:bg-stone-100 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-200 border border-stone-200 dark:border-stone-700 transition">
+              <span>📚</span> Safety Academy
+            </a>
+          </nav>
+        </div>
+
+        <!-- LIVE METRICS SIDEBAR WIDGET -->
+        <div id="sidebarMetrics" class="space-y-3 pt-4 border-t border-stone-200 dark:border-stone-700 hidden">
+          <p class="text-[11px] uppercase tracking-widest font-bold text-stone-400">Drill Metrics</p>
+          
+          <div class="bg-white dark:bg-stone-800 p-3 rounded-xl border border-stone-200 dark:border-stone-700 space-y-2">
+            <div class="flex justify-between text-xs font-bold text-stone-700 dark:text-stone-200">
+              <span>Safety Score</span>
+              <span id="scoreText">100%</span>
+            </div>
+            <div class="w-full bg-stone-100 dark:bg-stone-700 rounded-full h-2 overflow-hidden">
+              <div id="scoreBar" class="bg-gold-500 h-2 rounded-full transition-all duration-500" style="width: 100%"></div>
+            </div>
+          </div>
+
+          <div class="bg-white dark:bg-stone-800 p-3 rounded-xl border border-stone-200 dark:border-stone-700 space-y-2">
+            <div class="flex justify-between text-xs font-bold text-stone-700 dark:text-stone-200">
+              <span>Elapsed Time</span>
+              <span id="timerText" class="font-mono">00:00</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <a href="index.html" class="w-full bg-stone-900 hover:bg-black dark:bg-stone-800 dark:hover:bg-stone-700 text-white py-3 rounded-2xl font-bold text-xs transition shadow-md flex items-center justify-center gap-2">
+        <span>⬅️</span> Exit Simulation
+      </a>
+    </div>
+
+    <!-- MAIN SIMULATION PANEL -->
+    <div class="flex-1 flex flex-col h-full w-full overflow-hidden bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-100">
+      
+      <!-- TOP HEADER -->
+      <div class="bg-white dark:bg-stone-900 border-b border-stone-200 dark:border-stone-800 p-3.5 sm:p-4 text-stone-900 dark:text-white flex items-center justify-between shadow-2xs relative z-10 flex-shrink-0">
+        <div class="flex items-center space-x-3">
+          <div class="relative">
+            <img src="images/shy-zazi.png" onerror="this.onerror=null; this.src='https://via.placeholder.com/80/D4AF37/FFFFFF?text=Zazi';" alt="Zazi 🐾" class="w-10 h-10 rounded-xl object-cover border-2 border-gold-500 bg-stone-50 shadow-xs" />
+            <span class="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 border-2 border-white dark:border-stone-900 rounded-full"></span>
+          </div>
+          <div>
+            <h1 class="font-extrabold text-base sm:text-lg leading-tight flex items-center gap-1.5 text-stone-900 dark:text-white">
+              Crisis Simulator 🐾
+              <span class="bg-gold-500/15 text-gold-700 dark:text-gold-300 text-[10px] uppercase font-bold px-2.5 py-0.5 rounded-full border border-gold-500/30">Drill Mode</span>
+            </h1>
+            <p class="text-xs text-stone-500 dark:text-stone-400 font-medium">Port Harcourt Tactical Decision Sandbox 🛡️</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button onclick="toggleZaliaTheme()" class="zalia-theme-btn flex items-center gap-2 px-3 py-2 bg-stone-50 dark:bg-stone-800 border border-gold-200 dark:border-stone-700 rounded-xl text-xs font-bold text-gold-800 dark:text-gold-200 shadow-sm hover:border-gold-500 transition-all">
+            <i data-lucide="moon" class="w-4 h-4 text-gold-600"></i>
+            <span class="theme-text">Night Mode</span>
+          </button>
+
+          <button onclick="resetSimulator()" class="bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-200 text-xs px-3 py-2 rounded-xl font-bold transition flex items-center gap-1 border border-stone-300 dark:border-stone-700">
+            <span>🔄</span> Reset
+          </button>
+        </div>
+      </div>
+
+      <!-- MAIN CONTENT VIEW -->
+      <div id="simViewport" class="flex-1 p-4 sm:p-6 overflow-y-auto space-y-6 bg-stone-50/50 dark:bg-stone-950/40 scroll-smooth">
+        <section class="page-hero">
+          <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <span class="hero-pill"><i data-lucide="sparkles" class="w-3.5 h-3.5"></i> training that feels polished and calm</span>
+              <h2 class="mt-2 text-xl sm:text-2xl font-bold text-stone-900 dark:text-stone-100">Practice real safety choices in a reassuring, easy-to-use training space.</h2>
+              <p class="mt-2 text-sm text-stone-600 dark:text-stone-400">The simulator now feels more premium and intuitive, which helps users trust the experience more quickly.</p>
+            </div>
+            <div class="hero-actions">
+              <a href="contact.html" class="bg-gold-600 text-white"> Try Emergency contacts</a>
+              <a href="route-planner.html" class="bg-white dark:bg-stone-900 text-stone-700 dark:text-stone-200 border border-gold-200">Open route planner</a>
+            </div>
+          </div>
+        </section>
+        
+        <!-- SCENARIO SELECTION MENU (DEFAULT VIEW) -->
+        <div id="selectionScreen" class="space-y-6 max-w-3xl mx-auto pt-2">
+          
+          <div class="bg-white dark:bg-stone-800 border border-gold-500/30 p-5 rounded-3xl shadow-xs flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left">
+            <img src="images/thinking-zazi.png" onerror="this.onerror=null; this.src='https://via.placeholder.com/100/D4AF37/FFFFFF?text=Zazi';" alt="Zazi 🐾" class="w-20 h-20 rounded-2xl object-cover border-2 border-gold-500 shadow-md flex-shrink-0" />
+            <div class="space-y-1">
+              <span class="text-gold-700 dark:text-gold-400 text-[10px] uppercase font-extrabold tracking-wider bg-gold-500/10 px-2 py-0.5 rounded-full border border-gold-500/20">
+                Zazi Interactive Training 🐾
+              </span>
+              <h2 class="text-xl sm:text-2xl font-black text-stone-900 dark:text-white">Select a Safety Drill</h2>
+              <p class="text-xs text-stone-600 dark:text-stone-300 leading-relaxed">
+                Test your tactical decision-making in real-time local scenarios. Evaluate your choices and learn how to handle critical threats in Port Harcourt.
+              </p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            
+            <!-- SCENARIO CARDS -->
+            <div onclick="startScenario('gunshots')" class="bg-white dark:bg-stone-800 hover:border-gold-500 border border-stone-200 dark:border-stone-700 p-5 rounded-2xl shadow-xs hover:shadow-md transition cursor-pointer group space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="text-2xl">💥</span>
+                <span class="bg-red-100 dark:bg-red-950/50 text-red-700 dark:text-red-300 text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full">High Threat</span>
+              </div>
+              <div>
+                <h3 class="font-bold text-stone-900 dark:text-white group-hover:text-gold-700 dark:group-hover:text-gold-400 transition">Gunshots at Garrison Flyover</h3>
+                <p class="text-xs text-stone-500 dark:text-stone-400 mt-1">Sudden loud gunfire breaks out while trapped in evening traffic along Aba Road.</p>
+              </div>
+              <div class="flex justify-between items-center pt-2 text-xs font-bold text-gold-700 dark:text-gold-400">
+                <span>4 Tactical Steps</span>
+                <span>Start Scenario ➔</span>
+              </div>
+            </div>
+
+            <div onclick="startScenario('robbery')" class="bg-white dark:bg-stone-800 hover:border-gold-500 border border-stone-200 dark:border-stone-700 p-5 rounded-2xl shadow-xs hover:shadow-md transition cursor-pointer group space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="text-2xl">🚕</span>
+                <span class="bg-amber-100 dark:bg-amber-950/50 text-amber-800 dark:text-amber-300 text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full">Medium Threat</span>
+              </div>
+              <div>
+                <h3 class="font-bold text-stone-900 dark:text-white group-hover:text-gold-700 dark:group-hover:text-gold-400 transition">"One-Chance" Taxi Suspicions</h3>
+                <p class="text-xs text-stone-500 dark:text-stone-400 mt-1">You board a taxi late at night near Rumuokoro and notice suspicious behavior inside.</p>
+              </div>
+              <div class="flex justify-between items-center pt-2 text-xs font-bold text-gold-700 dark:text-gold-400">
+                <span>4 Tactical Steps</span>
+                <span>Start Scenario ➔</span>
+              </div>
+            </div>
+
+            <div onclick="startScenario('intruder')" class="bg-white dark:bg-stone-800 hover:border-gold-500 border border-stone-200 dark:border-stone-700 p-5 rounded-2xl shadow-xs hover:shadow-md transition cursor-pointer group space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="text-2xl">🏠</span>
+                <span class="bg-red-100 dark:bg-red-950/50 text-red-700 dark:text-red-300 text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full">High Threat</span>
+              </div>
+              <div>
+                <h3 class="font-bold text-stone-900 dark:text-white group-hover:text-gold-700 dark:group-hover:text-gold-400 transition">Midnight Home Intrusion</h3>
+                <p class="text-xs text-stone-500 dark:text-stone-400 mt-1">Unusual noises and forced entrance attempts detected at your perimeter gate at 2:00 AM.</p>
+              </div>
+              <div class="flex justify-between items-center pt-2 text-xs font-bold text-gold-700 dark:text-gold-400">
+                <span>4 Tactical Steps</span>
+                <span>Start Scenario ➔</span>
+              </div>
+            </div>
+
+            <div onclick="startScenario('pos_scam')" class="bg-white dark:bg-stone-800 hover:border-gold-500 border border-stone-200 dark:border-stone-700 p-5 rounded-2xl shadow-xs hover:shadow-md transition cursor-pointer group space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="text-2xl">💳</span>
+                <span class="bg-blue-100 dark:bg-blue-950/50 text-blue-800 dark:text-blue-300 text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full">Financial Scam</span>
+              </div>
+              <div>
+                <h3 class="font-bold text-stone-900 dark:text-white group-hover:text-gold-700 dark:group-hover:text-gold-400 transition">POS / ATM Swap Extortion</h3>
+                <p class="text-xs text-stone-500 dark:text-stone-400 mt-1">A bystander offers unsolicited assistance while your debit card seems stuck at a local terminal.</p>
+              </div>
+              <div class="flex justify-between items-center pt-2 text-xs font-bold text-gold-700 dark:text-gold-400">
+                <span>4 Tactical Steps</span>
+                <span>Start Scenario ➔</span>
+              </div>
+            </div>
+
+            <div onclick="startScenario('market_fire')" class="bg-white dark:bg-stone-800 hover:border-gold-500 border border-stone-200 dark:border-stone-700 p-5 rounded-2xl shadow-xs hover:shadow-md transition cursor-pointer group space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="text-2xl">🔥</span>
+                <span class="bg-orange-100 dark:bg-orange-950/50 text-orange-800 dark:text-orange-300 text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full">Critical Safety</span>
+              </div>
+              <div>
+                <h3 class="font-bold text-stone-900 dark:text-white group-hover:text-gold-700 dark:group-hover:text-gold-400 transition">Marketplace Fire Alarm</h3>
+                <p class="text-xs text-stone-500 dark:text-stone-400 mt-1">A large smoke plume appears in a crowded market while you are nearby shopping.</p>
+              </div>
+              <div class="flex justify-between items-center pt-2 text-xs font-bold text-gold-700 dark:text-gold-400">
+                <span>4 Tactical Steps</span>
+                <span>Start Scenario ➔</span>
+              </div>
+            </div>
+
+            <div onclick="startScenario('flood')" class="bg-white dark:bg-stone-800 hover:border-gold-500 border border-stone-200 dark:border-stone-700 p-5 rounded-2xl shadow-xs hover:shadow-md transition cursor-pointer group space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="text-2xl">🌊</span>
+                <span class="bg-sky-100 dark:bg-sky-950/50 text-sky-800 dark:text-sky-300 text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full">Weather Risk</span>
+              </div>
+              <div>
+                <h3 class="font-bold text-stone-900 dark:text-white group-hover:text-gold-700 dark:group-hover:text-gold-400 transition">Flash Flood Road Hazard</h3>
+                <p class="text-xs text-stone-500 dark:text-stone-400 mt-1">Heavy rain causes a fast-moving flood on a low-lying bridge while you are driving home.</p>
+              </div>
+              <div class="flex justify-between items-center pt-2 text-xs font-bold text-gold-700 dark:text-gold-400">
+                <span>4 Tactical Steps</span>
+                <span>Start Scenario ➔</span>
+              </div>
+            </div>
+
+            <div onclick="startScenario('phone_scam')" class="bg-white dark:bg-stone-800 hover:border-gold-500 border border-stone-200 dark:border-stone-700 p-5 rounded-2xl shadow-xs hover:shadow-md transition cursor-pointer group space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="text-2xl">📞</span>
+                <span class="bg-blue-100 dark:bg-blue-950/50 text-blue-800 dark:text-blue-300 text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full">Cyber Risk</span>
+              </div>
+              <div>
+                <h3 class="font-bold text-stone-900 dark:text-white group-hover:text-gold-700 dark:group-hover:text-gold-400 transition">Imposter Call Scam</h3>
+                <p class="text-xs text-stone-500 dark:text-stone-400 mt-1">A caller claims to be from your bank and asks for your account details urgently.</p>
+              </div>
+              <div class="flex justify-between items-center pt-2 text-xs font-bold text-gold-700 dark:text-gold-400">
+                <span>4 Tactical Steps</span>
+                <span>Start Scenario ➔</span>
+              </div>
+            </div>
+
+            <div onclick="startScenario('protest')" class="bg-white dark:bg-stone-800 hover:border-gold-500 border border-stone-200 dark:border-stone-700 p-5 rounded-2xl shadow-xs hover:shadow-md transition cursor-pointer group space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="text-2xl">🪧</span>
+                <span class="bg-violet-100 dark:bg-violet-950/50 text-violet-800 dark:text-violet-300 text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full">Crowd Safety</span>
+              </div>
+              <div>
+                <h3 class="font-bold text-stone-900 dark:text-white group-hover:text-gold-700 dark:group-hover:text-gold-400 transition">Protest Crowd Escalation</h3>
+                <p class="text-xs text-stone-500 dark:text-stone-400 mt-1">A peaceful march begins to swell and tensions rise near a major junction.</p>
+              </div>
+              <div class="flex justify-between items-center pt-2 text-xs font-bold text-gold-700 dark:text-gold-400">
+                <span>4 Tactical Steps</span>
+                <span>Start Scenario ➔</span>
+              </div>
+            </div>
+
+            <div onclick="startScenario('medical')" class="bg-white dark:bg-stone-800 hover:border-gold-500 border border-stone-200 dark:border-stone-700 p-5 rounded-2xl shadow-xs hover:shadow-md transition cursor-pointer group space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="text-2xl">🩹</span>
+                <span class="bg-emerald-100 dark:bg-emerald-950/50 text-emerald-800 dark:text-emerald-300 text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full">Health Aid</span>
+              </div>
+              <div>
+                <h3 class="font-bold text-stone-900 dark:text-white group-hover:text-gold-700 dark:group-hover:text-gold-400 transition">Roadside Medical Emergency</h3>
+                <p class="text-xs text-stone-500 dark:text-stone-400 mt-1">A fellow commuter collapses during heavy traffic and needs urgent help.</p>
+              </div>
+              <div class="flex justify-between items-center pt-2 text-xs font-bold text-gold-700 dark:text-gold-400">
+                <span>4 Tactical Steps</span>
+                <span>Start Scenario ➔</span>
+              </div>
+            </div>
+
+            <div onclick="startScenario('night_walk')" class="bg-white dark:bg-stone-800 hover:border-gold-500 border border-stone-200 dark:border-stone-700 p-5 rounded-2xl shadow-xs hover:shadow-md transition cursor-pointer group space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="text-2xl">🌙</span>
+                <span class="bg-stone-100 dark:bg-stone-900/70 text-stone-700 dark:text-stone-300 text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full">Night Safety</span>
+              </div>
+              <div>
+                <h3 class="font-bold text-stone-900 dark:text-white group-hover:text-gold-700 dark:group-hover:text-gold-400 transition">Checkpoint Walk Home</h3>
+                <p class="text-xs text-stone-500 dark:text-stone-400 mt-1">A sudden power outage leaves you walking home along a poorly lit street.</p>
+              </div>
+              <div class="flex justify-between items-center pt-2 text-xs font-bold text-gold-700 dark:text-gold-400">
+                <span>4 Tactical Steps</span>
+                <span>Start Scenario ➔</span>
+              </div>
+            </div>
+
+            <div onclick="startScenario('snatch')" class="bg-white dark:bg-stone-800 hover:border-gold-500 border border-stone-200 dark:border-stone-700 p-5 rounded-2xl shadow-xs hover:shadow-md transition cursor-pointer group space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="text-2xl">🏍️</span>
+                <span class="bg-red-100 dark:bg-red-950/50 text-red-700 dark:text-red-300 text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full">Street Threat</span>
+              </div>
+              <div>
+                <h3 class="font-bold text-stone-900 dark:text-white group-hover:text-gold-700 dark:group-hover:text-gold-400 transition">Motorbike Snatch Attempt</h3>
+                <p class="text-xs text-stone-500 dark:text-stone-400 mt-1">A motorbike approaches too close while you are walking with your phone in hand.</p>
+              </div>
+              <div class="flex justify-between items-center pt-2 text-xs font-bold text-gold-700 dark:text-gold-400">
+                <span>4 Tactical Steps</span>
+                <span>Start Scenario ➔</span>
+              </div>
+            </div>
+
+            <div onclick="startScenario('power_outage')" class="bg-white dark:bg-stone-800 hover:border-gold-500 border border-stone-200 dark:border-stone-700 p-5 rounded-2xl shadow-xs hover:shadow-md transition cursor-pointer group space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="text-2xl">💡</span>
+                <span class="bg-amber-100 dark:bg-amber-950/50 text-amber-800 dark:text-amber-300 text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full">Urban Risk</span>
+              </div>
+              <div>
+                <h3 class="font-bold text-stone-900 dark:text-white group-hover:text-gold-700 dark:group-hover:text-gold-400 transition">Power Outage Street Risk</h3>
+                <p class="text-xs text-stone-500 dark:text-stone-400 mt-1">Streetlights fail during a busy evening, and you must cross a congested intersection.</p>
+              </div>
+              <div class="flex justify-between items-center pt-2 text-xs font-bold text-gold-700 dark:text-gold-400">
+                <span>4 Tactical Steps</span>
+                <span>Start Scenario ➔</span>
+              </div>
+            </div>
+
+            <div onclick="startScenario('roadblock')" class="bg-white dark:bg-stone-800 hover:border-gold-500 border border-stone-200 dark:border-stone-700 p-5 rounded-2xl shadow-xs hover:shadow-md transition cursor-pointer group space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="text-2xl">🚧</span>
+                <span class="bg-amber-100 dark:bg-amber-950/50 text-amber-800 dark:text-amber-300 text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full">Transport Safety</span>
+              </div>
+              <div>
+                <h3 class="font-bold text-stone-900 dark:text-white group-hover:text-gold-700 dark:group-hover:text-gold-400 transition">Suspicious Roadblock on Expressway</h3>
+                <p class="text-xs text-stone-500 dark:text-stone-400 mt-1">An unmarked checkpoint appears on the East-West Expressway with officers asking drivers to stop.</p>
+              </div>
+              <div class="flex justify-between items-center pt-2 text-xs font-bold text-gold-700 dark:text-gold-400">
+                <span>3 Tactical Steps</span>
+                <span>Start Scenario ➔</span>
+              </div>
+            </div>
+
+            <div onclick="startScenario('riverboat')" class="bg-white dark:bg-stone-800 hover:border-gold-500 border border-stone-200 dark:border-stone-700 p-5 rounded-2xl shadow-xs hover:shadow-md transition cursor-pointer group space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="text-2xl">🛶</span>
+                <span class="bg-sky-100 dark:bg-sky-950/50 text-sky-800 dark:text-sky-300 text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full">Marine Safety</span>
+              </div>
+              <div>
+                <h3 class="font-bold text-stone-900 dark:text-white group-hover:text-gold-700 dark:group-hover:text-gold-400 transition">Engine Stall on Creek Route</h3>
+                <p class="text-xs text-stone-500 dark:text-stone-400 mt-1">Your passenger boat engine dies during a rainy creek crossing and the current is picking up.</p>
+              </div>
+              <div class="flex justify-between items-center pt-2 text-xs font-bold text-gold-700 dark:text-gold-400">
+                <span>3 Tactical Steps</span>
+                <span>Start Scenario ➔</span>
+              </div>
+            </div>
+
+            <div onclick="startScenario('bus_fire')" class="bg-white dark:bg-stone-800 hover:border-gold-500 border border-stone-200 dark:border-stone-700 p-5 rounded-2xl shadow-xs hover:shadow-md transition cursor-pointer group space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="text-2xl">🚌</span>
+                <span class="bg-orange-100 dark:bg-orange-950/50 text-orange-800 dark:text-orange-300 text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full">Critical Safety</span>
+              </div>
+              <div>
+                <h3 class="font-bold text-stone-900 dark:text-white group-hover:text-gold-700 dark:group-hover:text-gold-400 transition">Public Bus Fire Drill</h3>
+                <p class="text-xs text-stone-500 dark:text-stone-400 mt-1">A public bus begins to emit smoke from the rear while passengers are still boarding.</p>
+              </div>
+              <div class="flex justify-between items-center pt-2 text-xs font-bold text-gold-700 dark:text-gold-400">
+                <span>3 Tactical Steps</span>
+                <span>Start Scenario ➔</span>
+              </div>
+            </div>
+
+            <div onclick="startScenario('sim_swap')" class="bg-white dark:bg-stone-800 hover:border-gold-500 border border-stone-200 dark:border-stone-700 p-5 rounded-2xl shadow-xs hover:shadow-md transition cursor-pointer group space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="text-2xl">📱</span>
+                <span class="bg-blue-100 dark:bg-blue-950/50 text-blue-800 dark:text-blue-300 text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full">Mobile Security</span>
+              </div>
+              <div>
+                <h3 class="font-bold text-stone-900 dark:text-white group-hover:text-gold-700 dark:group-hover:text-gold-400 transition">SIM Swap Identity Trap</h3>
+                <p class="text-xs text-stone-500 dark:text-stone-400 mt-1">Your phone loses service and a text claims your SIM has been moved to a new device.</p>
+              </div>
+              <div class="flex justify-between items-center pt-2 text-xs font-bold text-gold-700 dark:text-gold-400">
+                <span>3 Tactical Steps</span>
+                <span>Start Scenario ➔</span>
+              </div>
+            </div>
+
+            <div onclick="startScenario('road_accident')" class="bg-white dark:bg-stone-800 hover:border-gold-500 border border-stone-200 dark:border-stone-700 p-5 rounded-2xl shadow-xs hover:shadow-md transition cursor-pointer group space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="text-2xl">🚑</span>
+                <span class="bg-emerald-100 dark:bg-emerald-950/50 text-emerald-800 dark:text-emerald-300 text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full">Road Safety</span>
+              </div>
+              <div>
+                <h3 class="font-bold text-stone-900 dark:text-white group-hover:text-gold-700 dark:group-hover:text-gold-400 transition">Crash Site Assistance</h3>
+                <p class="text-xs text-stone-500 dark:text-stone-400 mt-1">You arrive at a minor collision on a busy road with injured passengers and frustrated drivers.</p>
+              </div>
+              <div class="flex justify-between items-center pt-2 text-xs font-bold text-gold-700 dark:text-gold-400">
+                <span>3 Tactical Steps</span>
+                <span>Start Scenario ➔</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ACTIVE DRILL VIEW (HIDDEN INITIALLY) -->
+        <div id="activeDrillScreen" class="hidden space-y-4 max-w-2xl mx-auto">
+          
+          <!-- STATUS BAR -->
+          <div class="bg-white dark:bg-stone-800 border border-gold-500/30 p-4 rounded-2xl shadow-2xs flex items-center justify-between">
+            <div class="space-y-0.5">
+              <span id="drillCategory" class="text-[10px] uppercase font-extrabold text-gold-700 dark:text-gold-400 tracking-wider">DRILL SCENARIO</span>
+              <h2 id="drillTitle" class="font-black text-stone-900 dark:text-white text-base sm:text-lg">Title</h2>
+            </div>
+            <div class="text-right">
+              <span class="text-[10px] text-stone-400 font-bold block uppercase">Step</span>
+              <span id="stepCounter" class="text-sm font-extrabold text-gold-700 dark:text-gold-400">1 / 4</span>
+            </div>
+          </div>
+
+          <!-- STORY PROMPT CONTAINER -->
+          <div class="bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 p-5 rounded-2xl shadow-2xs space-y-4 relative overflow-hidden">
+            <div class="flex items-start gap-3">
+              <img src="images/zazi-image-final.png" onerror="this.onerror=null; this.src='https://via.placeholder.com/80/D4AF37/FFFFFF?text=Zazi';" alt="Zazi 🐾" class="w-10 h-10 rounded-xl object-cover border-2 border-gold-500 flex-shrink-0 shadow-xs" />
+              <div class="space-y-1">
+                <p class="text-xs font-bold text-gold-700 dark:text-gold-400 uppercase tracking-wider">Zazi Tactical Dispatch 🐾</p>
+                <p id="scenarioDescription" class="text-sm text-stone-800 dark:text-stone-200 leading-relaxed font-medium">
+                  Loading scenario context...
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- OPTION BUTTONS CONTAINER -->
+          <div class="space-y-2 pt-2">
+            <p class="text-xs font-bold text-stone-500 dark:text-stone-400 uppercase tracking-wider px-1">Choose your tactical response:</p>
+            <div id="optionsContainer" class="space-y-2.5">
+              <!-- Dynamically Populated -->
+            </div>
+          </div>
+
+          <!-- FEEDBACK POPUP CONTAINER -->
+          <div id="feedbackBox" class="hidden p-4 rounded-2xl border space-y-3 transition-all">
+            <div class="flex items-center justify-between">
+              <h4 id="feedbackTitle" class="font-extrabold text-sm flex items-center gap-2">Result</h4>
+              <span id="scoreDelta" class="text-xs font-bold px-2 py-0.5 rounded-md"></span>
+            </div>
+            <p id="feedbackText" class="text-xs leading-relaxed font-medium"></p>
+            <button id="nextStepBtn" onclick="nextStep()" class="w-full bg-stone-900 hover:bg-black dark:bg-stone-700 dark:hover:bg-stone-600 text-white font-bold py-2.5 rounded-xl text-xs transition shadow-2xs">
+              Proceed to Next Action ➔
+            </button>
+          </div>
+
+        </div>
+
+        <!-- FINAL DEBRIEF REPORT SCREEN (HIDDEN INITIALLY) -->
+        <div id="debriefScreen" class="hidden max-w-2xl mx-auto space-y-6 pt-2">
+          
+          <div class="bg-white dark:bg-stone-800 border-2 border-gold-500/40 p-6 rounded-3xl shadow-md text-center space-y-4">
+            
+            <div class="relative w-20 h-20 mx-auto">
+              <img src="images/exited-zazi.png" onerror="this.onerror=null; this.src='https://via.placeholder.com/100/D4AF37/FFFFFF?text=Zazi';" alt="Zazi 🐾" class="w-20 h-20 rounded-2xl object-cover border-2 border-gold-500 shadow-md" />
+              <span class="absolute -bottom-2 -right-2 bg-gold-500 text-white rounded-full w-7 h-7 flex items-center justify-center text-xs shadow-xs">🏆</span>
+            </div>
+
+            <div>
+              <span class="text-xs font-bold text-gold-700 dark:text-gold-400 uppercase tracking-wider">Simulation Debrief Complete</span>
+              <h2 id="debriefTitle" class="text-2xl font-black text-stone-900 dark:text-white mt-1">Tactical Evaluation</h2>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 max-w-sm mx-auto pt-2">
+              <div class="bg-stone-50 dark:bg-stone-900 p-3 rounded-2xl border border-stone-200 dark:border-stone-700">
+                <span class="text-[10px] font-bold text-stone-400 block uppercase">Final Score</span>
+                <span id="debriefScore" class="text-2xl font-black text-gold-700 dark:text-gold-400">0%</span>
+              </div>
+              <div class="bg-stone-50 dark:bg-stone-900 p-3 rounded-2xl border border-stone-200 dark:border-stone-700">
+                <span class="text-[10px] font-bold text-stone-400 block uppercase">Time Elapsed</span>
+                <span id="debriefTime" class="text-2xl font-black text-stone-800 dark:text-stone-200">0s</span>
+              </div>
+            </div>
+
+            <div class="text-left bg-amber-50/70 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 p-4 rounded-2xl text-xs space-y-2">
+              <h4 class="font-bold text-amber-900 dark:text-amber-300 flex items-center gap-1.5">
+                <span>🐾</span> Zazi's Safety Summary
+              </h4>
+              <p id="debriefSummary" class="text-stone-700 dark:text-stone-300 leading-relaxed">
+                Loading summary...
+              </p>
+            </div>
+
+            <div class="flex gap-2 pt-2">
+              <button onclick="resetSimulator()" class="flex-1 bg-gold-500 hover:bg-gold-600 text-white font-bold py-3 rounded-xl text-xs transition shadow-xs">
+                Try Another Drill 🔄
+              </button>
+              <a href="index.html" class="flex-1 bg-stone-900 dark:bg-stone-700 hover:bg-black dark:hover:bg-stone-600 text-white font-bold py-3 rounded-xl text-xs transition shadow-xs flex items-center justify-center">
+                Return to Home 🏠
+              </a>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <nav class="mobile-bottom-nav hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 dark:bg-stone-950/95 backdrop-blur border-t border-gold-200/80 dark:border-stone-800 px-2 pt-2 pb-[calc(8px+env(safe-area-inset-bottom))] justify-around shadow-[0_-8px_30px_rgba(0,0,0,.08)]">
+    <a href="index.html" class="flex flex-col items-center gap-1 px-3 py-1.5 text-[10px] font-bold text-stone-500 dark:text-stone-400">🏠<span>Home</span></a>
+    <a href="incidents.html" class="flex flex-col items-center gap-1 px-3 py-1.5 text-[10px] font-bold text-stone-500 dark:text-stone-400">🚨<span>Incidents</span></a>
+    <a href="simulator.html" class="flex flex-col items-center gap-1 px-3 py-1.5 rounded-xl bg-gold-100 dark:bg-stone-800 text-gold-700 dark:text-gold-300">⚡<span>Simulator</span></a>
+    <a href="ZaziAi.html" class="flex flex-col items-center gap-1 px-3 py-1.5 text-[10px] font-bold text-stone-500 dark:text-stone-400">🤖<span>Zazi AI</span></a>
+    <a href="route-planner.html" class="flex flex-col items-center gap-1 px-3 py-1.5 text-[10px] font-bold text-stone-500 dark:text-stone-400">🗺️<span>Routes</span></a>
+  </nav>
+
+  <!-- SIMULATION ENGINE JAVASCRIPT -->
+  <script>
+    // SCENARIO DATABASE
+    const scenarios = {
+      gunshots: {
+        category: "HIGH THREAT • PHYSICAL SAFETY",
+        title: "Gunshots at Garrison Flyover",
+        steps: [
+          {
+            prompt: "You are stuck in slow gridlock near Garrison Flyover when sudden, rapid gunshots ring out 50 meters ahead. Drivers are shouting. What is your immediate action?",
+            options: [
+              { text: "Open your car door immediately and stand up to locate the shooters.", score: -30, title: "Dangerous Action!", textFeedback: "Never stand or expose yourself during rapid gunfire. High exposure to stray bullets." },
+              { text: "Recline your car seat fully flat, duck below the window line, and protect yourself using the engine block area.", score: 25, title: "Tactically Correct!", textFeedback: "Excellent. Reclining and keeping your head lower than the engine/doors protects against stray fire." },
+              { text: "Honk repeatedly and attempt to reverse violently into the lane behind you.", score: -10, title: "Risky Move", textFeedback: "Honking causes panic and draws unwanted attention to your vehicle in active shooter zones." }
+            ]
+          },
+          {
+            prompt: "The gunshots slow down, but shouting continues nearby. You need to shelter safely. Where do you align your body inside or outside the vehicle?",
+            options: [
+              { text: "Stay low behind the vehicle's engine block or front wheel wells if exiting.", score: 25, title: "Optimal Cover!", textFeedback: "Engine blocks and wheel rims provide real ballistic protection compared to thin door panels." },
+              { text: "Hide behind the glass passenger window.", score: -25, title: "False Security", textFeedback: "Glass offers zero protection against ballistic rounds and creates high shatter hazards." }
+            ]
+          },
+          {
+            prompt: "Traffic begins to clear slightly on the right lane towards Waterlines. You are still inside your car.",
+            options: [
+              { text: "Drive quickly while remaining crouched low, heading directly away from the sound.", score: 25, title: "Great Escape!", textFeedback: "Distance is your greatest advantage. Clear the immediate hot zone safely." },
+              { text: "Pull out your smartphone and record a social media live stream.", score: -35, title: "Critical Error!", textFeedback: "Never prioritize filming over survival and cover in an active shooting incident." }
+            ]
+          },
+          {
+            prompt: "You have successfully driven 2 kilometers away to a safe gas station along Aba Road. What is your final step?",
+            options: [
+              { text: "Dial 112 emergency services and log an incident alert on Zalia.", score: 25, title: "Scenario Completed!", textFeedback: "Reporting safe alerts allows security agencies to respond and warns other commuters." },
+              { text: "Turn around immediately to see if traffic cleared.", score: -20, title: "Poor Decision", textFeedback: "Never return to an active, unconfirmed crime scene." }
+            ]
+          }
+        ]
+      },
+      robbery: {
+        category: "MEDIUM THREAT • TRANSPORT SAFETY",
+        title: "One-Chance Taxi Suspicions",
+        steps: [
+          {
+            prompt: "You board a shared taxi at Rumuokoro going towards Garrison. Shortly after moving, the driver deviates into an unlit side street, claiming 'to dodge traffic.'",
+            options: [
+              { text: "Quietly test the rear door handle to see if the child lock is engaged.", score: 25, title: "Smart Assessment", textFeedback: "Checking door locks early lets you confirm if you are trapped before reaching isolated areas." },
+              { text: "Start shouting aggressively at the driver immediately while in motion.", score: -15, title: "Escalation Risk", textFeedback: "Aggressive confrontation in a moving vehicle can trigger immediate physical violence." }
+            ]
+          },
+          {
+            prompt: "The door is unlocked, but the vehicle is slowing near a dark alley where two men are standing.",
+            options: [
+              { text: "Throw a small wad of cash toward the front passenger and jump out as the vehicle slows.", score: 25, title: "Tactical Escape!", textFeedback: "Distracting perpetrators while taking advantage of low speeds maximizes your survival chances." },
+              { text: "Beg for mercy and hand over all your belongings quietly inside the car.", score: -10, title: "Passive Response", textFeedback: "While non-confrontational, remaining inside an isolated car increases abduction risks." }
+            ]
+          },
+          {
+            prompt: "You escape onto a main street with streetlights and nearby vendors.",
+            options: [
+              { text: "Run into a well-lit pharmacy/shop and ask the security guard to alert your trusted contacts.", score: 25, title: "Safe Haven Reached!", textFeedback: "Seeking immediate public shelter deters pursuit and provides emergency access." },
+              { text: "Sit on the dark curb alone to catch your breath.", score: -20, title: "Vulnerable Spot", textFeedback: "Remaining isolated near the escape point leaves you vulnerable to returning perpetrators." }
+            ]
+          }
+        ]
+      },
+      intruder: {
+        category: "HIGH THREAT • RESIDENTIAL",
+        title: "Midnight Home Intrusion",
+        steps: [
+          {
+            prompt: "At 2:00 AM, you wake up to metallic scraping and heavy banging on your perimeter gate.",
+            options: [
+              { text: "Lock your bedroom door, turn off all lights, and move into an interior safe spot.", score: 25, title: "Tactical Stealth", textFeedback: "Darkness and interior barriers buy crucial time while obscuring your position." },
+              { text: "Turn on all house lights and walk outside to shout at the gate.", score: -30, title: "Extreme Risk", textFeedback: "Exposing yourself outside removes defensive structural protection." }
+            ]
+          },
+          {
+            prompt: "The noise shifts to a window frame near the kitchen.",
+            options: [
+              { text: "Trigger your panic alarm app / alert neighbor WhatsApp group silent emergency signal.", score: 25, title: "Silent SOS Sent", textFeedback: "Silent distress signals summon help without revealing your precise hiding spot." },
+              { text: "Confront the window with a kitchen knife.", score: -20, title: "High Danger", textFeedback: "Close-quarters physical confrontation against unknown armed intruders carries high risk." }
+            ]
+          },
+          {
+            prompt: "Neighbors begin blowing whistles and private security flashlights shine outside.",
+            options: [
+              { text: "Remain hidden indoors until security/police clearly identify themselves at your door.", score: 25, title: "Safe Resolution!", textFeedback: "Verifying response forces prevents accidental crossfire or secondary ambushes." },
+              { text: "Rush outside immediately into the dark yard.", score: -15, title: "Premature Exposure", textFeedback: "Mistaken identity by responding security forces is a hazard in dark conditions." }
+            ]
+          }
+        ]
+      },
+      pos_scam: {
+        category: "FINANCIAL THREAT • SCAM PREVENT",
+        title: "POS / ATM Swap Extortion",
+        steps: [
+          {
+            prompt: "An ATM terminal at a petrol station declines your card. A stranger standing close offers to 'clean the chip' for you.",
+            options: [
+              { text: "Firmly decline, keep your card in hand, and press CANCEL on the keypad.", score: 25, title: "Scam Blocked", textFeedback: "Never transfer physical control of your bank card to strangers under any pretense." },
+              { text: "Hand the card over briefly while keeping your eye on it.", score: -25, title: "Card Swapped!", textFeedback: "Professional fraudsters use sleight-of-hand in under 2 seconds to swap cards." }
+            ]
+          },
+          {
+            prompt: "The stranger becomes pushy and insists you try entering your PIN again while standing over your shoulder.",
+            options: [
+              { text: "Cover the keypad fully with your free hand and enter a fake PIN or cancel.", score: 25, title: "PIN Shielded", textFeedback: "Shielding PINs prevents shoulder surfing and camera recording." },
+              { text: "Enter your real PIN clearly so the transaction finishes quickly.", score: -20, title: "PIN Compromised", textFeedback: "Unshielded PINs combined with swapped cards lead to instant account draining." }
+            ]
+          },
+          {
+            prompt: "You notice the terminal printed an unusual error code and the operator looks suspicious.",
+            options: [
+              { text: "Open your mobile banking app immediately to freeze the card digitally.", score: 25, title: "Account Secured!", textFeedback: "Instant card freezing via app neutralizes potential duplicate card compromises." },
+              { text: "Walk away and check your balance next morning.", score: -15, title: "Delayed Action", textFeedback: "Financial fraud response requires immediate card lock actions." }
+            ]
+          }
+        ]
+      },
+      market_fire: {
+        category: "CRITICAL SAFETY • FIRE RESPONSE",
+        title: "Marketplace Fire Alarm",
+        steps: [
+          {
+            prompt: "Smoke suddenly fills a busy market stall area and people are running. What do you do first?",
+            options: [
+              { text: "Move calmly to the nearest clear exit and avoid low doorways.", score: 25, title: "Safe Exit", textFeedback: "Calmly moving toward a clear exit reduces panic and smoke inhalation risk." },
+              { text: "Push through the crowd quickly to get a closer view of the fire.", score: -25, title: "Dangerous Curiosity", textFeedback: "Approaching the fire increases your exposure to heat, smoke, and falling debris." }
+            ]
+          },
+          {
+            prompt: "A vendor yells that the fire started near a cooking stove. The smoke is thick and the market roof is low.",
+            options: [
+              { text: "Stay low, cover your nose with a cloth, and head toward the nearest open gate.", score: 25, title: "Smoke Safe", textFeedback: "Staying low under heavy smoke helps you breathe cleaner air and move safely." },
+              { text: "Climb onto nearby stacked crates to get above the smoke layer.", score: -20, title: "Smoke Hazard", textFeedback: "Elevating into hot smoke is risky and may expose you to fire and collapsing structures." }
+            ]
+          },
+          {
+            prompt: "You reach the exit but hear someone calling for help from inside the stalls.",
+            options: [
+              { text: "Alert emergency responders immediately and do not re-enter the hot zone alone.", score: 25, title: "Responsible Help", textFeedback: "Calling professionals is the safest way to get rescue help without putting yourself at risk." },
+              { text: "Run back in to carry the person out yourself.", score: -30, title: "Self-Endangering", textFeedback: "Re-entering a fire zone alone is extremely dangerous and can make the situation worse." }
+            ]
+          },
+          {
+            prompt: "Outside the market, you see a group sharing a live video of the fire. What is the best next step?",
+            options: [
+              { text: "Share the incident location with emergency contacts and stay nearby at a safe distance.", score: 25, title: "Good Alert", textFeedback: "Accurate location updates help authorities and keep you safe from the scene." },
+              { text: "Post the video publicly and walk back toward the market.", score: -15, title: "Risky Sharing", textFeedback: "Posting while approaching the hazard spreads risk and may delay rescue operations." }
+            ]
+          }
+        ]
+      },
+      flood: {
+        category: "WEATHER RISK • ROAD SAFETY",
+        title: "Flash Flood Road Hazard",
+        steps: [
+          {
+            prompt: "Heavy rain causes a small bridge on your route to begin flooding quickly.",
+            options: [
+              { text: "Stop before the bridge and wait in a safe, elevated spot while observing water depth.", score: 25, title: "Smart Pause", textFeedback: "Stopping before crossing allows you to judge whether the road is safe without committing to the hazard." },
+              { text: "Drive through the water to save time.", score: -25, title: "Dangerous Crossing", textFeedback: "Even shallow floodwater can wash your vehicle away and hide deep hazards." }
+            ]
+          },
+          {
+            prompt: "The water level rises and you hear a loud rushing sound from under the bridge.",
+            options: [
+              { text: "Turn around and take a higher-altitude detour along a known main road.", score: 25, title: "Safe Reroute", textFeedback: "Avoiding flooded areas is the safest choice during flash floods." },
+              { text: "Continue forward because the water looks shallow enough.", score: -20, title: "Underestimated Flood", textFeedback: "Fast-flowing water can sweep even large vehicles off the road." }
+            ]
+          },
+          {
+            prompt: "A nearby motorcyclist slips and water flows over the edge of the road.",
+            options: [
+              { text: "Keep your distance, call emergency help, and warn other drivers using hazard lights.", score: 25, title: "Coordinated Safety", textFeedback: "Warning others and waiting for assistance helps prevent more accidents." },
+              { text: "Stop beside the rider and step into the moving water to help immediately.", score: -15, title: "Personal Risk", textFeedback: "Entering floodwater puts you in danger unless trained rescue personnel are available." }
+            ]
+          },
+          {
+            prompt: "The storm begins to ease, but the route remains hazardous.",
+            options: [
+              { text: "Drive slowly on dry land only and check for road closures before proceeding.", score: 25, title: "Cautious Recovery", textFeedback: "Remaining attentive after a flood prevents secondary accidents." },
+              { text: "Speed up now that it appears safer.", score: -15, title: "Aftershock Risk", textFeedback: "Post-storm roads can still have hidden debris and weakened surfaces." }
+            ]
+          }
+        ]
+      },
+      phone_scam: {
+        category: "CYBER THREAT • SOCIAL ENGINEERING",
+        title: "Imposter Call Scam",
+        steps: [
+          {
+            prompt: "A caller claims to be from your bank and says a suspicious transfer requires your account number immediately.",
+            options: [
+              { text: "Politely end the call and verify through your bank's official number later.", score: 25, title: "Correct Verification", textFeedback: "Stopping the call and using trusted contact channels prevents social-engineering fraud." },
+              { text: "Provide the details quickly to stop the alleged transfer.", score: -25, title: "Information Leak", textFeedback: "Banks never request full account numbers or PINs over unsolicited phone calls." }
+            ]
+          },
+          {
+            prompt: "The caller then says they need your OTP for security confirmation.",
+            options: [
+              { text: "Refuse and warn them you will contact the bank directly.", score: 25, title: "OTP Protected", textFeedback: "One-time passwords are private and should never be shared with callers." },
+              { text: "Read the OTP out loud to resolve the issue faster.", score: -30, title: "OTP Compromised", textFeedback: "Sharing OTPs lets fraudsters bypass bank protections immediately." }
+            ]
+          },
+          {
+            prompt: "You receive a follow-up SMS confirming a transaction you did not authorize.",
+            options: [
+              { text: "Log into your banking app and lock the account at once.", score: 25, title: "Account Secured", textFeedback: "Immediate digital lockdown disrupts fraudulent activity before losses grow." },
+              { text: "Ignore it and check again tomorrow.", score: -20, title: "Delayed Response", textFeedback: "Waiting gives fraudsters more time to complete transactions and access funds." }
+            ]
+          }
+        ]
+      },
+      protest: {
+        category: "CROWD SAFETY • PUBLIC ORDER",
+        title: "Protest Crowd Escalation",
+        steps: [
+          {
+            prompt: "A peaceful march swells near a major junction and police vehicles begin arriving.",
+            options: [
+              { text: "Move to a safe side street and observe from a distance.", score: 25, title: "Safe Distance", textFeedback: "Keeping distance from large crowds reduces the risk of being caught in sudden clashes." },
+              { text: "Stay in the center of the crowd to watch what happens.", score: -20, title: "Unsafe Position", textFeedback: "Remaining in a dense crowd exposes you to trampling or crowd surge incidents." }
+            ]
+          },
+          {
+            prompt: "Officers deploy loud warnings and some participants begin throwing objects.",
+            options: [
+              { text: "Leave the area immediately using a route away from both groups.", score: 25, title: "Best Exit", textFeedback: "Choosing a path away from tension points keeps you out of harm's way." },
+              { text: "Try to film the scene from close proximity.", score: -25, title: "Documenting Danger", textFeedback: "Recording near unrest can make you a target and distract from your own escape." }
+            ]
+          },
+          {
+            prompt: "You are now near a quiet residential block a few streets away.",
+            options: [
+              { text: "Find a safe gathering point like a shop or police post and wait.", score: 25, title: "Secure Shelter", textFeedback: "Using a known public safe point gives you protection until the situation calms." },
+              { text: "Take an unlit alley shortcut to get home faster.", score: -15, title: "Risky Short Cut", textFeedback: "Unknown alleys can hide hazards or leave you trapped if the crowd shifts." }
+            ]
+          }
+        ]
+      },
+      medical: {
+        category: "HEALTH EMERGENCY • FIRST AID",
+        title: "Roadside Medical Emergency",
+        steps: [
+          {
+            prompt: "A fellow commuter collapses in traffic and appears disoriented with shallow breathing.",
+            options: [
+              { text: "Pull over safely, signal for help, and check their airway and breathing.", score: 25, title: "First Responder", textFeedback: "A quick safety stop and basic assessment can save a life before help arrives." },
+              { text: "Keep driving to avoid becoming involved in the incident.", score: -20, title: "Avoiding Duty", textFeedback: "Leaving a vulnerable person without assistance delays critical care." }
+            ]
+          },
+          {
+            prompt: "They are conscious but weak and asking you to call an ambulance.",
+            options: [
+              { text: "Call emergency services and stay with them until responders arrive.", score: 25, title: "Responsible Aid", textFeedback: "Staying present while help is on the way offers support and clear information." },
+              { text: "Suggest they rest in the car and you will look for a clinic later.", score: -15, title: "Delayed Care", textFeedback: "Waiting to seek proper help risks the condition worsening rapidly." }
+            ]
+          },
+          {
+            prompt: "You have a basic first-aid kit in your vehicle.",
+            options: [
+              { text: "Use a clean compress and monitor symptoms while keeping them warm.", score: 25, title: "Stabilizing Care", textFeedback: "Basic first-aid can help preserve stability until professionals arrive." },
+              { text: "Give them food or drink immediately to help them recover.", score: -20, title: "Risky Intervention", textFeedback: "Food or drink can worsen some medical emergencies and should be avoided without guidance." }
+            ]
+          }
+        ]
+      },
+      night_walk: {
+        category: "NIGHT SAFETY • PERSONAL SECURITY",
+        title: "Checkpoint Walk Home",
+        steps: [
+          {
+            prompt: "Power suddenly goes out and the street becomes dark while you are walking past several closed shops.",
+            options: [
+              { text: "Use your phone light and head to the nearest open business or guard post.", score: 25, title: "Visible Route", textFeedback: "Keeping a visible route toward safety is the best option during a sudden blackout." },
+              { text: "Keep walking on the dark street to reach home faster.", score: -20, title: "Hidden Hazards", textFeedback: "Dark streets raise the risk of ambush and tripping hazards." }
+            ]
+          },
+          {
+            prompt: "You notice a group of people lingering near a junction ahead.",
+            options: [
+              { text: "Avoid them and choose a more populated route, even if it is longer.", score: 25, title: "Best Choice", textFeedback: "A longer safe route is better than a short risky one at night." },
+              { text: "Walk past them quickly without changing direction.", score: -15, title: "Potential Exposure", textFeedback: "Passing close by an unvetted group increases your personal risk." }
+            ]
+          },
+          {
+            prompt: "You reach a well-lit checkpoint with security personnel nearby.",
+            options: [
+              { text: "Pause and ask them to escort you to the main road.", score: 25, title: "Trusted Escort", textFeedback: "Safety escorts from trusted personnel are a smart way to finish a dark stretch." },
+              { text: "Continue alone once you see a lit sign ahead.", score: -10, title: "Solo Finish", textFeedback: "Walking alone through still-dark areas can expose you to danger before reaching safety." }
+            ]
+          }
+        ]
+      },
+      snatch: {
+        category: "STREET THREAT • PERSONAL PROPERTY",
+        title: "Motorbike Snatch Attempt",
+        steps: [
+          {
+            prompt: "A motorbike draws alongside you while you're walking with your phone in hand.",
+            options: [
+              { text: "Keep the phone close, move toward a busy area, and secure your bag.", score: 25, title: "Defensive Move", textFeedback: "Closing distance to your belongings and moving to crowds reduces snatch risk." },
+              { text: "Pull the phone away and swing it at the rider.", score: -25, title: "Escalation", textFeedback: "Aggressive reactions can provoke attackers and increase bodily harm." }
+            ]
+          },
+          {
+            prompt: "The motorbike slows and the rider reaches for your wrist.",
+            options: [
+              { text: "Drop any loose items, secure your body, and head for the nearest public place.", score: 25, title: "Smart Loss Minimization", textFeedback: "Surrendering low-value items while preserving personal safety is often the best choice." },
+              { text: "Hold tightly and refuse to let go of your phone.", score: -20, title: "Personal Harm Risk", textFeedback: "Grabbing increases the chance of being dragged or injured in a snatch attempt." }
+            ]
+          },
+          {
+            prompt: "A nearby guard post is visible across the road.",
+            options: [
+              { text: "Run toward the guard post and call for help immediately.", score: 25, title: "Safe Escape", textFeedback: "Seeking visible assistance after an attempted snatch is the safest next step." },
+              { text: "Stay where you are and wait for the rider to pass.", score: -15, title: "Lingering Risk", textFeedback: "Remaining in place gives attackers more opportunity and delays help." }
+            ]
+          }
+        ]
+      },
+      roadblock: {
+        category: "TRANSPORT SAFETY • CHECKPOINT RISK",
+        title: "Suspicious Roadblock on Expressway",
+        steps: [
+          {
+            prompt: "An unmarked checkpoint appears on the East-West Expressway with officers asking drivers to stop.",
+            options: [
+              { text: "Remain in your vehicle, ask for official identification, and keep the engine running.", score: 25, title: "Verified Approach", textFeedback: "Confirming identities and staying inside your car lowers the risk of being exposed to an unauthorized roadblock." },
+              { text: "Get out immediately and walk up to the officers.", score: -20, title: "Unnecessary Exposure", textFeedback: "Stepping out into a suspicious checkpoint can put you in harm's way before the situation is verified." }
+            ]
+          },
+          {
+            prompt: "The officer says the road is closed and asks you to drive into a shaded compound for checks.",
+            options: [
+              { text: "Politely refuse, keep your doors locked, and request that they approach your car instead.", score: 25, title: "Controlled Response", textFeedback: "Keeping barriers between you and unfamiliar officers protects you during an unverified stop." },
+              { text: "Agree to enter the compound because it looks official.", score: -25, title: "Potential Trap", textFeedback: "Entering an isolated compound without verification can turn a potential scam into a dangerous situation." }
+            ]
+          },
+          {
+            prompt: "Other drivers are stopped and the compound is quiet. What do you do next?",
+            options: [
+              { text: "Call 112, tell a trusted contact your location, and wait calmly if you are still unsure.", score: 25, title: "Safe Backup", textFeedback: "Alerting help while remaining behind your own barrier is the safest path in a suspicious checkpoint scenario." },
+              { text: "Hand over your documents without calling anyone.", score: -25, title: "Compromised Safety", textFeedback: "Giving up identification and paperwork without verification increases the risk of fraud or detention." }
+            ]
+          }
+        ]
+      },
+      riverboat: {
+        category: "MARINE SAFETY • RIVER TRANSIT",
+        title: "Engine Stall on Creek Route",
+        steps: [
+          {
+            prompt: "Your passenger boat engine dies during a rainy creek crossing and the current is picking up.",
+            options: [
+              { text: "Put on a life jacket, remain seated, and ask the crew to signal for rescue.", score: 25, title: "Marine Safety", textFeedback: "Life jackets and calm, seated behavior are essential when a boat stalls in moving water." },
+              { text: "Jump into the water to try and push the boat ashore.", score: -20, title: "Unsafe Action", textFeedback: "Entering strong currents increases drowning risk and makes rescue harder." }
+            ]
+          },
+          {
+            prompt: "Rain is falling harder and the channel is narrow.",
+            options: [
+              { text: "Stay low, keep limbs inside the boat, and avoid sudden movement.", score: 25, title: "Stable Position", textFeedback: "Remaining stable and low helps prevent capsizing and keeps you safer in rough river conditions." },
+              { text: "Stand up to look for a nearby landing spot.", score: -25, title: "Instability Risk", textFeedback: "Standing in a stalled vessel raises the risk of falling overboard or destabilizing the boat." }
+            ]
+          },
+          {
+            prompt: "A riverside patrol boat approaches to offer assistance.",
+            options: [
+              { text: "Wave clearly, keep your hands visible, and follow the crew's instructions before disembarking.", score: 25, title: "Safe Rescue", textFeedback: "Cooperating calmly with rescue personnel is the best way to get safely off the stalled boat." },
+              { text: "Jump overboard before the patrol reaches you.", score: -20, title: "Premature Exit", textFeedback: "Leaving the boat without guidance can leave you in deeper danger than staying put." }
+            ]
+          }
+        ]
+      },
+      bus_fire: {
+        category: "CRITICAL SAFETY • TRANSPORT FIRE",
+        title: "Public Bus Fire Drill",
+        steps: [
+          {
+            prompt: "A public bus begins to emit smoke from the rear while passengers are still boarding.",
+            options: [
+              { text: "Alert the driver calmly, prepare the nearest exit, and move toward it without pushing.", score: 25, title: "Calm Evacuation", textFeedback: "A calm, orderly exit reduces panic and helps everyone leave the vehicle safely." },
+              { text: "Rush to the front door only and push past other passengers.", score: -15, title: "Crowd Panic", textFeedback: "Panic and crowding at a single exit makes evacuation slower and more dangerous." }
+            ]
+          },
+          {
+            prompt: "Flames spread near the engine compartment and the door is partially blocked.",
+            options: [
+              { text: "Use the emergency hammer to break the nearest window if necessary.", score: 25, title: "Escape Prepared", textFeedback: "Alternative exits like windows can save lives when the main door is blocked." },
+              { text: "Stay in your seat and wait for the bus to stop." , score: -30, title: "Delayed Escape", textFeedback: "Waiting inside a burning vehicle can be deadly if flames continue to spread." }
+            ]
+          },
+          {
+            prompt: "A passenger is trapped under a bag near the aisle.",
+            options: [
+              { text: "Help them move low and guide them toward the exit once the path is clear.", score: 25, title: "Assisted Escape", textFeedback: "Helping others safely during an evacuation is the right choice when you can do so without risking yourself." },
+              { text: "Push past them to escape alone.", score: -20, title: "Selfish Escape", textFeedback: "Leaving someone behind in a fire can cause more harm and guilt." }
+            ]
+          }
+        ]
+      },
+      sim_swap: {
+        category: "CYBER THREAT • MOBILE SECURITY",
+        title: "SIM Swap Identity Trap",
+        steps: [
+          {
+            prompt: "Your phone loses service and a text claims your SIM has been moved to a new device.",
+            options: [
+              { text: "Contact your bank through its official app on another trusted device immediately.", score: 25, title: "Smart Response", textFeedback: "Using an alternate trusted channel protects you from fraudulent SIM swap schemes." },
+              { text: "Reply to the SMS from the same phone.", score: -30, title: "Fraud Risk", textFeedback: "Responding on the compromised line gives attackers access to your accounts." }
+            ]
+          },
+          {
+            prompt: "A caller says they are network support and asks you to share a verification code.",
+            options: [
+              { text: "Refuse and say you will visit the service center instead.", score: 25, title: "Code Protected", textFeedback: "Verification codes should never be given to callers, even if they sound official." },
+              { text: "Provide the code to restore service faster.", score: -25, title: "Code Compromised", textFeedback: "Sharing one-time codes hands control to fraudsters immediately." }
+            ]
+          },
+          {
+            prompt: "The attacker now tries to access your email account.",
+            options: [
+              { text: "Change passwords from a secure device and enable two-factor authentication.", score: 25, title: "Account Secured", textFeedback: "Securing accounts quickly stops attackers from using stolen credentials." },
+              { text: "Continue using the phone once service returns.", score: -15, title: "After-the-Fact Risk", textFeedback: "Waiting to secure your accounts lets attackers move faster than you." }
+            ]
+          }
+        ]
+      },
+      road_accident: {
+        category: "ROAD SAFETY • ACCIDENT SCENE",
+        title: "Crash Site Assistance",
+        steps: [
+          {
+            prompt: "You arrive at a minor collision on a busy road.",
+            options: [
+              { text: "Park safely, switch on hazard lights, and call emergency services.", score: 25, title: "Prepared Helper", textFeedback: "A safe stop and alerting authorities keeps the scene controlled and responders informed." },
+              { text: "Stop in the middle of the road to inspect the vehicles.", score: -20, title: "Blocking Traffic", textFeedback: "Stopping unsafely on active roadways can cause more accidents and harm." }
+            ]
+          },
+          {
+            prompt: "One driver is angry and another passenger appears injured.",
+            options: [
+              { text: "Keep bystanders back and check the injured person's responsiveness.", score: 25, title: "Calm Care", textFeedback: "Stabilizing an injured person while preventing escalation is the safest first response." },
+              { text: "Join the argument with the angry driver.", score: -25, title: "Escalation", textFeedback: "Arguing at an accident scene distracts from safety and may make the situation worse." }
+            ]
+          },
+          {
+            prompt: "Traffic builds up behind the crash site.",
+            options: [
+              { text: "Wait at a safe distance until responders arrive.", score: 25, title: "Safe Distance", textFeedback: "Remaining away from the scene avoids secondary collisions and keeps you safer." },
+              { text: "Run toward the vehicles to force drivers to move.", score: -20, title: "Dangerous Move", textFeedback: "Entering an active accident zone without a clear role increases your risk unnecessarily." }
+            ]
+          }
+        ]
+      }
+    };
+
+    // SIMULATION STATE VARIABLES
+    let currentScenarioKey = null;
+    let currentStepIndex = 0;
+    let currentScore = 100;
+    let timerInterval = null;
+    let secondsElapsed = 0;
+
+    // ENGINE FUNCTIONS
+    function startScenario(key) {
+      if (!scenarios[key]) return;
+      
+      currentScenarioKey = key;
+      currentStepIndex = 0;
+      currentScore = 100;
+      secondsElapsed = 0;
+
+      document.getElementById('selectionScreen').classList.add('hidden');
+      document.getElementById('debriefScreen').classList.add('hidden');
+      document.getElementById('activeDrillScreen').classList.remove('hidden');
+      document.getElementById('sidebarMetrics').classList.remove('hidden');
+
+      startTimer();
+      renderStep();
+    }
+
+    function startTimer() {
+      clearInterval(timerInterval);
+      timerInterval = setInterval(() => {
+        secondsElapsed++;
+        const mins = String(Math.floor(secondsElapsed / 60)).padStart(2, '0');
+        const secs = String(secondsElapsed % 60).padStart(2, '0');
+        document.getElementById('timerText').textContent = `${mins}:${secs}`;
+      }, 1000);
+    }
+
+    function renderStep() {
+      const scenario = scenarios[currentScenarioKey];
+      const step = scenario.steps[currentStepIndex];
+
+      document.getElementById('drillCategory').textContent = scenario.category;
+      document.getElementById('drillTitle').textContent = scenario.title;
+      document.getElementById('stepCounter').textContent = `${currentStepIndex + 1} / ${scenario.steps.length}`;
+      document.getElementById('scenarioDescription').textContent = step.prompt;
+
+      // Reset feedback box
+      const feedbackBox = document.getElementById('feedbackBox');
+      feedbackBox.classList.add('hidden');
+
+      // Populate options
+      const container = document.getElementById('optionsContainer');
+      container.innerHTML = '';
+
+      step.options.forEach((option, idx) => {
+        const btn = document.createElement('button');
+        btn.className = "w-full text-left p-3.5 rounded-xl border border-stone-200 dark:border-stone-700 hover:border-gold-500 bg-white dark:bg-stone-800 text-stone-800 dark:text-stone-100 font-medium text-xs sm:text-sm transition shadow-2xs flex items-center justify-between group";
+        btn.innerHTML = `
+          <span>${option.text}</span>
+          <span class="text-gold-500 opacity-0 group-hover:opacity-100 transition">➔</span>
+        `;
+        btn.onclick = () => selectOption(idx);
+        container.appendChild(btn);
+      });
+
+      updateScoreUI();
+    }
+
+    function selectOption(optionIndex) {
+      const step = scenarios[currentScenarioKey].steps[currentStepIndex];
+      const option = step.options[optionIndex];
+
+      currentScore = Math.max(0, Math.min(100, currentScore + option.score));
+      updateScoreUI();
+
+      // Disable all option buttons
+      const container = document.getElementById('optionsContainer');
+      Array.from(container.children).forEach(btn => {
+        btn.disabled = true;
+        btn.classList.add('opacity-50', 'cursor-not-allowed');
+      });
+
+      // Show feedback
+      const feedbackBox = document.getElementById('feedbackBox');
+      const feedbackTitle = document.getElementById('feedbackTitle');
+      const feedbackText = document.getElementById('feedbackText');
+      const scoreDelta = document.getElementById('scoreDelta');
+
+      feedbackTitle.textContent = option.title;
+      feedbackText.textContent = option.textFeedback;
+
+      if (option.score > 0) {
+        feedbackBox.className = "p-4 rounded-2xl border space-y-3 bg-emerald-50 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-800 text-emerald-900 dark:text-emerald-200";
+        scoreDelta.className = "text-xs font-bold px-2 py-0.5 rounded-md bg-emerald-200 dark:bg-emerald-800 text-emerald-900 dark:text-emerald-100";
+        scoreDelta.textContent = `+${option.score}% Safety`;
+      } else {
+        feedbackBox.className = "p-4 rounded-2xl border space-y-3 bg-rose-50 dark:bg-rose-950/40 border-rose-300 dark:border-rose-800 text-rose-900 dark:text-rose-200";
+        scoreDelta.className = "text-xs font-bold px-2 py-0.5 rounded-md bg-rose-200 dark:bg-rose-800 text-rose-900 dark:text-rose-100";
+        scoreDelta.textContent = `${option.score}% Safety`;
+      }
+
+      feedbackBox.classList.remove('hidden');
+    }
+
+    function nextStep() {
+      const scenario = scenarios[currentScenarioKey];
+      currentStepIndex++;
+
+      if (currentStepIndex < scenario.steps.length) {
+        renderStep();
+      } else {
+        finishScenario();
+      }
+    }
+
+    function updateScoreUI() {
+      document.getElementById('scoreText').textContent = `${currentScore}%`;
+      document.getElementById('scoreBar').style.width = `${currentScore}%`;
+    }
+
+    function finishScenario() {
+      clearInterval(timerInterval);
+
+      document.getElementById('activeDrillScreen').classList.add('hidden');
+      document.getElementById('debriefScreen').classList.remove('hidden');
+
+      document.getElementById('debriefScore').textContent = `${currentScore}%`;
+      document.getElementById('debriefTime').textContent = `${secondsElapsed}s`;
+
+      const summary = document.getElementById('debriefSummary');
+      if (currentScore >= 80) {
+        summary.textContent = "Excellent tactical awareness! You prioritized cover, silent signaling, and distance management, successfully neutralizing local threats.";
+      } else if (currentScore >= 50) {
+        summary.textContent = "Good response under pressure. Review the feedback tips to eliminate risky moves like premature exposure or delayed reporting.";
+      } else {
+        summary.textContent = "Critical safety hazards experienced. Remember: during high threats in Port Harcourt, always prioritize concealment, early barrier checks, and avoiding physical confrontation.";
+      }
+    }
+
+    function resetSimulator() {
+      clearInterval(timerInterval);
+      currentScenarioKey = null;
+      currentStepIndex = 0;
+      currentScore = 100;
+      secondsElapsed = 0;
+
+      document.getElementById('selectionScreen').classList.remove('hidden');
+      document.getElementById('activeDrillScreen').classList.add('hidden');
+      document.getElementById('debriefScreen').classList.add('hidden');
+      document.getElementById('sidebarMetrics').classList.add('hidden');
+
+      document.getElementById('timerText').textContent = '00:00';
+      updateScoreUI();
+    }
+  </script>
+
+<script>
+  (function () {
+    function updateZaziNightState() {
+      const hour = new Date().getHours();
+      const isLate = hour >= 22 || hour < 6;
+      document.querySelectorAll('img[src*="zaziimage"]').forEach(avatar => {
+        const wrapper = avatar.parentElement;
+        wrapper.classList.add('zalia-sleepy-avatar-wrap');
+        avatar.classList.toggle('zalia-sleepy-avatar', isLate);
+        let badge = wrapper.querySelector('.zalia-sleepy-badge');
+        if (!badge) {
+          badge = document.createElement('span');
+          badge.className = 'zalia-sleepy-badge';
+          badge.textContent = '😴';
+          badge.setAttribute('aria-label', 'Zazi is sleepy');
+          wrapper.appendChild(badge);
+        }
+        badge.hidden = !isLate;
+      });
+    }
+    document.addEventListener('DOMContentLoaded', updateZaziNightState);
+    window.setInterval(updateZaziNightState, 60000);
+  }());
+</script>
+<script src="zazi-presence.js"></script>
+
+</body>
+</html>

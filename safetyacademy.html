@@ -1,0 +1,2088 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+
+<meta
+name="viewport"
+content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+
+>
+
+<meta
+name="description"
+content="Zalia Safety Academy — Learn practical safety skills through interactive lessons, scenarios and quizzes."
+
+>
+
+  <meta name="theme-color" content="#1c1917">
+
+  <link rel="icon" type="image/png" href="/images/zalia-app-icon.png">
+  <link rel="apple-touch-icon" href="/images/zalia-app-icon.png">
+  <link rel="manifest" href="/manifest.json">
+
+  <title>Safety Academy • Zalia Security</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+
+      theme: {
+        extend: {
+
+          fontFamily: {
+            sans: [
+              '"Plus Jakarta Sans"',
+              "sans-serif"
+            ],
+
+            serif: [
+              '"Playfair Display"',
+              "serif"
+            ]
+          },
+
+          colors: {
+
+            gold: {
+              50: "#FDFBF7",
+              100: "#FAF5EA",
+              200: "#F4E7CE",
+              300: "#EBD4A4",
+              400: "#DFBC72",
+              500: "#D4A345",
+              600: "#B88230",
+              700: "#936125",
+              800: "#774C23",
+              900: "#623F21"
+            },
+
+            marble: {
+              50: "#FFFFFF",
+              100: "#FAF9F6",
+              200: "#F5F3EF",
+              300: "#EBE7E0",
+              400: "#D6CFBF",
+              500: "#B8AFA0"
+            }
+
+          },
+
+          boxShadow: {
+            "gold-glow":
+              "0 0 25px -5px rgba(212, 163, 69, 0.25)",
+
+            "lux-card":
+              "0 10px 30px -5px rgba(0, 0, 0, 0.04), 0 4px 12px -2px rgba(212, 163, 69, 0.08)"
+          }
+
+        }
+      }
+    };
+  </script>
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  >
+
+  <style>
+
+    body {
+      transition:
+        background-color .2s ease,
+        color .2s ease;
+    }
+
+    .gold-gradient-text {
+      background:
+        linear-gradient(
+          135deg,
+          #B88230 0%,
+          #D4A345 50%,
+          #936125 100%
+        );
+
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .gold-gradient-bg {
+      background:
+        linear-gradient(
+          135deg,
+          #DFBC72 0%,
+          #B88230 100%
+        );
+    }
+
+    .lesson-card {
+      transition:
+        transform .2s ease,
+        box-shadow .2s ease,
+        border-color .2s ease;
+    }
+
+    .lesson-card:hover {
+      transform: translateY(-4px);
+      box-shadow:
+        0 15px 35px -10px rgba(0,0,0,.12);
+    }
+
+    .quiz-option {
+      transition: all .18s ease;
+    }
+
+    .quiz-option:hover {
+      transform: translateX(3px);
+    }
+
+    .correct-answer {
+      border-color: #10b981 !important;
+      background: rgba(16,185,129,.10) !important;
+    }
+
+    .wrong-answer {
+      border-color: #ef4444 !important;
+      background: rgba(239,68,68,.10) !important;
+    }
+
+    .progress-bar {
+      transition: width .4s ease;
+    }
+
+    .badge {
+      transition: transform .2s ease;
+    }
+
+    .badge:hover {
+      transform: scale(1.05);
+    }
+
+  </style>
+
+</head>
+
+<body
+  class="bg-marble-100 dark:bg-stone-950 text-stone-800 dark:text-stone-200 font-sans min-h-screen"
+>
+
+  <!-- =====================================================
+       HEADER
+       ===================================================== -->
+
+  <div class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-10">
+
+
+<header
+  class="flex flex-col md:flex-row justify-between items-start md:items-center gap-5 mb-8 pb-6 border-b border-gold-200/80 dark:border-stone-800"
+>
+
+  <div class="flex items-center gap-4">
+
+    <div
+      class="w-12 h-12 rounded-2xl gold-gradient-bg p-0.5 shadow-gold-glow"
+    >
+
+      <div
+        class="w-full h-full bg-white dark:bg-stone-900 rounded-[14px] flex items-center justify-center overflow-hidden"
+      >
+
+        <img
+          src="/images/zalia-app-icon.png"
+          alt="Zalia"
+          class="w-10 h-10 object-contain"
+        >
+
+      </div>
+
+    </div>
+
+    <div>
+
+      <nav
+        class="flex items-center gap-4 text-xs font-bold mb-1 flex-wrap"
+      >
+
+        <a
+          href="index.html"
+          class="text-stone-500 hover:text-gold-700"
+        >
+          Dashboard
+        </a>
+
+        <a
+          href="safetyacademy.html"
+          class="text-gold-700 border-b-2 border-gold-500 pb-1"
+        >
+          Safety Academy
+        </a>
+
+        <a
+          href="incidents.html"
+          class="text-stone-500 hover:text-gold-700"
+        >
+          Incidents
+        </a>
+
+        <a
+          href="route-planner.html"
+          class="text-stone-500 hover:text-gold-700"
+        >
+          Route Planner
+        </a>
+<a
+href="ZaziAi.html"
+class="text-stone-500 hover:text-gold-700"
+>
+Zazi AI
+</a>
+<a
+href="simulator.html"
+class="text-stone-500 hover:text-gold-700"
+>
+Simulator
+</a>
+<a
+href="about.html"
+class="text-stone-500 hover:text-gold-700"
+>
+About
+</a>
+<a
+href="contact.html"
+class="text-stone-500 hover:text-gold-700"
+>
+Emergency Contacts
+</a>
+      </nav>
+
+      <h1
+        class="text-3xl font-serif font-extrabold gold-gradient-text"
+      >
+        ZALIA
+      </h1>
+
+    </div>
+
+  </div>
+
+  <div class="flex gap-3">
+
+    <button
+      id="themeButton"
+      class="px-4 py-2.5 bg-white dark:bg-stone-900 border border-gold-200 dark:border-stone-800 rounded-xl text-xs font-bold"
+    >
+      🌙 Night Mode
+    </button>
+
+    <a
+      href="index.html"
+      class="px-4 py-2.5 gold-gradient-bg text-white rounded-xl text-xs font-bold"
+    >
+      ← Dashboard
+    </a>
+
+  </div>
+
+</header>
+
+
+<!-- =====================================================
+     HERO
+     ===================================================== -->
+
+<section class="mb-8">
+
+  <div
+    class="bg-white dark:bg-stone-900 border border-gold-200/80 dark:border-stone-800 rounded-3xl p-6 sm:p-8 shadow-lux-card"
+  >
+
+    <div
+      class="flex flex-col lg:flex-row justify-between gap-8 items-center"
+    >
+
+      <div class="flex-1">
+
+        <span
+          class="inline-flex items-center gap-2 text-[11px] font-bold bg-gold-50 dark:bg-stone-800 text-gold-800 dark:text-gold-400 px-3 py-1.5 rounded-full border border-gold-300 dark:border-stone-700"
+        >
+          🎓 ZALIA SAFETY ACADEMY
+        </span>
+
+        <h2
+          class="mt-4 text-3xl sm:text-4xl font-serif font-extrabold text-stone-900 dark:text-stone-100"
+        >
+          Learn skills that could help you stay safer.
+        </h2>
+
+        <p
+          class="mt-3 text-sm text-stone-600 dark:text-stone-400 max-w-2xl leading-relaxed"
+        >
+          Build practical safety knowledge through short lessons,
+          realistic situations and interactive quizzes.
+        </p>
+
+      </div>
+
+
+      <!-- ZAZI -->
+
+      <div
+        class="w-full lg:w-80 bg-gradient-to-br from-gold-50 to-white dark:from-stone-800 dark:to-stone-900 border border-gold-300 dark:border-stone-700 rounded-2xl p-5"
+      >
+
+        <div class="flex items-center gap-3 mb-3">
+
+          <div
+            class="w-12 h-12 rounded-2xl bg-gold-100 dark:bg-stone-700 flex items-center justify-center text-2xl"
+          >
+            <img src="images/shy-zazi.png" alt="Zazi">
+          </div>
+
+          <div>
+
+            <p class="font-serif font-bold">
+              Zazi says...
+            </p>
+
+            <p class="text-[10px] text-stone-500">
+              Your safety study buddy
+            </p>
+
+          </div>
+
+        </div>
+
+        <p
+          class="text-xs leading-relaxed text-stone-600 dark:text-stone-400"
+        >
+          "Learning safety skills before something happens can help you
+          think more clearly when it really matters! 🐾✨"
+        </p>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- =====================================================
+     PROGRESS
+     ===================================================== -->
+
+<section class="mb-8">
+
+  <div
+    class="bg-white dark:bg-stone-900 border border-gold-200/80 dark:border-stone-800 rounded-3xl p-6 shadow-lux-card"
+  >
+
+    <div
+      class="flex flex-col sm:flex-row justify-between gap-4 mb-4"
+    >
+
+      <div>
+
+        <p
+          class="text-[10px] uppercase tracking-widest font-extrabold text-gold-700"
+        >
+          Your Progress
+        </p>
+
+        <h3 class="text-lg font-bold mt-1">
+          Safety Skills
+        </h3>
+
+      </div>
+
+      <div class="text-right">
+
+        <p
+          id="progressText"
+          class="text-2xl font-extrabold gold-gradient-text"
+        >
+          0%
+        </p>
+
+        <p
+          id="completedText"
+          class="text-[10px] text-stone-400"
+        >
+          0 of 10 lessons completed
+        </p>
+
+      </div>
+
+    </div>
+
+    <div
+      class="w-full h-3 bg-stone-100 dark:bg-stone-800 rounded-full overflow-hidden"
+    >
+
+      <div
+        id="progressBar"
+        class="progress-bar h-full gold-gradient-bg rounded-full"
+        style="width:0%"
+      ></div>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- =====================================================
+     SEARCH
+     ===================================================== -->
+
+<div class="mb-6">
+
+  <div class="relative">
+
+    <span
+      class="absolute left-4 top-3.5 text-gold-600"
+    >
+      🔎
+    </span>
+
+    <input
+      id="searchLessons"
+      type="text"
+      placeholder="Search safety lessons..."
+      class="w-full bg-white dark:bg-stone-900 border border-gold-200 dark:border-stone-800 rounded-2xl pl-11 pr-4 py-3.5 text-sm outline-none focus:border-gold-500"
+    >
+
+  </div>
+
+</div>
+
+
+<!-- =====================================================
+     CATEGORY FILTER
+     ===================================================== -->
+
+<div
+  id="categoryFilters"
+  class="flex gap-2 overflow-x-auto pb-3 mb-6"
+>
+
+  <button
+    data-category="all"
+    class="category-button shrink-0 px-4 py-2 rounded-xl bg-gold-600 text-white text-xs font-bold"
+  >
+    All
+  </button>
+
+  <button
+    data-category="emergency"
+    class="category-button shrink-0 px-4 py-2 rounded-xl bg-white dark:bg-stone-900 border border-gold-200 dark:border-stone-800 text-xs font-bold"
+  >
+    🚨 Emergency
+  </button>
+
+  <button
+    data-category="personal"
+    class="category-button shrink-0 px-4 py-2 rounded-xl bg-white dark:bg-stone-900 border border-gold-200 dark:border-stone-800 text-xs font-bold"
+  >
+    🛡️ Personal
+  </button>
+
+  <button
+    data-category="environment"
+    class="category-button shrink-0 px-4 py-2 rounded-xl bg-white dark:bg-stone-900 border border-gold-200 dark:border-stone-800 text-xs font-bold"
+  >
+    🌍 Environment
+  </button>
+
+  <button
+    data-category="digital"
+    class="category-button shrink-0 px-4 py-2 rounded-xl bg-white dark:bg-stone-900 border border-gold-200 dark:border-stone-800 text-xs font-bold"
+  >
+    📱 Digital
+  </button>
+
+</div>
+
+
+<!-- =====================================================
+     LESSON GRID
+     ===================================================== -->
+
+<section>
+
+  <div
+    id="lessonGrid"
+    class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"
+  ></div>
+
+</section>
+
+
+<!-- =====================================================
+     BADGES
+     ===================================================== -->
+
+<section class="mt-12">
+
+  <div
+    class="bg-white dark:bg-stone-900 border border-gold-200/80 dark:border-stone-800 rounded-3xl p-6 sm:p-7 shadow-lux-card"
+  >
+
+    <div class="mb-5">
+
+      <p
+        class="text-[10px] uppercase tracking-widest font-extrabold text-gold-700"
+      >
+        Achievements
+      </p>
+
+      <h2 class="text-xl font-serif font-bold">
+        Safety Badges 🏆
+      </h2>
+
+    </div>
+
+    <div
+      id="badgeGrid"
+      class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4"
+    ></div>
+
+  </div>
+
+</section>
+
+
+<!-- =====================================================
+     FOOTER
+     ===================================================== -->
+
+<footer
+  class="mt-12 pt-8 border-t border-gold-200/80 dark:border-stone-800 text-center text-xs text-stone-500 dark:text-stone-400"
+>
+
+  <p class="font-semibold">
+    ZALIA • Safety Academy
+  </p>
+
+  <p class="mt-2">
+    Learn. Practice. Prepare. Stay safer.
+  </p>
+
+  <p class="text-[10px] mt-4 text-stone-400">
+    Safety education is not a substitute for professional emergency
+    services or medical care.
+  </p>
+
+</footer>
+
+
+  </div>
+
+  <!-- =====================================================
+       LESSON MODAL
+       ===================================================== -->
+
+  <div
+    id="lessonModal"
+    class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm p-4 overflow-y-auto"
+  >
+
+
+<div
+  class="max-w-3xl mx-auto my-6 bg-white dark:bg-stone-900 rounded-3xl shadow-2xl overflow-hidden"
+>
+
+  <div
+    class="gold-gradient-bg p-6 text-white"
+  >
+
+    <div class="flex justify-between items-start gap-4">
+
+      <div>
+
+        <p
+          id="modalCategory"
+          class="text-[10px] uppercase tracking-widest font-bold opacity-80"
+        ></p>
+
+        <h2
+          id="modalTitle"
+          class="text-2xl sm:text-3xl font-serif font-extrabold mt-1"
+        ></h2>
+
+      </div>
+
+      <button
+        id="closeLesson"
+        class="w-10 h-10 rounded-xl bg-white/20 hover:bg-white/30 text-xl"
+      >
+        ×
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <div
+    id="lessonContent"
+    class="p-6 sm:p-8"
+  ></div>
+
+</div>
+
+
+  </div>
+
+  <script>
+
+    /* =====================================================
+       SAFETY LESSON DATABASE
+       ===================================================== */
+
+    const lessons = [
+
+      {
+        id: "fire",
+        icon: "🔥",
+        title: "Fire Safety",
+        category: "emergency",
+        level: "Beginner",
+        description:
+          "Learn what to do when a fire starts and how to get away safely.",
+
+        sections: [
+          {
+            title: "The golden rule",
+            text:
+              "Your first priority during a fire is getting yourself and other people away from danger. Do not risk your life trying to save belongings."
+          },
+          {
+            title: "If you discover a fire",
+            text:
+              "Raise the alarm, move away from the fire and smoke, use a safe exit if available, and contact emergency services."
+          },
+          {
+            title: "Smoke is dangerous",
+            text:
+              "Smoke can make it difficult to see and breathe. Stay as low as practical while moving away from smoke and fire."
+          }
+        ],
+
+        scenario:
+          "You smell smoke and notice flames beginning in a kitchen. What should you prioritize?",
+
+        options: [
+          "Try to save expensive items",
+          "Raise the alarm and get people away from danger",
+          "Open every window before leaving",
+          "Stay nearby and watch the fire"
+        ],
+
+        answer: 1,
+
+        explanation:
+          "Correct! People should be moved away from danger first. Emergency services should be contacted as appropriate."
+      },
+
+
+      {
+        id: "firstaid",
+        icon: "🩹",
+        title: "First Aid Basics",
+        category: "emergency",
+        level: "Beginner",
+        description:
+          "Learn basic first-aid priorities for common emergencies.",
+
+        sections: [
+          {
+            title: "Check the scene",
+            text:
+              "Before helping someone, make sure the area is reasonably safe for you too."
+          },
+          {
+            title: "Get help",
+            text:
+              "For serious injuries or medical emergencies, contact appropriate emergency services and follow instructions from trained professionals."
+          },
+          {
+            title: "Severe bleeding",
+            text:
+              "If safe to do so, apply firm direct pressure with a clean cloth or dressing and seek urgent medical help."
+          }
+        ],
+
+        scenario:
+          "Someone has a serious bleeding injury. What is an appropriate immediate action while getting professional help?",
+
+        options: [
+          "Ignore the injury",
+          "Apply firm direct pressure with a clean dressing if safe",
+          "Give them random medication",
+          "Tell them to walk around"
+        ],
+
+        answer: 1,
+
+        explanation:
+          "Correct! Direct pressure can help control severe bleeding while professional medical assistance is being obtained."
+      },
+
+
+      {
+        id: "road",
+        icon: "🚗",
+        title: "Road Safety",
+        category: "personal",
+        level: "Beginner",
+        description:
+          "Build safer habits when walking, cycling or travelling by road.",
+
+        sections: [
+          {
+            title: "Stay aware",
+            text:
+              "Avoid distractions when crossing roads or moving through traffic."
+          },
+          {
+            title: "Visibility matters",
+            text:
+              "At night or in poor weather, use safe, visible areas and wear reflective clothing when appropriate."
+          },
+          {
+            title: "Vehicle safety",
+            text:
+              "Use seat belts where provided and avoid travelling with a driver who is impaired or driving dangerously."
+          }
+        ],
+
+        scenario:
+          "Your driver is speeding aggressively and you feel unsafe. What is the safest response?",
+
+        options: [
+          "Encourage them to drive faster",
+          "Ignore the situation",
+          "Ask them to slow down or stop somewhere safe",
+          "Open the door while the car is moving"
+        ],
+
+        answer: 2,
+
+        explanation:
+          "Correct! Ask the driver to slow down or stop at a safe location. Never put yourself in additional danger."
+      },
+
+
+      {
+        id: "water",
+        icon: "🌊",
+        title: "Water Safety",
+        category: "environment",
+        level: "Beginner",
+        description:
+          "Learn safer habits around rivers, boats, beaches and waterways.",
+
+        sections: [
+          {
+            title: "Wear a life jacket",
+            text:
+              "Use an appropriate, properly fitted personal flotation device when travelling or working on water."
+          },
+          {
+            title: "Check conditions",
+            text:
+              "Weather, currents, visibility and boat traffic can change quickly. Follow local warnings and instructions."
+          },
+          {
+            title: "Never enter dangerous water to rescue someone",
+            text:
+              "A person attempting an untrained water rescue can also become a victim. Call for professional help and use safe rescue equipment where available."
+          }
+        ],
+
+        scenario:
+          "You see someone struggling in deep water. What should you avoid doing?",
+
+        options: [
+          "Call for professional assistance",
+          "Alert people nearby",
+          "Jump into dangerous water without training or equipment",
+          "Use a safe flotation aid if available"
+        ],
+
+        answer: 2,
+
+        explanation:
+          "Correct! Untrained water rescues can put both people in danger. Get professional help."
+      },
+
+
+      {
+        id: "flood",
+        icon: "🌧️",
+        title: "Flood Safety",
+        category: "environment",
+        level: "Beginner",
+        description:
+          "Know how to prepare for flooding and avoid common flood hazards.",
+
+        sections: [
+          {
+            title: "Move to safer ground",
+            text:
+              "If flooding threatens your area, follow official evacuation instructions and move to safer ground."
+          },
+          {
+            title: "Never underestimate moving water",
+            text:
+              "Floodwater can hide holes, debris, open drains and electrical hazards."
+          },
+          {
+            title: "Avoid driving through floodwater",
+            text:
+              "Water depth and current can be difficult to judge, and vehicles can lose control or become stranded."
+          }
+        ],
+
+        scenario:
+          "A road is covered by fast-moving floodwater. What should you do?",
+
+        options: [
+          "Drive through quickly",
+          "Walk through it",
+          "Avoid the flooded route and follow safer guidance",
+          "Remove your shoes and continue"
+        ],
+
+        answer: 2,
+
+        explanation:
+          "Correct! Avoid dangerous floodwater and follow official safety or evacuation guidance."
+      },
+
+
+      {
+        id: "home",
+        icon: "🏠",
+        title: "Home Safety",
+        category: "personal",
+        level: "Beginner",
+        description:
+          "Learn simple habits that can reduce common household risks.",
+
+        sections: [
+          {
+            title: "Know your exits",
+            text:
+              "Everyone in the household should know how to leave safely during an emergency."
+          },
+          {
+            title: "Electrical safety",
+            text:
+              "Do not overload sockets or use damaged electrical cables and equipment."
+          },
+          {
+            title: "Keep hazards away",
+            text:
+              "Keep dangerous chemicals, medicines, matches and other hazards away from children."
+          }
+        ],
+
+        scenario:
+          "You notice a damaged electrical cable in your home. What should you do?",
+
+        options: [
+          "Keep using it",
+          "Touch exposed wires to test them",
+          "Stop using it and have it safely repaired or replaced",
+          "Cover it with paper"
+        ],
+
+        answer: 2,
+
+        explanation:
+          "Correct! Damaged electrical equipment can create fire and shock hazards."
+      },
+
+
+      {
+        id: "personal",
+        icon: "🛡️",
+        title: "Personal Security",
+        category: "personal",
+        level: "Intermediate",
+        description:
+          "Learn awareness habits that can help you make safer decisions.",
+
+        sections: [
+          {
+            title: "Trust your instincts",
+            text:
+              "If a situation feels unsafe, create distance and move toward a safer public location when possible."
+          },
+          {
+            title: "Share plans",
+            text:
+              "When appropriate, let a trusted person know where you are going and when you expect to return."
+          },
+          {
+            title: "Avoid unnecessary confrontation",
+            text:
+              "Your goal is to get to safety, not to win an argument or confrontation."
+          }
+        ],
+
+        scenario:
+          "You feel that someone is following you while you are walking. What is a safer response?",
+
+        options: [
+          "Confront them aggressively",
+          "Go somewhere isolated",
+          "Move toward a populated safe location and contact someone you trust",
+          "Stop and wait for them"
+        ],
+
+        answer: 2,
+
+        explanation:
+          "Correct! Moving toward a safer populated location and contacting someone you trust can reduce isolation."
+      },
+
+
+      {
+        id: "scams",
+        icon: "💳",
+        title: "Scam & Fraud Safety",
+        category: "digital",
+        level: "Intermediate",
+        description:
+          "Learn how to recognize common warning signs of scams and fraud.",
+
+        sections: [
+          {
+            title: "Urgency is a warning sign",
+            text:
+              "Scammers may pressure you to act immediately before you have time to verify information."
+          },
+          {
+            title: "Protect sensitive information",
+            text:
+              "Never casually share passwords, PINs, one-time codes or other sensitive credentials."
+          },
+          {
+            title: "Verify independently",
+            text:
+              "Contact organisations through official channels rather than using contact information supplied by a suspicious message."
+          }
+        ],
+
+        scenario:
+          "Someone messages you claiming to be your bank and asks for your one-time verification code. What should you do?",
+
+        options: [
+          "Send the code immediately",
+          "Post the code publicly",
+          "Do not share it and verify through an official channel",
+          "Send half of the code"
+        ],
+
+        answer: 2,
+
+        explanation:
+          "Correct! One-time codes and similar credentials should not be shared with someone who contacts you unexpectedly."
+      },
+
+
+      {
+        id: "digital",
+        icon: "📱",
+        title: "Digital Safety",
+        category: "digital",
+        level: "Intermediate",
+        description:
+          "Protect your accounts, devices and personal information online.",
+
+        sections: [
+          {
+            title: "Use strong passwords",
+            text:
+              "Use strong, unique passwords and consider a reputable password manager."
+          },
+          {
+            title: "Enable extra protection",
+            text:
+              "Where available, enable multi-factor authentication on important accounts."
+          },
+          {
+            title: "Think before clicking",
+            text:
+              "Unexpected links and attachments can lead to phishing, malware or fraudulent websites."
+          }
+        ],
+
+        scenario:
+          "You receive an unexpected message containing a link asking you to 'verify your account immediately'. What should you do?",
+
+        options: [
+          "Click immediately",
+          "Forward it to everyone",
+          "Verify the message through the organisation's official website or contact channel",
+          "Enter your password first"
+        ],
+
+        answer: 2,
+
+        explanation:
+          "Correct! Verify unexpected requests independently before clicking links or providing information."
+      },
+
+
+      {
+        id: "emergency",
+        icon: "🚨",
+        title: "Emergency Preparedness",
+        category: "emergency",
+        level: "Intermediate",
+        description:
+          "Prepare yourself and your household before an emergency happens.",
+
+        sections: [
+          {
+            title: "Know emergency contacts",
+            text:
+              "Know the appropriate emergency numbers and keep important contacts accessible."
+          },
+          {
+            title: "Have a basic emergency kit",
+            text:
+              "Depending on your situation, useful supplies may include water, essential medication, a flashlight, a power bank and basic first-aid supplies."
+          },
+          {
+            title: "Have a communication plan",
+            text:
+              "Families and groups can agree on how they will communicate and where they will meet if separated."
+          }
+        ],
+
+        scenario:
+          "Your area suddenly loses power during a severe weather event. What is a sensible preparation step?",
+
+        options: [
+          "Use candles next to curtains",
+          "Check your emergency supplies and stay informed through reliable sources",
+          "Ignore official information",
+          "Go outside unnecessarily"
+        ],
+
+        answer: 1,
+
+        explanation:
+          "Correct! Checking emergency supplies and following reliable information can help you respond more safely."
+      }
+
+    ];
+
+
+    /* =====================================================
+       BADGES
+       ===================================================== */
+
+    const badges = [
+
+      {
+        id: "first",
+        icon: "🌱",
+        name: "Safety Starter",
+        requirement: 1
+      },
+
+      {
+        id: "three",
+        icon: "🛡️",
+        name: "Safety Learner",
+        requirement: 3
+      },
+
+      {
+        id: "five",
+        icon: "⭐",
+        name: "Safety Builder",
+        requirement: 5
+      },
+
+      {
+        id: "seven",
+        icon: "🏆",
+        name: "Safety Champion",
+        requirement: 7
+      },
+
+      {
+        id: "ten",
+        icon: "👑",
+        name: "Zalia Safety Pro",
+        requirement: 10
+      }
+
+    ];
+
+
+    /* =====================================================
+       STATE
+       ===================================================== */
+
+    let completedLessons =
+      JSON.parse(
+        localStorage.getItem("zalia_completed_lessons") || "[]"
+      );
+
+
+    let activeCategory = "all";
+
+    let currentLesson = null;
+
+
+    /* =====================================================
+       ELEMENTS
+       ===================================================== */
+
+    const lessonGrid =
+      document.getElementById("lessonGrid");
+
+    const searchInput =
+      document.getElementById("searchLessons");
+
+    const lessonModal =
+      document.getElementById("lessonModal");
+
+    const lessonContent =
+      document.getElementById("lessonContent");
+
+    const modalTitle =
+      document.getElementById("modalTitle");
+
+    const modalCategory =
+      document.getElementById("modalCategory");
+
+
+    /* =====================================================
+       SAVE PROGRESS
+       ===================================================== */
+
+    function saveProgress() {
+
+      localStorage.setItem(
+        "zalia_completed_lessons",
+        JSON.stringify(completedLessons)
+      );
+
+      updateProgress();
+
+      renderBadges();
+
+    }
+
+
+    /* =====================================================
+       PROGRESS
+       ===================================================== */
+
+    function updateProgress() {
+
+      const completed =
+        completedLessons.length;
+
+      const total =
+        lessons.length;
+
+      const percentage =
+        Math.round(
+          (completed / total) * 100
+        );
+
+      document.getElementById(
+        "progressText"
+      ).textContent =
+        percentage + "%";
+
+      document.getElementById(
+        "completedText"
+      ).textContent =
+        `${completed} of ${total} lessons completed`;
+
+      document.getElementById(
+        "progressBar"
+      ).style.width =
+        percentage + "%";
+
+    }
+
+
+    /* =====================================================
+       RENDER LESSONS
+       ===================================================== */
+
+    function renderLessons() {
+
+      const query =
+        searchInput.value
+          .trim()
+          .toLowerCase();
+
+      const filtered =
+        lessons.filter(
+          lesson => {
+
+            const categoryMatch =
+              activeCategory === "all" ||
+              lesson.category === activeCategory;
+
+            const searchMatch =
+              !query ||
+              lesson.title.toLowerCase().includes(query) ||
+              lesson.description.toLowerCase().includes(query);
+
+            return categoryMatch && searchMatch;
+
+          }
+        );
+
+
+      lessonGrid.innerHTML = "";
+
+
+      if (!filtered.length) {
+
+        lessonGrid.innerHTML = `
+          <div class="col-span-full p-10 bg-white dark:bg-stone-900 border border-gold-200 dark:border-stone-800 rounded-3xl text-center">
+            <div class="text-4xl mb-3">🔎</div>
+            <p class="font-bold">No lessons found</p>
+            <p class="text-xs text-stone-500 mt-1">
+              Try another search or category.
+            </p>
+          </div>
+        `;
+
+        return;
+
+      }
+
+
+      filtered.forEach(
+        lesson => {
+
+          const completed =
+            completedLessons.includes(
+              lesson.id
+            );
+
+
+          const card =
+            document.createElement("article");
+
+
+          card.className =
+            "lesson-card bg-white dark:bg-stone-900 border border-gold-200/80 dark:border-stone-800 rounded-3xl p-5 shadow-lux-card cursor-pointer";
+
+
+          card.innerHTML = `
+
+            <div class="flex items-start justify-between gap-3">
+
+              <div
+                class="w-14 h-14 rounded-2xl bg-gold-50 dark:bg-stone-800 border border-gold-200 dark:border-stone-700 flex items-center justify-center text-3xl"
+              >
+                ${lesson.icon}
+              </div>
+
+              ${
+                completed
+                  ? `
+                    <span class="text-[10px] font-extrabold bg-emerald-100 text-emerald-700 px-2.5 py-1 rounded-full">
+                      ✓ COMPLETED
+                    </span>
+                  `
+                  : `
+                    <span class="text-[10px] font-bold bg-gold-100 text-gold-800 dark:bg-stone-800 dark:text-gold-400 px-2.5 py-1 rounded-full">
+                      ${lesson.level}
+                    </span>
+                  `
+              }
+
+            </div>
+
+
+            <div class="mt-5">
+
+              <p
+                class="text-[10px] uppercase tracking-widest font-extrabold text-gold-700 dark:text-gold-400"
+              >
+                ${lesson.category}
+              </p>
+
+              <h3
+                class="text-lg font-serif font-bold mt-1"
+              >
+                ${lesson.title}
+              </h3>
+
+              <p
+                class="text-xs text-stone-500 dark:text-stone-400 mt-2 leading-relaxed"
+              >
+                ${lesson.description}
+              </p>
+
+            </div>
+
+
+            <button
+              class="mt-5 w-full px-4 py-3 gold-gradient-bg text-white rounded-xl text-xs font-extrabold"
+            >
+              ${completed ? "Review Lesson" : "Start Lesson"} →
+            </button>
+
+          `;
+
+
+          card
+            .querySelector("button")
+            .addEventListener(
+              "click",
+              () => openLesson(lesson.id)
+            );
+
+
+          lessonGrid.appendChild(card);
+
+        }
+      );
+
+    }
+
+
+    /* =====================================================
+       OPEN LESSON
+       ===================================================== */
+
+    function openLesson(id) {
+
+      currentLesson =
+        lessons.find(
+          lesson => lesson.id === id
+        );
+
+
+      if (!currentLesson) {
+        return;
+      }
+
+
+      modalTitle.textContent =
+        `${currentLesson.icon} ${currentLesson.title}`;
+
+
+      modalCategory.textContent =
+        `${currentLesson.category} • ${currentLesson.level}`;
+
+
+      renderLessonStart();
+
+
+      lessonModal.classList.remove(
+        "hidden"
+      );
+
+
+      document.body.style.overflow =
+        "hidden";
+
+    }
+
+
+    /* =====================================================
+       LESSON CONTENT
+       ===================================================== */
+
+    function renderLessonStart() {
+
+      lessonContent.innerHTML = `
+
+        <div class="space-y-6">
+
+          <div
+            class="bg-gold-50 dark:bg-stone-800 border border-gold-200 dark:border-stone-700 rounded-2xl p-5"
+          >
+
+            <div class="flex gap-3">
+
+              <div class="text-2xl">
+                🐾
+              </div>
+
+              <div>
+
+                <p class="font-bold text-sm">
+                  Zazi's quick tip
+                </p>
+
+                <p class="text-xs text-stone-600 dark:text-stone-400 mt-1 leading-relaxed">
+                  Take your time with this lesson. Understanding the
+                  "why" behind a safety skill is just as important as
+                  remembering the steps.
+                </p>
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <div>
+
+            <h3 class="text-xl font-serif font-bold mb-4">
+              What you need to know
+            </h3>
+
+            <div class="space-y-4">
+
+              ${currentLesson.sections.map(
+                section => `
+
+                  <div
+                    class="border-l-4 border-gold-500 pl-4"
+                  >
+
+                    <h4 class="font-bold text-sm">
+                      ${section.title}
+                    </h4>
+
+                    <p class="text-xs text-stone-600 dark:text-stone-400 leading-relaxed mt-1">
+                      ${section.text}
+                    </p>
+
+                  </div>
+
+                `
+              ).join("")}
+
+            </div>
+
+          </div>
+
+
+          <div
+            class="border-t border-gold-200 dark:border-stone-800 pt-6"
+          >
+
+            <button
+              id="startQuizButton"
+              class="w-full px-5 py-4 gold-gradient-bg text-white rounded-2xl font-extrabold text-sm"
+            >
+              🧠 Test Your Knowledge
+            </button>
+
+          </div>
+
+        </div>
+
+      `;
+
+
+      document
+        .getElementById("startQuizButton")
+        .addEventListener(
+          "click",
+          renderQuiz
+        );
+
+    }
+
+
+    /* =====================================================
+       QUIZ
+       ===================================================== */
+
+    function renderQuiz() {
+
+      lessonContent.innerHTML = `
+
+        <div class="space-y-6">
+
+          <div>
+
+            <span
+              class="text-[10px] uppercase tracking-widest font-extrabold text-gold-700"
+            >
+              QUICK SCENARIO
+            </span>
+
+            <h3 class="text-xl font-serif font-bold mt-2">
+              ${currentLesson.scenario}
+            </h3>
+
+          </div>
+
+
+          <div
+            id="quizOptions"
+            class="space-y-3"
+          >
+
+            ${currentLesson.options.map(
+              (option, index) => `
+
+                <button
+                  data-index="${index}"
+                  class="quiz-option w-full text-left p-4 rounded-2xl border border-gold-200 dark:border-stone-700 bg-white dark:bg-stone-800 text-sm font-semibold"
+                >
+
+                  <span
+                    class="inline-flex w-8 h-8 rounded-lg bg-gold-100 dark:bg-stone-700 text-gold-800 dark:text-gold-400 items-center justify-center mr-3"
+                  >
+                    ${String.fromCharCode(65 + index)}
+                  </span>
+
+                  ${option}
+
+                </button>
+
+              `
+            ).join("")}
+
+          </div>
+
+
+          <div
+            id="quizFeedback"
+            class="hidden"
+          ></div>
+
+        </div>
+
+      `;
+
+
+      document
+        .querySelectorAll(".quiz-option")
+        .forEach(
+          button => {
+
+            button.addEventListener(
+              "click",
+              () => checkAnswer(
+                Number(
+                  button.dataset.index
+                )
+              )
+            );
+
+          }
+        );
+
+    }
+
+
+    /* =====================================================
+       CHECK ANSWER
+       ===================================================== */
+
+    function checkAnswer(selected) {
+
+      const buttons =
+        document.querySelectorAll(
+          ".quiz-option"
+        );
+
+
+      buttons.forEach(
+        button => {
+
+          button.disabled = true;
+
+        }
+      );
+
+
+      const selectedButton =
+        document.querySelector(
+          `[data-index="${selected}"]`
+        );
+
+
+      const correctButton =
+        document.querySelector(
+          `[data-index="${currentLesson.answer}"]`
+        );
+
+
+      if (
+        selected ===
+        currentLesson.answer
+      ) {
+
+        selectedButton.classList.add(
+          "correct-answer"
+        );
+
+        showQuizFeedback(
+          true
+        );
+
+      } else {
+
+        selectedButton.classList.add(
+          "wrong-answer"
+        );
+
+        correctButton.classList.add(
+          "correct-answer"
+        );
+
+        showQuizFeedback(
+          false
+        );
+
+      }
+
+    }
+
+
+    /* =====================================================
+       FEEDBACK
+       ===================================================== */
+
+    function showQuizFeedback(correct) {
+
+      const feedback =
+        document.getElementById(
+          "quizFeedback"
+        );
+
+
+      feedback.classList.remove(
+        "hidden"
+      );
+
+
+      if (correct) {
+
+        feedback.innerHTML = `
+
+          <div
+            class="bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900 rounded-2xl p-5"
+          >
+
+            <p class="font-extrabold text-emerald-700 dark:text-emerald-400">
+              🎉 Correct!
+            </p>
+
+            <p class="text-xs text-stone-600 dark:text-stone-400 mt-2 leading-relaxed">
+              ${currentLesson.explanation}
+            </p>
+
+            <button
+              id="completeLessonButton"
+              class="mt-4 w-full px-4 py-3 bg-emerald-600 text-white rounded-xl text-xs font-extrabold"
+            >
+              ⭐ Complete Lesson
+            </button>
+
+          </div>
+
+        `;
+
+      } else {
+
+        feedback.innerHTML = `
+
+          <div
+            class="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900 rounded-2xl p-5"
+          >
+
+            <p class="font-extrabold text-amber-700 dark:text-amber-400">
+              💡 Not quite!
+            </p>
+
+            <p class="text-xs text-stone-600 dark:text-stone-400 mt-2 leading-relaxed">
+              ${currentLesson.explanation}
+            </p>
+
+            <button
+              id="tryAgainButton"
+              class="mt-4 w-full px-4 py-3 gold-gradient-bg text-white rounded-xl text-xs font-extrabold"
+            >
+              Try Again
+            </button>
+
+          </div>
+
+        `;
+
+
+        document
+          .getElementById("tryAgainButton")
+          .addEventListener(
+            "click",
+            renderQuiz
+          );
+
+        return;
+
+      }
+
+
+      document
+        .getElementById(
+          "completeLessonButton"
+        )
+        .addEventListener(
+          "click",
+          completeCurrentLesson
+        );
+
+    }
+
+
+    /* =====================================================
+       COMPLETE LESSON
+       ===================================================== */
+
+    function completeCurrentLesson() {
+
+      if (
+        !completedLessons.includes(
+          currentLesson.id
+        )
+      ) {
+
+        completedLessons.push(
+          currentLesson.id
+        );
+
+      }
+
+
+      saveProgress();
+
+
+      lessonContent.innerHTML = `
+
+        <div class="text-center py-8">
+
+          <div class="text-6xl mb-5">
+            🎉
+          </div>
+
+          <h3
+            class="text-2xl font-serif font-extrabold"
+          >
+            Skill Unlocked!
+          </h3>
+
+          <p
+            class="text-sm text-stone-500 dark:text-stone-400 mt-3"
+          >
+            You've completed
+            <strong>${currentLesson.title}</strong>.
+          </p>
+
+
+          <div
+            class="mt-6 bg-gold-50 dark:bg-stone-800 border border-gold-200 dark:border-stone-700 rounded-2xl p-5"
+          >
+
+            <p class="text-3xl">
+              ${currentLesson.icon}
+            </p>
+
+            <p class="font-bold mt-2">
+              ${currentLesson.title}
+            </p>
+
+            <p class="text-[10px] text-stone-500 mt-1">
+              Zalia Safety Skill
+            </p>
+
+          </div>
+
+
+          <button
+            id="continueLearning"
+            class="mt-6 w-full px-5 py-4 gold-gradient-bg text-white rounded-2xl font-extrabold text-sm"
+          >
+            Continue Learning →
+          </button>
+
+        </div>
+
+      `;
+
+
+      document
+        .getElementById(
+          "continueLearning"
+        )
+        .addEventListener(
+          "click",
+          () => {
+
+            closeLesson();
+
+            renderLessons();
+
+          }
+        );
+
+    }
+
+
+    /* =====================================================
+       CLOSE MODAL
+       ===================================================== */
+
+    function closeLesson() {
+
+      lessonModal.classList.add(
+        "hidden"
+      );
+
+      document.body.style.overflow =
+        "";
+
+      currentLesson = null;
+
+    }
+
+
+    document
+      .getElementById("closeLesson")
+      .addEventListener(
+        "click",
+        closeLesson
+      );
+
+
+    lessonModal.addEventListener(
+      "click",
+      event => {
+
+        if (
+          event.target ===
+          lessonModal
+        ) {
+
+          closeLesson();
+
+        }
+
+      }
+    );
+
+
+    /* =====================================================
+       SEARCH
+       ===================================================== */
+
+    searchInput.addEventListener(
+      "input",
+      renderLessons
+    );
+
+
+    /* =====================================================
+       CATEGORY FILTER
+       ===================================================== */
+
+    document
+      .querySelectorAll(".category-button")
+      .forEach(
+        button => {
+
+          button.addEventListener(
+            "click",
+            () => {
+
+              activeCategory =
+                button.dataset.category;
+
+
+              document
+                .querySelectorAll(
+                  ".category-button"
+                )
+                .forEach(
+                  item => {
+
+                    item.classList.remove(
+                      "bg-gold-600",
+                      "text-white"
+                    );
+
+                    item.classList.add(
+                      "bg-white",
+                      "dark:bg-stone-900"
+                    );
+
+                  }
+                );
+
+
+              button.classList.add(
+                "bg-gold-600",
+                "text-white"
+              );
+
+
+              renderLessons();
+
+            }
+          );
+
+        }
+      );
+
+
+    /* =====================================================
+       THEME
+       ===================================================== */
+
+    const savedTheme =
+      localStorage.getItem(
+        "zalia_theme"
+      );
+
+
+    if (
+      savedTheme === "dark"
+    ) {
+
+      document.documentElement.classList.add(
+        "dark"
+      );
+
+    }
+
+
+    document
+      .getElementById("themeButton")
+      .addEventListener(
+        "click",
+        () => {
+
+          const isDark =
+            document.documentElement.classList.contains(
+              "dark"
+            );
+
+
+          document.documentElement.classList.toggle(
+            "dark",
+            !isDark
+          );
+
+
+          localStorage.setItem(
+            "zalia_theme",
+            isDark
+              ? "light"
+              : "dark"
+          );
+
+
+          document.getElementById(
+            "themeButton"
+          ).textContent =
+            isDark
+              ? "🌙 Night Mode"
+              : "☀️ Light Mode";
+
+        }
+      );
+
+
+    /* =====================================================
+       BADGES
+       ===================================================== */
+
+    function renderBadges() {
+
+      const badgeGrid =
+        document.getElementById(
+          "badgeGrid"
+        );
+
+
+      const completed =
+        completedLessons.length;
+
+
+      badgeGrid.innerHTML =
+        badges.map(
+          badge => {
+
+            const unlocked =
+              completed >=
+              badge.requirement;
+
+
+            return `
+
+              <div
+                class="badge text-center p-4 rounded-2xl border ${
+                  unlocked
+                    ? "border-gold-300 bg-gold-50 dark:bg-stone-800"
+                    : "border-stone-200 dark:border-stone-800 opacity-40"
+                }"
+              >
+
+                <div class="text-4xl">
+                  ${unlocked ? badge.icon : "🔒"}
+                </div>
+
+                <p class="text-xs font-extrabold mt-2">
+                  ${badge.name}
+                </p>
+
+                <p class="text-[9px] text-stone-400 mt-1">
+                  ${
+                    unlocked
+                      ? "Unlocked!"
+                      : `${badge.requirement} lessons`
+                  }
+                </p>
+
+              </div>
+
+            `;
+
+          }
+        )
+        .join("");
+
+    }
+
+
+    /* =====================================================
+       INITIALIZE
+       ===================================================== */
+
+    renderLessons();
+
+    updateProgress();
+
+    renderBadges();
+
+  </script>
+
+</body>
+</html>

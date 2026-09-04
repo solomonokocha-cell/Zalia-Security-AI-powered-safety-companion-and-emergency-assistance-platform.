@@ -1,0 +1,81 @@
+{
+"name": "Zalia Security - Safety Companion",
+"short_name": "Zalia",
+"description": "Your personal AI safety companion with live security alerts, emergency contacts, safe route planning, and 24/7 support for Rivers State and beyond.",
+"start_url": "/",
+"scope": "/",
+"display": "standalone",
+"orientation": "portrait-primary",
+"theme_color": "#1c1917",
+"background_color": "#0f172a",
+"prefer_related_applications": false,
+"categories": [
+"productivity",
+"utilities"
+],
+
+"icons": [
+{
+"src": "/images/zalia-app-icon.png",
+"sizes": "650x650",
+"type": "image/png",
+"purpose": "any"
+},
+{
+"src": "/images/zalia-app-icon.png",
+"sizes": "650x650",
+"type": "image/png",
+"purpose": "maskable"
+}
+],
+
+"shortcuts": [
+{
+"name": "Chat with Zazi",
+"short_name": "Chat",
+"description": "Start a conversation with your AI safety companion",
+"url": "/ZaziAi.html",
+"icons": [
+{
+"src": "/images/zalia-app-icon.png",
+"sizes": "650x650",
+"type": "image/png"
+}
+]
+},
+{
+"name": "Report Incident",
+"short_name": "Report",
+"description": "Report a security incident or safety concern",
+"url": "/incidents.html",
+"icons": [
+{
+"src": "/images/zalia-app-icon.png",
+"sizes": "650x650",
+"type": "image/png"
+}
+]
+},
+{
+"name": "Route Planner",
+"short_name": "Routes",
+"description": "Plan safer routes around Port Harcourt",
+"url": "/route-planner.html",
+"icons": [
+{
+"src": "/images/zalia-app-icon.png",
+"sizes": "650x650",
+"type": "image/png"
+}
+]
+}
+],
+
+"screenshots": [
+{
+"src": "/images/zalia-app-icon.png",
+"sizes": "650x650",
+"type": "image/png"
+}
+]
+}

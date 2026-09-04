@@ -1,0 +1,3199 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5.0, user-scalable=yes"
+  >
+
+  <meta
+    name="description"
+    content="Zalia Security - Your AI-powered safety companion with emergency tools, safer route planning, incident information and Zazi AI."
+  >
+
+  <meta
+    name="keywords"
+    content="Zalia Security, Zazi AI, safety, security, Port Harcourt, Rivers State, emergency, police stations"
+  >
+
+  <meta name="author" content="Zalia Security">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#0f172a">
+
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Zalia • Your Personal Safety Companion">
+  <meta
+    property="og:description"
+    content="AI-powered safety companion with emergency contacts, incident information and safer travel tools."
+  >
+  <meta property="og:image" content="/images/zalia-app-icon.png">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Zalia Security">
+  <meta name="twitter:description" content="Your AI safety companion">
+  <meta name="twitter:image" content="/images/zalia-app-icon.png">
+
+  <title>Zalia • Your AI Safety Companion | Security & Alerts</title>
+
+  <!-- =========================================================
+       CONTENT SECURITY POLICY
+       ========================================================= -->
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="
+      default-src 'self';
+      script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://unpkg.com;
+      style-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://fonts.googleapis.com https://unpkg.com;
+      img-src 'self' data: blob: https:;
+      font-src 'self' data: https://fonts.googleapis.com https://fonts.gstatic.com;
+      connect-src 'self' http://127.0.0.1:5000 http://localhost:5000 https://unpkg.com https://fonts.googleapis.com https://www.gdacs.org https://api.reliefweb.int https://overpass-api.de https://overpass.kumi.systems https://*.tile.openstreetmap.org;
+      worker-src 'self' blob:;
+      frame-src 'self';
+    "
+  >
+
+  <!-- Icons -->
+  <link rel="icon" type="image/png" href="/images/zalia-app-icon.png">
+  <link rel="apple-touch-icon" href="/images/zalia-app-icon.png">
+  <link rel="manifest" href="/manifest.json">
+
+  <!-- Main CSS -->
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Lucide -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Google Fonts -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,800;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  >
+
+  <!-- Leaflet -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  >
+
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+  ></script>
+
+  <!-- Service Worker -->
+  <script src="/sw-register.js" defer></script>
+
+  <!-- =========================================================
+       ZALIA CONFIG
+       ========================================================= -->
+  <script>
+    /*
+      IMPORTANT:
+
+      When the website is opened with Live Server:
+          http://127.0.0.1:5500
+
+      Zazi's Flask backend is:
+          http://127.0.0.1:5000
+
+      When deployed, the same origin is used automatically.
+    */
+
+    window.ZALIA_CONFIG = {
+      apiBase:
+        (location.hostname === "127.0.0.1" ||
+         location.hostname === "localhost")
+          ? "http://127.0.0.1:5000"
+          : location.origin
+    };
+
+    window.ZAZI_API_URL =
+      window.ZALIA_CONFIG.apiBase + "/api/chat";
+
+    window.ZAZI_PAGE_URL =
+      window.ZALIA_CONFIG.apiBase + "/zazi";
+  </script>
+
+  <!-- =========================================================
+       THEME
+       ========================================================= -->
+  <script>
+
+    (function () {
+
+      const savedTheme =
+        localStorage.getItem("zalia_theme");
+
+      const prefersDark =
+        window.matchMedia &&
+        window.matchMedia("(prefers-color-scheme: dark)").matches;
+
+      const theme =
+        savedTheme ||
+        (prefersDark ? "dark" : "light");
+
+      document.documentElement.classList.toggle(
+        "dark",
+        theme === "dark"
+      );
+
+    })();
+
+    window.toggleZaliaTheme = function () {
+
+      const isDark =
+        document.documentElement.classList.contains("dark");
+
+      document.documentElement.classList.toggle(
+        "dark",
+        !isDark
+      );
+
+      localStorage.setItem(
+        "zalia_theme",
+        isDark ? "light" : "dark"
+      );
+
+      updateThemeButtonUI();
+
+    };
+
+    function updateThemeButtonUI() {
+
+      const isDark =
+        document.documentElement.classList.contains("dark");
+
+      document
+        .querySelectorAll(".zalia-theme-btn")
+        .forEach(button => {
+
+          const text =
+            button.querySelector(".theme-text");
+
+          const icon =
+            button.querySelector("[data-lucide]");
+
+          if (text) {
+            text.textContent =
+              isDark ? "Light Mode" : "Night Mode";
+          }
+
+          if (icon) {
+            icon.setAttribute(
+              "data-lucide",
+              isDark ? "sun" : "moon"
+            );
+          }
+
+        });
+
+      if (window.lucide) {
+        lucide.createIcons();
+      }
+
+    }
+
+  </script>
+
+  <!-- =========================================================
+       TAILWIND
+       ========================================================= -->
+  <script>
+
+    tailwind.config = {
+
+      darkMode: "class",
+
+      theme: {
+
+        extend: {
+
+          fontFamily: {
+
+            sans: [
+              '"Plus Jakarta Sans"',
+              "sans-serif"
+            ],
+
+            serif: [
+              '"Playfair Display"',
+              "serif"
+            ]
+
+          },
+
+          colors: {
+
+            gold: {
+
+              50: "#FDFBF7",
+              100: "#FAF5EA",
+              200: "#F4E7CE",
+              300: "#EBD4A4",
+              400: "#DFBC72",
+              500: "#D4A345",
+              600: "#B88230",
+              700: "#936125",
+              800: "#774C23",
+              900: "#623F21"
+
+            },
+
+            marble: {
+
+              50: "#FFFFFF",
+              100: "#FAF9F6",
+              200: "#F5F3EF",
+              300: "#EBE7E0",
+              400: "#D6CFBF",
+              500: "#B8AFA0"
+
+            }
+
+          },
+
+          boxShadow: {
+
+            "gold-glow":
+              "0 0 25px -5px rgba(212, 163, 69, 0.25)",
+
+            "gold-lg":
+              "0 20px 30px -10px rgba(184, 130, 48, 0.15)",
+
+            "lux-card":
+              "0 10px 30px -5px rgba(0, 0, 0, 0.04), 0 4px 12px -2px rgba(212, 163, 69, 0.08)"
+
+          }
+
+        }
+
+      }
+
+    };
+
+  </script>
+
+  <style>
+
+    @keyframes spinSlow {
+
+      from {
+        transform: rotate(0deg);
+      }
+
+      to {
+        transform: rotate(360deg);
+      }
+
+    }
+
+    .animate-spin-slow {
+      animation:
+        spinSlow 16s linear infinite;
+    }
+
+    .gold-gradient-text {
+
+      background:
+        linear-gradient(
+          135deg,
+          #B88230 0%,
+          #D4A345 50%,
+          #936125 100%
+        );
+
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+
+    }
+
+    .gold-gradient-bg {
+
+      background:
+        linear-gradient(
+          135deg,
+          #DFBC72 0%,
+          #B88230 100%
+        );
+
+    }
+
+    #policeStationMap {
+      width: 100%;
+      height: 450px;
+      min-height: 360px;
+      z-index: 1;
+    }
+
+    .leaflet-container {
+      font-family:
+        "Plus Jakarta Sans",
+        sans-serif;
+      background: #e7e5e4;
+    }
+
+    .police-popup-title {
+      font-weight: 800;
+      font-size: 13px;
+      margin-bottom: 6px;
+      color: #292524;
+    }
+
+    .police-popup-address {
+      font-size: 11px;
+      color: #78716c;
+      margin-bottom: 10px;
+    }
+
+    .police-direction-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 11px;
+      border-radius: 9px;
+      background: #b88230;
+      color: white !important;
+      text-decoration: none;
+      font-size: 10px;
+      font-weight: 800;
+    }
+
+    .police-direction-btn:hover {
+      background: #936125;
+    }
+
+    .map-status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    @media (max-width: 640px) {
+
+      #policeStationMap {
+        height: 390px;
+      }
+
+    }
+
+  </style>
+
+</head>
+
+<body
+  class="bg-marble-100 dark:bg-stone-950 text-stone-800 dark:text-stone-200 font-sans min-h-screen selection:bg-gold-200 selection:text-gold-900 pb-20 transition-colors duration-200"
+>
+
+  <!-- =========================================================
+       STEALTH DISGUISE
+       ========================================================= -->
+
+  <div
+    id="disguiseOverlay"
+    class="hidden fixed inset-0 z-50 bg-white/95 dark:bg-stone-900/95 backdrop-blur-xl text-stone-800 dark:text-stone-100 flex flex-col items-center justify-between p-8 select-none cursor-pointer"
+  >
+
+    <div
+      class="w-full flex justify-between items-center text-xs text-stone-400 font-medium border-b border-gold-200/50 pb-4"
+    >
+
+      <span class="tracking-widest uppercase">
+        WeatherSync Luxury • v4.2
+      </span>
+
+      <span class="flex items-center gap-1.5 text-gold-600 font-semibold">
+
+        <i data-lucide="lock" class="w-3.5 h-3.5"></i>
+
+        Stealth Shield Active
+
+      </span>
+
+    </div>
+
+    <div class="text-center my-auto space-y-6">
+
+      <div
+        class="relative w-32 h-32 mx-auto flex items-center justify-center"
+      >
+
+        <div
+          class="absolute inset-0 bg-gold-200/40 rounded-full animate-ping"
+        ></div>
+
+        <i
+          data-lucide="sun"
+          class="w-24 h-24 text-gold-500 relative z-10 animate-spin-slow"
+        ></i>
+
+      </div>
+
+      <div>
+
+        <h1
+          class="text-7xl font-serif font-light text-stone-900 dark:text-stone-100 tracking-tight"
+        >
+          27°C
+        </h1>
+
+        <p class="text-xl text-gold-700 font-serif italic mt-2">
+          Port Harcourt, Rivers State
+        </p>
+
+        <p class="text-xs text-stone-500 uppercase tracking-widest mt-1">
+          Humid & Clear • Wind 11 km/h SW
+        </p>
+
+      </div>
+
+      <div
+        class="bg-gradient-to-b from-marble-50 to-gold-50/50 dark:from-stone-800 dark:to-stone-800/50 border border-gold-200 dark:border-stone-700 p-5 rounded-2xl max-w-xs mx-auto space-y-3 text-left shadow-lux-card"
+      >
+
+        <div
+          class="flex justify-between text-xs border-b border-gold-100 dark:border-stone-700 pb-2"
+        >
+
+          <span class="text-stone-500 dark:text-stone-400">
+            Air Quality Index
+          </span>
+
+          <span class="font-bold text-emerald-600">
+            42 (Good)
+          </span>
+
+        </div>
+
+        <div
+          class="flex justify-between text-xs border-b border-gold-100 dark:border-stone-700 pb-2"
+        >
+
+          <span class="text-stone-500 dark:text-stone-400">
+            UV Index
+          </span>
+
+          <span class="font-bold text-gold-600">
+            5 (Moderate)
+          </span>
+
+        </div>
+
+        <div class="flex justify-between text-xs">
+
+          <span class="text-stone-500 dark:text-stone-400">
+            Humidity
+          </span>
+
+          <span class="font-bold">
+            84%
+          </span>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="text-center space-y-1.5">
+
+      <p
+        class="text-[11px] text-stone-400 font-medium tracking-wide"
+      >
+        Double-tap anywhere on screen to restore Zalia Intelligence Portal
+      </p>
+
+    </div>
+
+  </div>
+
+
+  <!-- =========================================================
+       MAIN PORTAL
+       ========================================================= -->
+
+  <div class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-10">
+
+    <!-- HEADER -->
+
+    <header
+      class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 pb-6 border-b border-gold-200/80 dark:border-stone-800 gap-4"
+    >
+
+      <div class="flex items-center gap-4">
+
+        <div
+          class="w-12 h-12 rounded-2xl gold-gradient-bg p-0.5 shadow-gold-glow flex items-center justify-center"
+        >
+
+          <div
+            class="w-full h-full bg-white dark:bg-stone-900 rounded-[14px] flex items-center justify-center overflow-hidden"
+          >
+
+            <img
+              src="images/zalia-app-icon.png"
+              alt="Zalia"
+              class="w-10 h-10 object-contain"
+            >
+
+          </div>
+
+        </div>
+
+        <div>
+
+          <nav
+            class="flex items-center gap-4 text-xs font-bold mb-1 flex-wrap"
+          >
+
+            <a
+              href="index.html"
+              class="text-gold-700 border-b-2 border-gold-500 pb-1"
+            >
+              Dashboard
+            </a>
+
+            <a
+              href="about.html"
+              class="text-stone-500 hover:text-gold-700"
+            >
+              About
+            </a>
+
+            <a
+              href="contact.html"
+              class="text-stone-500 hover:text-gold-700"
+            >
+              Emergency Contacts
+            </a>
+
+            <!-- ZAZI LINK -->
+            <a
+              id="zaziNavLink"
+              href="http://127.0.0.1:5000/zazi"
+              class="text-stone-500 hover:text-gold-700"
+            >
+              Zazi AI
+            </a>
+
+            <a
+              href="incidents.html"
+              class="text-stone-500 hover:text-gold-700"
+            >
+              Incidents
+            </a>
+
+            <a
+              href="simulator.html"
+              class="text-stone-500 hover:text-gold-700"
+            >
+              Crisis Simulator
+            </a>
+
+            <a
+              href="route-planner.html"
+              class="text-stone-500 hover:text-gold-700"
+            >
+              Route Planner
+            </a>
+            <a
+              href="safetyacademy.html"
+              class="text-stone-500 hover:text-gold-700"
+            >
+              Safety Academy
+            </a>
+          </nav>
+
+          <div class="flex items-center gap-2">
+
+            <h1
+              class="text-3xl font-serif font-extrabold tracking-tight gold-gradient-text"
+            >
+              ZALIA
+            </h1>
+
+            <span
+              class="text-[10px] font-bold uppercase tracking-widest bg-gold-100 text-gold-800 dark:bg-stone-800 dark:text-gold-400 border border-gold-300 dark:border-stone-700 px-2 py-0.5 rounded-full"
+            >
+              Rivers State
+            </span>
+
+          </div>
+
+          <p
+            class="text-xs text-stone-500 dark:text-stone-400 font-medium mt-0.5"
+          >
+            Maritime Safety, Waterway Escort & Rapid Dispatch Portal
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div class="flex items-center gap-3 w-full md:w-auto">
+
+        <button
+          id="quickDisguiseBtn"
+          class="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2.5 bg-white dark:bg-stone-900 hover:bg-gold-50 dark:hover:bg-stone-800 border border-gold-300 dark:border-stone-700 rounded-xl text-xs font-bold transition-all"
+        >
+
+          <i
+            data-lucide="eye-off"
+            class="w-4 h-4 text-gold-600"
+          ></i>
+
+          Stealth Disguise
+
+        </button>
+
+        <button
+          onclick="toggleZaliaTheme()"
+          class="zalia-theme-btn flex items-center gap-2 px-4 py-2 bg-white dark:bg-stone-900 border border-gold-200 dark:border-stone-800 rounded-2xl text-xs font-bold shadow-sm"
+        >
+
+          <i
+            data-lucide="moon"
+            class="w-4 h-4 text-gold-600"
+          ></i>
+
+          <span class="theme-text">
+            Night Mode
+          </span>
+
+        </button>
+
+        <button
+          onclick="toggleZaliaSound()"
+          class="flex items-center gap-2 px-4 py-2 bg-white dark:bg-stone-900 border border-gold-200 dark:border-stone-800 rounded-2xl text-xs font-bold"
+        >
+
+          <i
+            id="soundIcon"
+            data-lucide="volume-2"
+            class="w-4 h-4 text-gold-600"
+          ></i>
+
+          <span id="soundText">
+            Sound On
+          </span>
+
+        </button>
+
+      </div>
+
+    </header>
+
+
+    <!-- HERO -->
+
+    <section class="mb-8">
+
+      <div
+        class="bg-white dark:bg-stone-900 border border-gold-200/80 dark:border-stone-800 rounded-3xl p-6 sm:p-8 shadow-lux-card"
+      >
+
+        <div
+          class="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between"
+        >
+
+          <div>
+
+            <span
+              class="inline-flex items-center gap-2 text-[11px] font-bold bg-gold-50 dark:bg-stone-800 text-gold-800 dark:text-gold-400 px-3 py-1.5 rounded-full border border-gold-300 dark:border-stone-700"
+            >
+
+              <i
+                data-lucide="sparkles"
+                class="w-3.5 h-3.5"
+              ></i>
+
+              4.8★ trusted safety experience
+
+            </span>
+
+            <h2
+              class="mt-3 text-2xl sm:text-3xl font-bold text-stone-900 dark:text-stone-100"
+            >
+              Fast, calm, and reassuring for every emergency decision.
+            </h2>
+
+            <p
+              class="mt-2 text-sm text-stone-600 dark:text-stone-400 max-w-2xl"
+            >
+              A cleaner layout, clearer actions, and smoother navigation make Zalia feel dependable from the first tap.
+            </p>
+
+          </div>
+
+          <div class="flex flex-wrap gap-3">
+
+            <a
+              href="contact.html"
+              class="px-5 py-3 bg-gold-600 text-white rounded-xl text-xs font-bold"
+            >
+              Emergency contacts
+            </a>
+
+            <a
+              href="route-planner.html"
+              class="px-5 py-3 bg-white dark:bg-stone-900 text-stone-700 dark:text-stone-200 border border-gold-200 rounded-xl text-xs font-bold"
+            >
+              Open route planner
+            </a>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- STATUS WIDGETS -->
+
+    <div
+      class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8"
+    >
+
+      <div
+        class="bg-white dark:bg-stone-900 border border-gold-200/80 dark:border-stone-800 p-4 rounded-2xl shadow-lux-card flex items-center gap-3.5"
+      >
+
+        <div
+          class="p-3 bg-gold-50 dark:bg-stone-800 text-gold-600 rounded-xl border border-gold-200"
+        >
+          <i data-lucide="ship" class="w-5 h-5"></i>
+        </div>
+
+        <div>
+
+          <p class="text-[10px] text-stone-400 font-bold uppercase tracking-wider">
+            Waterways Patrol
+          </p>
+
+          <p class="text-xs sm:text-sm font-bold">
+            Bonny Gunboat Active
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div
+        class="bg-white dark:bg-stone-900 border border-gold-200/80 dark:border-stone-800 p-4 rounded-2xl shadow-lux-card flex items-center gap-3.5"
+      >
+
+        <div
+          class="p-3 bg-amber-50 dark:bg-amber-950/30 text-amber-600 rounded-xl border border-amber-200"
+        >
+          <i data-lucide="flame" class="w-5 h-5"></i>
+        </div>
+
+        <div>
+
+          <p class="text-[10px] text-stone-400 font-bold uppercase tracking-wider">
+            Refinery Hazard Index
+          </p>
+
+          <p class="text-xs sm:text-sm font-bold text-amber-700 dark:text-amber-500">
+            Moderate Warning
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div
+        class="bg-white dark:bg-stone-900 border border-gold-200/80 dark:border-stone-800 p-4 rounded-2xl shadow-lux-card flex items-center gap-3.5"
+      >
+
+        <div
+          class="p-3 bg-red-50 dark:bg-red-950/30 text-red-600 rounded-xl border border-red-200"
+        >
+          <i data-lucide="shield-alert" class="w-5 h-5"></i>
+        </div>
+
+        <div>
+
+          <p class="text-[10px] text-stone-400 font-bold uppercase tracking-wider">
+            Highway Security
+          </p>
+
+          <p class="text-xs sm:text-sm font-bold text-red-600 dark:text-red-400">
+            Emohua Axis Caution
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div
+        class="bg-white dark:bg-stone-900 border border-gold-200/80 dark:border-stone-800 p-4 rounded-2xl shadow-lux-card flex items-center gap-3.5"
+      >
+
+        <div
+          class="p-3 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 rounded-xl border border-emerald-200"
+        >
+          <i data-lucide="building-2" class="w-5 h-5"></i>
+        </div>
+
+        <div>
+
+          <p class="text-[10px] text-stone-400 font-bold uppercase tracking-wider">
+            Port Harcourt Metro
+          </p>
+
+          <p class="text-xs sm:text-sm font-bold text-emerald-700 dark:text-emerald-400">
+            High Patrol Density
+          </p>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- =======================================================
+         MAIN GRID
+         ======================================================= -->
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+
+      <!-- LEFT / CENTER -->
+
+      <div class="lg:col-span-2 space-y-8">
+
+
+        <!-- ===================================================
+             POLICE MAP
+             =================================================== -->
+
+        <div
+          class="bg-white dark:bg-stone-900 border border-gold-200/80 dark:border-stone-800 rounded-3xl p-6 sm:p-7 shadow-lux-card"
+        >
+
+          <div
+            class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-5 gap-3"
+          >
+
+            <div>
+
+              <h2
+                class="text-lg font-serif font-bold flex items-center gap-2"
+              >
+
+                <i
+                  data-lucide="map-pin"
+                  class="w-5 h-5 text-gold-600"
+                ></i>
+
+                Police Stations & Safety Map
+
+              </h2>
+
+              <p
+                class="text-xs text-stone-500 dark:text-stone-400"
+              >
+                Interactive map showing mapped police facilities around Port Harcourt.
+              </p>
+
+            </div>
+
+            <span
+              class="flex items-center gap-2 text-[11px] font-bold bg-gold-50 dark:bg-stone-800 text-gold-800 dark:text-gold-400 px-3 py-1.5 rounded-full border border-gold-300 dark:border-stone-700"
+            >
+
+              <span
+                id="mapStatusDot"
+                class="map-status-dot bg-amber-500"
+              ></span>
+
+              <span id="policeMapStatus">
+                Loading police stations...
+              </span>
+
+            </span>
+
+          </div>
+
+
+          <!-- MAP TOOLBAR -->
+
+          <div
+            class="flex flex-col sm:flex-row gap-3 mb-4"
+          >
+
+            <button
+              id="findPoliceStationsBtn"
+              type="button"
+              class="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-gold-600 hover:bg-gold-700 text-white rounded-xl text-xs font-bold transition-all active:scale-95"
+            >
+
+              <i
+                data-lucide="refresh-cw"
+                class="w-4 h-4"
+              ></i>
+
+              Find Police Stations
+
+            </button>
+
+            <button
+              id="locateMeBtn"
+              type="button"
+              class="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-white dark:bg-stone-800 border border-gold-200 dark:border-stone-700 rounded-xl text-xs font-bold hover:border-gold-500 transition-all"
+            >
+
+              <i
+                data-lucide="crosshair"
+                class="w-4 h-4 text-gold-600"
+              ></i>
+
+              Find My Location
+
+            </button>
+
+          </div>
+
+
+          <!-- REAL MAP -->
+
+          <div
+            class="w-full bg-stone-950 border border-gold-300 dark:border-stone-700 rounded-2xl overflow-hidden shadow-inner"
+          >
+
+            <div
+              id="policeStationMap"
+              aria-label="Interactive police station map around Port Harcourt"
+            ></div>
+
+          </div>
+
+
+          <p
+            class="mt-3 text-[10px] text-stone-400 dark:text-stone-500"
+          >
+            🛡️ Map data comes from OpenStreetMap. Click a 👮 marker to view the station and open directions.
+          </p>
+
+
+          <!-- MAP LEGEND -->
+
+          <div
+            class="flex flex-wrap gap-3 mt-4 text-[10px] font-bold"
+          >
+
+            <span
+              class="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-stone-50 dark:bg-stone-800 rounded-lg"
+            >
+              👮 Police Station
+            </span>
+
+            <span
+              class="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-stone-50 dark:bg-stone-800 rounded-lg"
+            >
+              🔵 Your Location
+            </span>
+
+          </div>
+
+
+          <!-- CORRIDOR CARDS -->
+
+          <div
+            class="grid grid-cols-1 sm:grid-cols-3 gap-3.5 mt-5"
+          >
+
+            <div
+              class="p-3.5 rounded-2xl border bg-gold-50/70 dark:bg-stone-800/80 border-gold-400"
+            >
+
+              <div class="flex justify-between items-center mb-1">
+
+                <span
+                  class="text-[10px] font-extrabold tracking-wider uppercase text-gold-800 dark:text-gold-400"
+                >
+                  WATERWAY
+                </span>
+
+                <span
+                  class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800"
+                >
+                  Escorted
+                </span>
+
+              </div>
+
+              <p class="text-xs font-bold truncate">
+                PH - Bonny Channel
+              </p>
+
+              <p class="text-[11px] text-stone-600 dark:text-stone-400 mt-1">
+                Gunboat escort available. Safe passenger boat travel.
+              </p>
+
+            </div>
+
+
+            <div
+              class="p-3.5 rounded-2xl border bg-white dark:bg-stone-800/50 border-gold-200"
+            >
+
+              <div class="flex justify-between items-center mb-1">
+
+                <span
+                  class="text-[10px] font-extrabold tracking-wider uppercase text-stone-400"
+                >
+                  HIGHWAY
+                </span>
+
+                <span
+                  class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-red-100 text-red-800"
+                >
+                  High Risk
+                </span>
+
+              </div>
+
+              <p class="text-xs font-bold truncate">
+                East-West Road (Emohua)
+              </p>
+
+              <p class="text-[11px] text-stone-600 dark:text-stone-400 mt-1">
+                Avoid night trips. High kidnapping caution after 18:00.
+              </p>
+
+            </div>
+
+
+            <div
+              class="p-3.5 rounded-2xl border bg-white dark:bg-stone-800/50 border-gold-200"
+            >
+
+              <div class="flex justify-between items-center mb-1">
+
+                <span
+                  class="text-[10px] font-extrabold tracking-wider uppercase text-stone-400"
+                >
+                  METRO & BORDER
+                </span>
+
+                <span
+                  class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-100 text-amber-800"
+                >
+                  Caution
+                </span>
+
+              </div>
+
+              <p class="text-xs font-bold truncate">
+                Obio-Akpor & Oyigbo Axis
+              </p>
+
+              <p class="text-[11px] text-stone-600 dark:text-stone-400 mt-1">
+                Localized security caution in late evening hours.
+              </p>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- ===================================================
+             INCIDENT FEED
+             =================================================== -->
+
+        <div
+          class="bg-white dark:bg-stone-900 border border-gold-200/80 dark:border-stone-800 rounded-3xl p-6 sm:p-7 shadow-lux-card"
+        >
+
+          <div
+            class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-5 gap-3"
+          >
+
+            <div>
+
+              <h2
+                class="text-lg font-serif font-bold flex items-center gap-2"
+              >
+
+                <i
+                  data-lucide="radio"
+                  class="w-5 h-5 text-gold-600"
+                ></i>
+
+                Rivers Intelligence & Traffic Feed
+
+              </h2>
+
+              <p class="text-xs text-stone-500 dark:text-stone-400">
+                Verified disaster alerts and safety information.
+              </p>
+
+            </div>
+
+            <a
+              href="incidents.html"
+              class="flex items-center gap-2 px-4 py-2 gold-gradient-bg text-white rounded-xl text-xs font-bold"
+            >
+
+              <i
+                data-lucide="plus-circle"
+                class="w-4 h-4"
+              ></i>
+
+              Submit Incident
+
+            </a>
+
+          </div>
+
+
+          <!-- SEARCH -->
+
+          <div class="flex flex-col sm:flex-row gap-3 mb-5">
+
+            <div class="relative flex-1">
+
+              <i
+                data-lucide="search"
+                class="w-4 h-4 absolute left-3.5 top-3 text-gold-600"
+              ></i>
+
+              <input
+                id="searchInput"
+                type="text"
+                placeholder="Search Nigeria alerts..."
+                class="w-full bg-marble-50 dark:bg-stone-800 border border-gold-200 dark:border-stone-700 rounded-xl pl-10 pr-4 py-2.5 text-xs focus:outline-none focus:border-gold-500"
+              >
+
+            </div>
+
+            <div
+              class="flex gap-1.5 bg-marble-50 dark:bg-stone-800 p-1 rounded-xl border border-gold-200 dark:border-stone-700 text-xs"
+              id="filterTabs"
+            >
+
+              <button
+                data-filter="all"
+                class="filter-btn px-3 py-1.5 rounded-lg font-bold bg-gold-600 text-white"
+              >
+                All
+              </button>
+
+              <button
+                data-filter="high"
+                class="filter-btn px-3 py-1.5 rounded-lg font-bold text-stone-500"
+              >
+                Critical
+              </button>
+
+              <button
+                data-filter="medium"
+                class="filter-btn px-3 py-1.5 rounded-lg font-bold text-stone-500"
+              >
+                Caution
+              </button>
+
+              <button
+                data-filter="safe"
+                class="filter-btn px-3 py-1.5 rounded-lg font-bold text-stone-500"
+              >
+                Cleared
+              </button>
+
+            </div>
+
+          </div>
+
+
+          <div
+            id="reportsContainer"
+            class="space-y-3.5"
+          >
+
+            <div
+              class="p-8 rounded-2xl border border-gold-200 dark:border-stone-800 text-center text-xs text-stone-400"
+            >
+              Loading verified Nigeria alerts...
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- =====================================================
+           RIGHT COLUMN
+           ===================================================== -->
+
+      <div class="space-y-8">
+
+
+        <!-- EMERGENCY -->
+
+        <div
+          class="bg-red-50/60 dark:bg-red-950/20 border-2 border-red-400 dark:border-red-900/60 rounded-3xl p-6 sm:p-7 shadow-lux-card text-center"
+        >
+
+          <div
+            class="flex items-center justify-center gap-2 text-red-600 mb-2"
+          >
+
+            <i
+              data-lucide="siren"
+              class="w-6 h-6 animate-bounce"
+            ></i>
+
+            <h2
+              class="text-lg font-serif font-bold uppercase"
+            >
+              Emergency Quick Dispatch
+            </h2>
+
+          </div>
+
+          <p
+            class="text-xs text-red-800 dark:text-red-300 mb-5 leading-relaxed font-medium"
+          >
+            Immediate dispatch tools for urgent emergencies.
+          </p>
+
+          <div class="flex flex-col gap-3">
+
+            <a
+              href="tel:112"
+              class="flex items-center justify-center gap-2.5 px-5 py-3.5 bg-red-600 hover:bg-red-700 text-white rounded-2xl font-extrabold text-xs"
+            >
+
+              <i data-lucide="phone-call" class="w-4 h-4"></i>
+
+              Call Emergency (112)
+
+            </a>
+
+            <a
+              href="https://wa.me/2348032003514?text=EMERGENCY%20SOS%3A%20I%20need%20immediate%20assistance.%20My%20location%3A"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="flex items-center justify-center gap-2.5 px-5 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-extrabold text-xs"
+            >
+
+              <i data-lucide="message-square" class="w-4 h-4"></i>
+
+              Emergency WhatsApp SOS
+
+            </a>
+
+          </div>
+
+        </div>
+
+
+        <!-- SOS -->
+
+        <div
+          class="bg-white dark:bg-stone-900 border border-gold-200/80 dark:border-stone-800 rounded-3xl p-6 sm:p-7 shadow-lux-card text-center"
+        >
+
+          <div
+            class="flex items-center justify-center gap-2 text-gold-600 mb-1"
+          >
+
+            <i
+              data-lucide="shield-alert"
+              class="w-5 h-5 text-red-600"
+            ></i>
+
+            <h2 class="text-lg font-serif font-bold">
+              Silent SOS Panic Dispatch
+            </h2>
+
+          </div>
+
+          <p
+            class="text-xs text-stone-500 dark:text-stone-400 mb-6 leading-relaxed"
+          >
+            Press and hold for 3 seconds to activate the emergency response interface.
+          </p>
+
+          <div
+            class="relative flex justify-center items-center my-8"
+          >
+
+            <button
+              id="sosButton"
+              class="w-40 h-40 rounded-full border-4 flex flex-col items-center justify-center transition-all shadow-gold-glow relative z-10 select-none bg-gradient-to-b from-stone-900 to-stone-950 border-gold-400 active:scale-95 touch-none"
+            >
+
+              <i
+                data-lucide="shield-alert"
+                class="w-10 h-10 text-gold-400 mb-2"
+              ></i>
+
+              <span
+                id="sosBtnText"
+                class="text-xs font-bold text-white tracking-wider uppercase"
+              >
+                HOLD FOR SOS
+              </span>
+
+            </button>
+
+            <div
+              id="sosProgressRing"
+              class="absolute w-44 h-44 rounded-full border-4 border-transparent pointer-events-none"
+            ></div>
+
+          </div>
+
+          <div
+            id="sosStatusMsg"
+            class="text-xs font-semibold text-stone-500 min-h-[20px]"
+          >
+            Ready for emergency response
+          </div>
+
+        </div>
+
+
+        <!-- ZAZI CARD -->
+
+        <div
+          class="bg-gradient-to-br from-gold-50 to-white dark:from-stone-900 dark:to-stone-800 border border-gold-300 dark:border-stone-700 rounded-3xl p-6 shadow-lux-card"
+        >
+
+          <div class="flex items-center gap-3 mb-3">
+
+            <div
+              class="w-12 h-12 rounded-2xl bg-gold-100 dark:bg-stone-800 flex items-center justify-center text-2xl"
+            >
+              🐾
+            </div>
+
+            <div>
+
+              <h3 class="font-serif font-bold">
+                Zazi AI
+              </h3>
+
+              <p class="text-[10px] text-stone-500">
+                Your bubbly safety companion
+              </p>
+
+            </div>
+
+          </div>
+
+          <p
+            class="text-xs text-stone-600 dark:text-stone-400 leading-relaxed mb-4"
+          >
+            Ask Zazi about safety, emergencies, routes, scams, crisis situations or just chat.
+          </p>
+
+          <a
+            id="zaziCardLink"
+            href="http://127.0.0.1:5000/zazi"
+            class="flex items-center justify-center gap-2 w-full px-4 py-3 gold-gradient-bg text-white rounded-xl text-xs font-bold"
+          >
+
+            <i data-lucide="message-circle" class="w-4 h-4"></i>
+
+            Talk to Zazi
+
+          </a>
+
+        </div>
+
+
+        <!-- CONTACT ROSTER -->
+
+        <div
+          class="bg-white dark:bg-stone-900 border border-gold-200/80 dark:border-stone-800 rounded-3xl p-6 sm:p-7 shadow-lux-card space-y-4"
+        >
+
+          <h3
+            class="text-sm font-serif font-bold uppercase tracking-wider border-b border-gold-100 dark:border-stone-800 pb-3 flex items-center gap-2"
+          >
+
+            <i
+              data-lucide="phone"
+              class="w-4 h-4 text-gold-600"
+            ></i>
+
+            Sector Security Command
+
+          </h3>
+
+
+          <div class="space-y-3 text-xs">
+
+            <div
+              class="flex justify-between items-center p-2.5 rounded-xl bg-marble-50 dark:bg-stone-800/60 border border-gold-100"
+            >
+
+              <div>
+
+                <p class="font-bold">
+                  Joint Task Force (JTF)
+                </p>
+
+                <p class="text-[10px] text-stone-500">
+                  Operation Delta Safe
+                </p>
+
+              </div>
+
+              <a
+                href="tel:08000000000"
+                class="px-3 py-1.5 bg-gold-600 text-white rounded-lg font-bold"
+              >
+                Call
+              </a>
+
+            </div>
+
+
+            <div
+              class="flex justify-between items-center p-2.5 rounded-xl bg-marble-50 dark:bg-stone-800/60 border border-gold-100"
+            >
+
+              <div>
+
+                <p class="font-bold">
+                  NNS Pathfinder (Navy)
+                </p>
+
+                <p class="text-[10px] text-stone-500">
+                  Port Harcourt Marine Control
+                </p>
+
+              </div>
+
+              <a
+                href="tel:08000000000"
+                class="px-3 py-1.5 bg-gold-600 text-white rounded-lg font-bold"
+              >
+                Call
+              </a>
+
+            </div>
+
+
+            <div
+              class="flex justify-between items-center p-2.5 rounded-xl bg-marble-50 dark:bg-stone-800/60 border border-gold-100"
+            >
+
+              <div>
+
+                <p class="font-bold">
+                  Rivers Police Control
+                </p>
+
+                <p class="text-[10px] text-stone-500">
+                  State Command Control Room
+                </p>
+
+              </div>
+
+              <a
+                href="tel:08000000000"
+                class="px-3 py-1.5 bg-gold-600 text-white rounded-lg font-bold"
+              >
+                Call
+              </a>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- FOOTER -->
+
+    <footer
+      class="mt-12 pt-8 border-t border-gold-200/80 dark:border-stone-800 text-center text-xs text-stone-500 dark:text-stone-400 space-y-2"
+    >
+
+      <p class="font-semibold">
+        ZALIA • Maritime & Highway Intelligence Portal
+      </p>
+
+      <p>
+        Providing safety information, route tools and emergency resources across Rivers State.
+      </p>
+
+      <p class="text-[10px] text-stone-400 mt-4">
+        © 2026 Zalia Security Systems. All rights reserved.
+      </p>
+
+    </footer>
+
+  </div>
+
+
+  <!-- =========================================================
+       JAVASCRIPT ENGINE
+       ========================================================= -->
+
+  <script>
+
+    /* =========================================================
+       LUCIDE
+       ========================================================= */
+
+    document.addEventListener(
+      "DOMContentLoaded",
+      function () {
+
+        if (window.lucide) {
+          lucide.createIcons();
+        }
+
+      }
+    );
+
+
+    /* =========================================================
+       ZAZI PAGE LINKS
+       ========================================================= */
+
+    document.addEventListener(
+      "DOMContentLoaded",
+      function () {
+
+        const zaziUrl =
+          window.ZALIA_CONFIG.apiBase + "/zazi";
+
+        const nav =
+          document.getElementById("zaziNavLink");
+
+        const card =
+          document.getElementById("zaziCardLink");
+
+        if (nav) {
+          nav.href = zaziUrl;
+        }
+
+        if (card) {
+          card.href = zaziUrl;
+        }
+
+      }
+    );
+
+
+    /* =========================================================
+       SOUND
+       ========================================================= */
+
+    let zaliaSoundEnabled = true;
+
+    window.toggleZaliaSound = function () {
+
+      zaliaSoundEnabled =
+        !zaliaSoundEnabled;
+
+      const text =
+        document.getElementById("soundText");
+
+      const icon =
+        document.getElementById("soundIcon");
+
+      if (text) {
+        text.textContent =
+          zaliaSoundEnabled
+            ? "Sound On"
+            : "Sound Off";
+      }
+
+      if (icon) {
+
+        icon.setAttribute(
+          "data-lucide",
+          zaliaSoundEnabled
+            ? "volume-2"
+            : "volume-x"
+        );
+
+      }
+
+      if (window.lucide) {
+        lucide.createIcons();
+      }
+
+    };
+
+
+    /* =========================================================
+       OFFLINE STATUS
+       ========================================================= */
+
+    function checkNetworkStatus() {
+
+      let banner =
+        document.getElementById(
+          "zaliaOfflineBanner"
+        );
+
+      if (!navigator.onLine) {
+
+        if (!banner) {
+
+          banner =
+            document.createElement("div");
+
+          banner.id =
+            "zaliaOfflineBanner";
+
+          banner.className =
+            "w-full bg-amber-600 text-white text-xs font-bold text-center py-2 px-4 sticky top-0 z-40";
+
+          banner.textContent =
+            "⚠️ You are offline. Cached safety features remain available.";
+
+          document.body.prepend(banner);
+
+        }
+
+      } else if (banner) {
+
+        banner.remove();
+
+      }
+
+    }
+
+    window.addEventListener(
+      "online",
+      checkNetworkStatus
+    );
+
+    window.addEventListener(
+      "offline",
+      checkNetworkStatus
+    );
+
+    document.addEventListener(
+      "DOMContentLoaded",
+      checkNetworkStatus
+    );
+
+
+    /* =========================================================
+       POLICE STATION MAP
+       ========================================================= */
+
+    let policeMap = null;
+
+    let policeMarkers = [];
+
+    let userMarker = null;
+
+    const PORT_HARCOURT = {
+      lat: 4.8156,
+      lng: 7.0498
+    };
+
+
+    function setMapStatus(
+      message,
+      state = "loading"
+    ) {
+
+      const status =
+        document.getElementById(
+          "policeMapStatus"
+        );
+
+      const dot =
+        document.getElementById(
+          "mapStatusDot"
+        );
+
+      if (status) {
+        status.textContent = message;
+      }
+
+      if (dot) {
+
+        dot.className =
+          "map-status-dot";
+
+        if (state === "success") {
+          dot.classList.add(
+            "bg-emerald-500"
+          );
+        } else if (state === "error") {
+          dot.classList.add(
+            "bg-red-500"
+          );
+        } else {
+          dot.classList.add(
+            "bg-amber-500"
+          );
+        }
+
+      }
+
+    }
+
+
+    function createPoliceIcon() {
+
+      return L.divIcon({
+
+        className: "",
+
+        html: `
+          <div style="
+            width:36px;
+            height:36px;
+            border-radius:50%;
+            background:#b91c1c;
+            border:3px solid white;
+            box-shadow:0 3px 12px rgba(0,0,0,.35);
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:17px;
+          ">
+            👮
+          </div>
+        `,
+
+        iconSize: [36, 36],
+
+        iconAnchor: [18, 18],
+
+        popupAnchor: [0, -20]
+
+      });
+
+    }
+
+
+    function createUserIcon() {
+
+      return L.divIcon({
+
+        className: "",
+
+        html: `
+          <div style="
+            width:22px;
+            height:22px;
+            border-radius:50%;
+            background:#2563eb;
+            border:4px solid white;
+            box-shadow:0 2px 9px rgba(0,0,0,.4);
+          "></div>
+        `,
+
+        iconSize: [22, 22],
+
+        iconAnchor: [11, 11]
+
+      });
+
+    }
+
+
+    function escapeMapHTML(value) {
+
+      return String(value || "")
+        .replace(
+          /[&<>'"]/g,
+          function (character) {
+
+            return {
+              "&": "&amp;",
+              "<": "&lt;",
+              ">": "&gt;",
+              "'": "&#39;",
+              '"': "&quot;"
+            }[character];
+
+          }
+        );
+
+    }
+
+
+    function createPolicePopup(station) {
+
+      const tags =
+        station.tags || {};
+
+      const name =
+        tags.name ||
+        tags["name:en"] ||
+        "Police Station";
+
+      const street =
+        tags["addr:street"] ||
+        tags["addr:place"] ||
+        "";
+
+      const city =
+        tags["addr:city"] ||
+        "Port Harcourt";
+
+      const lat =
+        station.lat ??
+        station.center?.lat;
+
+      const lng =
+        station.lon ??
+        station.center?.lon;
+
+      const directions =
+        "https://www.google.com/maps/dir/?api=1&destination="
+        + encodeURIComponent(
+            `${lat},${lng}`
+          );
+
+      return `
+
+        <div style="min-width:220px">
+
+          <div class="police-popup-title">
+            👮 ${escapeMapHTML(name)}
+          </div>
+
+          <div class="police-popup-address">
+            📍 ${escapeMapHTML(
+              street
+                ? street + ", " + city
+                : city + ", Rivers State"
+            )}
+          </div>
+
+          <a
+            href="${directions}"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="police-direction-btn"
+          >
+            🧭 Get Directions
+          </a>
+
+        </div>
+
+      `;
+
+    }
+
+
+    function clearPoliceMarkers() {
+
+      policeMarkers.forEach(
+        marker => {
+
+          if (policeMap) {
+            policeMap.removeLayer(
+              marker
+            );
+          }
+
+        }
+      );
+
+      policeMarkers = [];
+
+    }
+
+
+    function initializePoliceMap() {
+
+      const container =
+        document.getElementById(
+          "policeStationMap"
+        );
+
+      if (!container) {
+        return;
+      }
+
+      if (typeof L === "undefined") {
+
+        setMapStatus(
+          "Map library failed to load.",
+          "error"
+        );
+
+        return;
+
+      }
+
+      policeMap =
+        L.map(
+          "policeStationMap",
+          {
+            center: [
+              PORT_HARCOURT.lat,
+              PORT_HARCOURT.lng
+            ],
+            zoom: 12,
+            zoomControl: true,
+            scrollWheelZoom: true
+          }
+        );
+
+
+      L.tileLayer(
+        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+        {
+          maxZoom: 19,
+
+          attribution:
+            '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>'
+        }
+      ).addTo(policeMap);
+
+
+      loadPoliceStations();
+
+
+      const refresh =
+        document.getElementById(
+          "findPoliceStationsBtn"
+        );
+
+      if (refresh) {
+
+        refresh.addEventListener(
+          "click",
+          function () {
+
+            loadPoliceStations();
+
+          }
+        );
+
+      }
+
+
+      const locate =
+        document.getElementById(
+          "locateMeBtn"
+        );
+
+      if (locate) {
+
+        locate.addEventListener(
+          "click",
+          locateUser
+        );
+
+      }
+
+    }
+
+
+    async function loadPoliceStations() {
+
+      if (!policeMap) {
+        return;
+      }
+
+      setMapStatus(
+        "Searching for mapped police stations..."
+      );
+
+      clearPoliceMarkers();
+
+
+      /*
+        Port Harcourt metropolitan area.
+      */
+
+      const south = 4.70;
+      const west = 6.90;
+      const north = 4.95;
+      const east = 7.25;
+
+
+      const query = `
+
+        [out:json][timeout:25];
+
+        (
+
+          node[
+            amenity=police
+          ](
+            ${south},
+            ${west},
+            ${north},
+            ${east}
+          );
+
+          way[
+            amenity=police
+          ](
+            ${south},
+            ${west},
+            ${north},
+            ${east}
+          );
+
+          relation[
+            amenity=police
+          ](
+            ${south},
+            ${west},
+            ${north},
+            ${east}
+          );
+
+        );
+
+        out center tags;
+
+      `;
+
+
+      /*
+        Two Overpass servers are used.
+
+        If the first is busy, the second is tried.
+      */
+
+      const endpoints = [
+
+        "https://overpass-api.de/api/interpreter",
+
+        "https://overpass.kumi.systems/api/interpreter"
+
+      ];
+
+
+      let payload = null;
+
+
+      for (
+        const endpoint of endpoints
+      ) {
+
+        try {
+
+          const response =
+            await fetch(
+              endpoint +
+              "?data=" +
+              encodeURIComponent(query),
+              {
+                method: "GET",
+                headers: {
+                  "Accept":
+                    "application/json"
+                }
+              }
+            );
+
+
+          if (!response.ok) {
+
+            throw new Error(
+              "HTTP " +
+              response.status
+            );
+
+          }
+
+
+          payload =
+            await response.json();
+
+          break;
+
+        } catch (error) {
+
+          console.warn(
+            "Police map source failed:",
+            endpoint,
+            error
+          );
+
+        }
+
+      }
+
+
+      if (!payload) {
+
+        setMapStatus(
+          "Police station data unavailable. Try again.",
+          "error"
+        );
+
+        return;
+
+      }
+
+
+      const stations =
+        Array.isArray(payload.elements)
+          ? payload.elements
+          : [];
+
+
+      if (!stations.length) {
+
+        setMapStatus(
+          "No mapped police stations found.",
+          "error"
+        );
+
+        return;
+
+      }
+
+
+      const icon =
+        createPoliceIcon();
+
+      const bounds = [];
+
+
+      stations.forEach(
+        station => {
+
+          const lat =
+            station.lat ??
+            station.center?.lat;
+
+          const lng =
+            station.lon ??
+            station.center?.lon;
+
+
+          if (
+            typeof lat !== "number" ||
+            typeof lng !== "number"
+          ) {
+            return;
+          }
+
+
+          const marker =
+            L.marker(
+              [lat, lng],
+              {
+                icon,
+                title:
+                  station.tags?.name ||
+                  "Police Station"
+              }
+            );
+
+
+          marker.bindPopup(
+            createPolicePopup(
+              station
+            )
+          );
+
+
+          marker.addTo(
+            policeMap
+          );
+
+
+          policeMarkers.push(
+            marker
+          );
+
+          bounds.push(
+            [lat, lng]
+          );
+
+        }
+      );
+
+
+      if (!policeMarkers.length) {
+
+        setMapStatus(
+          "No usable police station locations found.",
+          "error"
+        );
+
+        return;
+
+      }
+
+
+      setMapStatus(
+        policeMarkers.length +
+        " police station" +
+        (
+          policeMarkers.length === 1
+            ? ""
+            : "s"
+        ) +
+        " found",
+        "success"
+      );
+
+
+      if (bounds.length) {
+
+        policeMap.fitBounds(
+          L.latLngBounds(bounds).pad(
+            0.12
+          ),
+          {
+            maxZoom: 14
+          }
+        );
+
+      }
+
+    }
+
+
+    function locateUser() {
+
+      if (!navigator.geolocation) {
+
+        setMapStatus(
+          "Your browser does not support location.",
+          "error"
+        );
+
+        return;
+
+      }
+
+
+      setMapStatus(
+        "Finding your location..."
+      );
+
+
+      navigator.geolocation.getCurrentPosition(
+
+        function (position) {
+
+          const lat =
+            position.coords.latitude;
+
+          const lng =
+            position.coords.longitude;
+
+
+          if (userMarker) {
+
+            policeMap.removeLayer(
+              userMarker
+            );
+
+          }
+
+
+          userMarker =
+            L.marker(
+              [lat, lng],
+              {
+                icon:
+                  createUserIcon(),
+                title:
+                  "Your location"
+              }
+            )
+            .addTo(
+              policeMap
+            );
+
+
+          userMarker.bindPopup(
+            "<strong>📍 Your current location</strong>"
+          );
+
+
+          policeMap.setView(
+            [lat, lng],
+            14
+          );
+
+
+          setMapStatus(
+            "Your location found",
+            "success"
+          );
+
+        },
+
+        function () {
+
+          setMapStatus(
+            "Location permission was not granted.",
+            "error"
+          );
+
+        },
+
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 60000
+        }
+
+      );
+
+    }
+
+
+    document.addEventListener(
+      "DOMContentLoaded",
+      function () {
+
+        initializePoliceMap();
+
+      }
+    );
+
+
+    /* =========================================================
+       SOS
+       ========================================================= */
+
+    const sosButton =
+      document.getElementById(
+        "sosButton"
+      );
+
+    const sosBtnText =
+      document.getElementById(
+        "sosBtnText"
+      );
+
+    const sosProgressRing =
+      document.getElementById(
+        "sosProgressRing"
+      );
+
+    const sosStatusMsg =
+      document.getElementById(
+        "sosStatusMsg"
+      );
+
+    let sosTimer = null;
+
+    let sosTriggered = false;
+
+    const HOLD_TIME = 3000;
+
+
+    function startSOS(event) {
+
+      if (
+        event &&
+        event.type === "touchstart"
+      ) {
+        event.preventDefault();
+      }
+
+
+      sosTriggered = false;
+
+      sosBtnText.textContent =
+        "HOLDING...";
+
+      sosProgressRing.classList.remove(
+        "border-transparent"
+      );
+
+      sosProgressRing.classList.add(
+        "border-red-500",
+        "animate-pulse",
+        "scale-105"
+      );
+
+      sosStatusMsg.textContent =
+        "Acquiring your location...";
+
+
+      clearTimeout(
+        sosTimer
+      );
+
+
+      sosTimer =
+        setTimeout(
+          triggerSOS,
+          HOLD_TIME
+        );
+
+    }
+
+
+    function cancelSOS() {
+
+      if (sosTriggered) {
+        return;
+      }
+
+
+      clearTimeout(
+        sosTimer
+      );
+
+
+      sosBtnText.textContent =
+        "HOLD FOR SOS";
+
+
+      sosProgressRing.classList.add(
+        "border-transparent"
+      );
+
+      sosProgressRing.classList.remove(
+        "border-red-500",
+        "animate-pulse",
+        "scale-105"
+      );
+
+
+      sosStatusMsg.textContent =
+        "Ready for emergency response";
+
+    }
+
+
+    function triggerSOS() {
+
+      sosTriggered = true;
+
+      sosBtnText.textContent =
+        "DISTRESS SENT";
+
+
+      sosStatusMsg.innerHTML =
+        "<span class='text-red-600 font-bold'>⚠️ SOS ACTIVATED — CONTACT EMERGENCY SERVICES IF YOU ARE IN IMMEDIATE DANGER.</span>";
+
+
+      if (
+        navigator.geolocation
+      ) {
+
+        navigator.geolocation.getCurrentPosition(
+
+          function (position) {
+
+            const lat =
+              position.coords.latitude;
+
+            const lng =
+              position.coords.longitude;
+
+
+            sosStatusMsg.innerHTML =
+              `
+                <span class="text-emerald-600 font-bold">
+                  ✓ SOS READY • GPS:
+                  ${lat.toFixed(5)},
+                  ${lng.toFixed(5)}
+                </span>
+              `;
+
+          },
+
+          function () {
+
+            sosStatusMsg.innerHTML =
+              `
+                <span class="text-amber-600 font-bold">
+                  ⚠️ SOS activated, but GPS permission was unavailable.
+                </span>
+              `;
+
+          }
+
+        );
+
+      }
+
+    }
+
+
+    if (sosButton) {
+
+      sosButton.addEventListener(
+        "mousedown",
+        startSOS
+      );
+
+      sosButton.addEventListener(
+        "mouseup",
+        cancelSOS
+      );
+
+      sosButton.addEventListener(
+        "mouseleave",
+        cancelSOS
+      );
+
+      sosButton.addEventListener(
+        "touchstart",
+        startSOS,
+        { passive: false }
+      );
+
+      sosButton.addEventListener(
+        "touchend",
+        cancelSOS
+      );
+
+    }
+
+
+    /* =========================================================
+       STEALTH
+       ========================================================= */
+
+    const disguiseOverlay =
+      document.getElementById(
+        "disguiseOverlay"
+      );
+
+    const quickDisguiseBtn =
+      document.getElementById(
+        "quickDisguiseBtn"
+      );
+
+    let lastTapTime = 0;
+
+
+    function enableStealth() {
+
+      if (disguiseOverlay) {
+
+        disguiseOverlay.classList.remove(
+          "hidden"
+        );
+
+      }
+
+    }
+
+
+    function disableStealth() {
+
+      if (disguiseOverlay) {
+
+        disguiseOverlay.classList.add(
+          "hidden"
+        );
+
+      }
+
+    }
+
+
+    if (quickDisguiseBtn) {
+
+      quickDisguiseBtn.addEventListener(
+        "click",
+        enableStealth
+      );
+
+    }
+
+
+    if (disguiseOverlay) {
+
+      disguiseOverlay.addEventListener(
+        "click",
+        function () {
+
+          const now =
+            Date.now();
+
+          const difference =
+            now - lastTapTime;
+
+
+          if (
+            difference < 300 &&
+            difference > 0
+          ) {
+
+            disableStealth();
+
+          }
+
+
+          lastTapTime = now;
+
+        }
+      );
+
+    }
+
+
+    /* =========================================================
+       INCIDENT FEED
+       ========================================================= */
+
+    const searchInput =
+      document.getElementById(
+        "searchInput"
+      );
+
+    const filterTabs =
+      document.getElementById(
+        "filterTabs"
+      );
+
+    const reportsContainer =
+      document.getElementById(
+        "reportsContainer"
+      );
+
+    let incidentCards = [];
+
+
+    function escapeHTML(value) {
+
+      return String(value)
+        .replace(
+          /[&<>'"]/g,
+          character => ({
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            "'": "&#39;",
+            '"': "&quot;"
+          }[character])
+        );
+
+    }
+
+
+    function getSeverity(title) {
+
+      const text =
+        title.toLowerCase();
+
+
+      if (
+        text.includes("earthquake") ||
+        text.includes("tsunami") ||
+        text.includes("cyclone")
+      ) {
+        return "high";
+      }
+
+
+      if (
+        text.includes("flood") ||
+        text.includes("storm") ||
+        text.includes("fire")
+      ) {
+        return "medium";
+      }
+
+
+      return "safe";
+
+    }
+
+
+    function filterIncidents() {
+
+      const query =
+        searchInput
+          ? searchInput.value
+              .toLowerCase()
+          : "";
+
+
+      const active =
+        filterTabs
+          ? filterTabs.querySelector(
+              ".bg-gold-600"
+            )
+          : null;
+
+
+      const filter =
+        active
+          ? active.dataset.filter
+          : "all";
+
+
+      incidentCards.forEach(
+        card => {
+
+          const text =
+            card.textContent
+              .toLowerCase();
+
+          const severity =
+            card.dataset.severity;
+
+
+          const matchesSearch =
+            text.includes(query);
+
+          const matchesFilter =
+            filter === "all" ||
+            severity === filter;
+
+
+          card.classList.toggle(
+            "hidden",
+            !(
+              matchesSearch &&
+              matchesFilter
+            )
+          );
+
+        }
+      );
+
+    }
+
+
+    async function loadTrustedNigeriaAlerts() {
+
+      if (!reportsContainer) {
+        return;
+      }
+
+
+      reportsContainer.innerHTML =
+        `
+          <div class="p-8 rounded-2xl border border-gold-200 dark:border-stone-800 text-center text-xs text-stone-400">
+            Loading verified Nigeria alerts...
+          </div>
+        `;
+
+
+      try {
+
+        const response =
+          await fetch(
+            "https://www.gdacs.org/xml/rss.xml",
+            {
+              headers: {
+                Accept:
+                  "application/rss+xml, application/xml, text/xml"
+              }
+            }
+          );
+
+
+        if (!response.ok) {
+
+          throw new Error(
+            "GDACS HTTP " +
+            response.status
+          );
+
+        }
+
+
+        const xml =
+          new DOMParser()
+            .parseFromString(
+              await response.text(),
+              "application/xml"
+            );
+
+
+        const reports =
+          Array.from(
+            xml.querySelectorAll("item")
+          )
+          .filter(
+            item =>
+              item.textContent
+                .toLowerCase()
+                .includes("nigeria")
+          )
+          .slice(0, 20);
+
+
+        reportsContainer.innerHTML = "";
+
+
+        if (!reports.length) {
+
+          reportsContainer.innerHTML =
+            `
+              <div class="p-8 rounded-2xl border border-emerald-200 text-center text-xs text-stone-500">
+                No current Nigeria alerts are published by GDACS.
+              </div>
+            `;
+
+          incidentCards = [];
+
+          return;
+
+        }
+
+
+        reports.forEach(
+          item => {
+
+            const title =
+              item.querySelector(
+                "title"
+              )?.textContent
+              ?.trim() ||
+              "Verified disaster alert";
+
+
+            const link =
+              item.querySelector(
+                "link"
+              )?.textContent
+              ?.trim() ||
+              "https://www.gdacs.org/";
+
+
+            const published =
+              item.querySelector(
+                "pubDate"
+              )?.textContent
+              ?.trim();
+
+
+            const severity =
+              getSeverity(title);
+
+
+            const label =
+              severity === "high"
+                ? "Critical"
+                : severity === "medium"
+                  ? "Caution"
+                  : "Information";
+
+
+            const card =
+              document.createElement(
+                "article"
+              );
+
+
+            card.className =
+              "incident-card p-4 rounded-2xl border border-gold-200 dark:border-stone-800 bg-white dark:bg-stone-900 text-stone-800 dark:text-stone-200 space-y-2";
+
+
+            card.dataset.severity =
+              severity;
+
+
+            card.innerHTML =
+              `
+
+                <div class="flex items-center justify-between gap-3">
+
+                  <div class="flex items-center gap-2">
+
+                    <span class="p-1.5 bg-gold-600 text-white rounded-lg">
+                      <i data-lucide="badge-check" class="w-4 h-4"></i>
+                    </span>
+
+                    <span class="text-xs font-bold">
+                      ${escapeHTML(title)}
+                    </span>
+
+                  </div>
+
+                  <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-gold-100 text-gold-800">
+                    ${label}
+                  </span>
+
+                </div>
+
+                <p class="text-xs font-semibold">
+                  Nigeria
+                </p>
+
+                <p class="text-xs text-stone-600 dark:text-stone-400">
+                  Published by the Global Disaster Alert and Coordination System.
+                </p>
+
+                <div class="flex items-center justify-between gap-3 text-[10px] text-stone-400 pt-1 border-t border-gold-100">
+
+                  <span>
+                    ${
+                      published
+                        ? escapeHTML(
+                            new Date(
+                              published
+                            ).toLocaleString()
+                          )
+                        : "Recently published"
+                    }
+                  </span>
+
+                  <a
+                    href="${escapeHTML(link)}"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="font-bold text-gold-700"
+                  >
+                    Source: GDACS
+                  </a>
+
+                </div>
+
+              `;
+
+
+            reportsContainer.appendChild(
+              card
+            );
+
+          }
+        );
+
+
+        incidentCards =
+          Array.from(
+            reportsContainer.querySelectorAll(
+              ".incident-card"
+            )
+          );
+
+
+        if (window.lucide) {
+          lucide.createIcons();
+        }
+
+
+        filterIncidents();
+
+
+      } catch (error) {
+
+        console.warn(
+          "GDACS feed unavailable:",
+          error
+        );
+
+
+        reportsContainer.innerHTML =
+          `
+            <div class="p-8 rounded-2xl border border-amber-200 dark:border-amber-900/50 text-center text-xs text-stone-500 dark:text-stone-400">
+              Verified live alerts are unavailable right now. Try again when connected.
+            </div>
+          `;
+
+
+        incidentCards = [];
+
+      }
+
+    }
+
+
+    if (searchInput) {
+
+      searchInput.addEventListener(
+        "input",
+        filterIncidents
+      );
+
+    }
+
+
+    if (filterTabs) {
+
+      filterTabs
+        .querySelectorAll(
+          ".filter-btn"
+        )
+        .forEach(
+          button => {
+
+            button.addEventListener(
+              "click",
+              function () {
+
+                filterTabs
+                  .querySelectorAll(
+                    ".filter-btn"
+                  )
+                  .forEach(
+                    item => {
+
+                      item.classList.remove(
+                        "bg-gold-600",
+                        "text-white"
+                      );
+
+                      item.classList.add(
+                        "text-stone-500"
+                      );
+
+                    }
+                  );
+
+
+                button.classList.add(
+                  "bg-gold-600",
+                  "text-white"
+                );
+
+                button.classList.remove(
+                  "text-stone-500"
+                );
+
+
+                filterIncidents();
+
+              }
+            );
+
+          }
+        );
+
+    }
+
+
+    document.addEventListener(
+      "DOMContentLoaded",
+      function () {
+
+        loadTrustedNigeriaAlerts();
+
+        updateThemeButtonUI();
+
+      }
+    );
+
+  </script>
+
+
+  <!-- =========================================================
+       ZAZI SLEEPY AVATAR SUPPORT
+       ========================================================= -->
+
+  <script>
+
+    (function () {
+
+      function updateZaziNightState() {
+
+        const hour =
+          new Date().getHours();
+
+        const isLate =
+          hour >= 22 ||
+          hour < 6;
+
+
+        document
+          .querySelectorAll(
+            'img[src*="zaziimage"]'
+          )
+          .forEach(
+            avatar => {
+
+              const wrapper =
+                avatar.parentElement;
+
+              if (!wrapper) {
+                return;
+              }
+
+
+              wrapper.classList.add(
+                "zalia-sleepy-avatar-wrap"
+              );
+
+
+              avatar.classList.toggle(
+                "zalia-sleepy-avatar",
+                isLate
+              );
+
+
+              let badge =
+                wrapper.querySelector(
+                  ".zalia-sleepy-badge"
+                );
+
+
+              if (!badge) {
+
+                badge =
+                  document.createElement(
+                    "span"
+                  );
+
+                badge.className =
+                  "zalia-sleepy-badge";
+
+                badge.textContent =
+                  "😴";
+
+                badge.setAttribute(
+                  "aria-label",
+                  "Zazi is sleepy"
+                );
+
+                wrapper.appendChild(
+                  badge
+                );
+
+              }
+
+
+              badge.hidden =
+                !isLate;
+
+            }
+          );
+
+      }
+
+
+      document.addEventListener(
+        "DOMContentLoaded",
+        updateZaziNightState
+      );
+
+
+      setInterval(
+        updateZaziNightState,
+        60000
+      );
+
+    })();
+
+  </script>
+
+</body>
+</html>
+
