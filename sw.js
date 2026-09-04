@@ -11,6 +11,7 @@ const CORE_ASSETS = [
   '/about.html',
   '/contact.html',
   '/incidents.html',
+  '/safetyacademy,html',
   '/simulator.html',
   '/route-planner.html',
   '/game.html',
