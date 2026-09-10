@@ -63,7 +63,7 @@ app.config["GEMINI_API_KEY"] = os.getenv(
 
 app.config["GEMINI_MODEL"] = os.getenv(
     "GEMINI_MODEL",
-    "gemini-2.5-flash"
+    "gemini-3.6-flash"
 )
 
 app.config["GEMINI_TEMPERATURE"] = float(
