@@ -5,23 +5,29 @@ import uuid
 from functools import wraps
 
 from dotenv import load_dotenv
-
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-ENV_FILE = os.path.join(BASE_DIR, ".env")
-
-load_dotenv(ENV_FILE, override=True)
 from flask import Flask, request, jsonify, send_from_directory, g
 from flask_cors import CORS
-from openai import OpenAI, APIError, APIConnectionError, RateLimitError
+from google import genai
+from google.genai import types
 
 
 # ============================================================
-# PATHS / ENVIRONMENT
+# LOAD ENVIRONMENT
 # ============================================================
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = os.path.dirname(
+    os.path.abspath(__file__)
+)
 
-load_dotenv(os.path.join(BASE_DIR, ".env"))
+ENV_FILE = os.path.join(
+    BASE_DIR,
+    ".env"
+)
+
+load_dotenv(
+    ENV_FILE,
+    override=True
+)
 
 
 # ============================================================
@@ -42,7 +48,7 @@ logger = logging.getLogger(__name__)
 
 app = Flask(
     __name__,
-    static_folder=BASE_DIR,
+    static_folder=".",
     static_url_path=""
 )
 
@@ -51,25 +57,25 @@ app.config["SECRET_KEY"] = os.getenv(
     "dev-secret-key-change-in-production"
 )
 
-app.config["OPENAI_API_KEY"] = os.getenv(
-    "OPENAI_API_KEY"
+app.config["GEMINI_API_KEY"] = os.getenv(
+    "GEMINI_API_KEY"
 )
 
-app.config["OPENAI_MODEL"] = os.getenv(
-    "OPENAI_MODEL",
-    "gpt-4o-mini"
+app.config["GEMINI_MODEL"] = os.getenv(
+    "GEMINI_MODEL",
+    "gemini-2.5-flash"
 )
 
-app.config["OPENAI_TEMPERATURE"] = float(
+app.config["GEMINI_TEMPERATURE"] = float(
     os.getenv(
-        "OPENAI_TEMPERATURE",
+        "GEMINI_TEMPERATURE",
         "0.7"
     )
 )
 
-app.config["OPENAI_MAX_TOKENS"] = int(
+app.config["GEMINI_MAX_OUTPUT_TOKENS"] = int(
     os.getenv(
-        "OPENAI_MAX_TOKENS",
+        "GEMINI_MAX_OUTPUT_TOKENS",
         "600"
     )
 )
@@ -81,41 +87,39 @@ app.config["API_TIMEOUT"] = int(
     )
 )
 
-app.config["MAX_CONTENT_LENGTH"] = (
-    1 * 1024 * 1024
-)
+app.config["MAX_CONTENT_LENGTH"] = 1 * 1024 * 1024
 
 app.config["JSON_SORT_KEYS"] = False
 
 
 # ============================================================
-# OPENAI
+# GEMINI
 # ============================================================
 
-API_KEY = app.config["OPENAI_API_KEY"]
+API_KEY = app.config["GEMINI_API_KEY"]
 
 client = None
 
 if API_KEY:
 
     logger.info(
-        "OpenAI API key loaded successfully."
+        "Gemini API key loaded successfully."
     )
 
     try:
 
-        client = OpenAI(
+        client = genai.Client(
             api_key=API_KEY
         )
 
         logger.info(
-            "OpenAI client initialized successfully."
+            "Gemini client initialized successfully."
         )
 
     except Exception as e:
 
         logger.exception(
-            "Failed to initialize OpenAI client: %s",
+            "Failed to initialize Gemini client: %s",
             e
         )
 
@@ -124,7 +128,7 @@ if API_KEY:
 else:
 
     logger.warning(
-        "OPENAI_API_KEY is not configured. "
+        "GEMINI_API_KEY is not configured. "
         "Zazi AI features will be unavailable."
     )
 
@@ -144,8 +148,6 @@ CORS(
                 "http://127.0.0.1:5000",
                 "http://localhost:5500",
                 "http://127.0.0.1:5500",
-
-                # PythonAnywhere
                 "https://adel1aokocha.pythonanywhere.com"
             ],
             "methods": [
@@ -189,20 +191,16 @@ def set_security_headers(response):
         "unknown"
     )
 
-    response.headers["X-Content-Type-Options"] = (
-        "nosniff"
-    )
+    response.headers["X-Content-Type-Options"] = "nosniff"
 
-    response.headers["X-Frame-Options"] = (
-        "SAMEORIGIN"
-    )
+    response.headers["X-Frame-Options"] = "SAMEORIGIN"
 
     response.headers["X-XSS-Protection"] = (
         "1; mode=block"
     )
 
-    response.headers["Referrer-Policy"] = (
-        "strict-origin-when-cross-origin"
+    response.headers["Strict-Transport-Security"] = (
+        "max-age=31536000; includeSubDomains"
     )
 
     response.headers["Content-Security-Policy"] = (
@@ -217,9 +215,12 @@ def set_security_headers(response):
         "img-src 'self' data: blob: https:; "
         "font-src 'self' data: https:; "
         "connect-src 'self' "
-        "http://127.0.0.1:5000 "
-        "http://localhost:5000 "
+        "https://adel1aokocha.pythonanywhere.com "
         "https:;"
+    )
+
+    response.headers["Referrer-Policy"] = (
+        "strict-origin-when-cross-origin"
     )
 
     return response
@@ -241,29 +242,14 @@ def rate_limit(
         @wraps(func)
         def wrapped(*args, **kwargs):
 
-            forwarded = request.headers.get(
-                "X-Forwarded-For"
-            )
-
-            if forwarded:
-
-                client_ip = (
-                    forwarded
-                    .split(",")[0]
-                    .strip()
-                )
-
-            else:
-
-                client_ip = (
-                    request.remote_addr
-                    or "unknown"
-                )
+            client_ip = request.headers.get(
+                "X-Forwarded-For",
+                request.remote_addr or "unknown"
+            ).split(",")[0].strip()
 
             now = time.time()
 
             if client_ip not in requests_log:
-
                 requests_log[client_ip] = []
 
             requests_log[client_ip] = [
@@ -294,7 +280,10 @@ def rate_limit(
                 client_ip
             ].append(now)
 
-            return func(*args, **kwargs)
+            return func(
+                *args,
+                **kwargs
+            )
 
         return wrapped
 
@@ -383,26 +372,53 @@ to provide offline access to supported parts of the platform.
 CURRENT INCIDENT DATA
 ============================================================
 
-Zalia may provide incident information retrieved from its
-Firebase Firestore incident system.
+Zalia may provide you with incident information retrieved
+from its Firebase Firestore incident system.
 
 When CURRENT INCIDENT DATA is supplied:
 
-- Use it when relevant.
+- Use it when it is relevant to the user's question.
 - Do not invent incident details.
 - Clearly distinguish community reports from verified sources.
-- Treat community-submitted incidents as reports.
-- Do not claim an incident is live unless the supplied data
+- Treat community-submitted incidents as reports, not confirmed facts.
+- If the data does not contain the incident the user is asking about,
+  say that the available Zalia incident feed does not contain
+  enough information to verify it.
+- Do not claim that an incident is live unless the supplied data
   indicates that it is recent/current.
-- Do not pretend to independently browse the internet.
-- Do not invent current incidents, news, locations,
-  casualties, weather events or emergency information.
+- Do not pretend that you independently browsed the internet.
+- If a user asks about a recent event and the supplied data
+  does not verify it, explain that you cannot independently
+  verify the latest details.
+
+If an incident contains a source such as ReliefWeb / UN OCHA,
+NEMA, FRSC, Nigeria Police or another supplied source, identify
+that source when relevant.
 
 ============================================================
-WHAT CAN ZAZI DO?
+WHEN THE USER ASKS WHAT YOU CAN DO
 ============================================================
 
-If the user asks what you can do, explain that Zazi can help with:
+If the user asks:
+
+"What can you do?"
+
+"What can Zazi do?"
+
+"What does Zazi do?"
+
+"What are your features?"
+
+"What can I ask you?"
+
+Answer clearly.
+
+For example:
+
+"Quite a lot 😄🐾✨ I'm Zazi, the AI safety companion inside
+Zalia Security.
+
+I can help with:
 
 🚨 Emergency and personal safety
 🗺️ Safer travel and route planning
@@ -414,32 +430,20 @@ If the user asks what you can do, explain that Zazi can help with:
 📱 Using Zalia's safety features
 💬 Normal questions, planning, ideas and everyday conversations
 
-Be bubbly and natural.
+You can ask me about a safety situation, ask how something
+works, or simply talk to me. 🐾✨"
 
-============================================================
-WHAT IS ZALIA?
-============================================================
-
-Zalia Security is a technology-based safety platform designed
-to bring important safety tools together in one place.
-
-It combines Zazi AI, emergency resources, incident reporting,
-route planning, crisis simulation, online-safety guidance and
-other practical safety tools.
-
-The goal is simple:
-
-Make useful safety information and practical safety tools easier
-to access when people need them.
+Do NOT answer this question with a generic fallback.
 
 ============================================================
 ZAZI MUST BE HONEST
 ============================================================
 
-Do not claim that Zalia has a feature unless it actually exists.
+Do not claim that Zalia has a feature unless it actually
+exists in the application.
 
 Do not claim to have live information unless live information
-has been supplied.
+has been supplied to you.
 
 Do not pretend to have browsed the internet.
 
@@ -496,10 +500,11 @@ def sanitize_input(
         text,
         str
     ):
-
         return ""
 
-    return text.strip()[:max_length]
+    text = text.strip()
+
+    return text[:max_length]
 
 
 def normalize_history(history):
@@ -508,7 +513,6 @@ def normalize_history(history):
         history,
         list
     ):
-
         return []
 
     normalized = []
@@ -519,18 +523,12 @@ def normalize_history(history):
             item,
             dict
         ):
-
             continue
 
-        role = item.get(
-            "role"
-        )
-
-        if role not in {
+        if item.get("role") not in {
             "user",
             "assistant"
         }:
-
             continue
 
         content = sanitize_input(
@@ -543,7 +541,7 @@ def normalize_history(history):
         if content:
 
             normalized.append({
-                "role": role,
+                "role": item["role"],
                 "content": content
             })
 
@@ -558,11 +556,18 @@ def normalize_incident_context(
     incident_context
 ):
 
+    """
+    Safely clean incident information received from
+    ZaziAi.html.
+
+    Firebase itself is accessed from the frontend.
+    The backend only receives the relevant incident data.
+    """
+
     if not isinstance(
         incident_context,
         list
     ):
-
         return []
 
     cleaned_incidents = []
@@ -573,72 +578,73 @@ def normalize_incident_context(
             incident,
             dict
         ):
-
             continue
 
-        cleaned = {
-            "type": sanitize_input(
-                incident.get(
-                    "type",
-                    ""
-                ),
-                150
+        incident_type = sanitize_input(
+            incident.get(
+                "type",
+                ""
             ),
+            150
+        )
 
-            "location": sanitize_input(
-                incident.get(
-                    "location",
-                    ""
-                ),
-                150
+        location = sanitize_input(
+            incident.get(
+                "location",
+                ""
             ),
+            150
+        )
 
-            "description": sanitize_input(
-                incident.get(
-                    "description",
-                    ""
-                ),
-                600
+        description = sanitize_input(
+            incident.get(
+                "description",
+                ""
             ),
+            600
+        )
 
-            "timestamp": sanitize_input(
-                str(
-                    incident.get(
-                        "timestamp",
-                        ""
-                    )
-                ),
-                100
-            ),
-
-            "source": sanitize_input(
+        timestamp = sanitize_input(
+            str(
                 incident.get(
-                    "source",
+                    "timestamp",
                     ""
-                ),
-                150
+                )
             ),
+            100
+        )
 
-            "url": sanitize_input(
-                incident.get(
-                    "url",
-                    ""
-                ),
-                500
-            )
-        }
+        source = sanitize_input(
+            incident.get(
+                "source",
+                ""
+            ),
+            150
+        )
+
+        url = sanitize_input(
+            incident.get(
+                "url",
+                ""
+            ),
+            500
+        )
 
         if not (
-            cleaned["type"]
-            or cleaned["location"]
-            or cleaned["description"]
+            incident_type
+            or location
+            or description
         ):
-
             continue
 
-        cleaned_incidents.append(
-            cleaned
-        )
+        cleaned_incidents.append({
+            "type": incident_type,
+            "location": location,
+            "description": description,
+            "timestamp": timestamp,
+            "source": source,
+            "url": url
+        })
 
     return cleaned_incidents
 
@@ -704,6 +710,10 @@ def get_builtin_response(
 
     text = message.lower().strip()
 
+    # --------------------------------------------------------
+    # WHAT CAN YOU DO
+    # --------------------------------------------------------
+
     capability_phrases = [
         "what can you do",
         "what can zazi do",
@@ -738,12 +748,16 @@ I can help you with:
 💬 Normal questions, ideas, planning and everyday conversations
 
 Zalia is also a Progressive Web App, which means it can provide
-an app-like experience on supported devices, including
+an app-like experience on supported mobile devices, including
 installation and offline functionality for supported content.
 
 Basically, you can ask me a question, describe a situation,
 or just talk to me. 🐾✨
 """.strip()
+
+    # --------------------------------------------------------
+    # WHAT IS ZALIA
+    # --------------------------------------------------------
 
     zalia_phrases = [
         "what is zalia",
@@ -768,7 +782,9 @@ other practical safety tools.
 
 Zalia is also built as a Progressive Web App, so it can provide
 an app-like experience across devices and can be installed on
-compatible devices.
+compatible devices. It also uses offline technology so some
+supported features can remain available without an internet
+connection.
 
 The goal is simple:
 
@@ -780,36 +796,7 @@ to access when people need them. 🐾✨
 
 
 # ============================================================
-# PAGE HELPER
-# ============================================================
-
-def serve_page(filename):
-
-    path = os.path.join(
-        BASE_DIR,
-        filename
-    )
-
-    if not os.path.isfile(path):
-
-        logger.error(
-            "Page does not exist: %s",
-            path
-        )
-
-        return jsonify({
-            "error": f"{filename} not found",
-            "request_id": g.request_id
-        }), 404
-
-    return send_from_directory(
-        BASE_DIR,
-        filename
-    )
-
-
-# ============================================================
-# HOME PAGE
+# HOME
 # ============================================================
 
 @app.route(
@@ -818,105 +805,56 @@ def serve_page(filename):
 )
 def home():
 
-    return serve_page(
-        "index.html"
-    )
+    try:
+
+        return send_from_directory(
+            ".",
+            "index.html"
+        )
+
+    except Exception as e:
+
+        logger.error(
+            "Error serving home page: %s",
+            e
+        )
+
+        return jsonify({
+            "error": "Page not found"
+        }), 404
 
 
 # ============================================================
 # ZAZI PAGE
 # ============================================================
 
-@app.route("/zazi", methods=["GET"])
+@app.route(
+    "/zazi",
+    methods=["GET"]
+)
+@app.route(
+    "/ZaziAi.html",
+    methods=["GET"]
+)
 def zazi_page():
+
     try:
+
         return send_from_directory(
             ".",
             "ZaziAi.html"
         )
+
     except Exception as e:
+
         logger.error(
             "Error serving Zazi page: %s",
             e
         )
+
         return jsonify({
             "error": "Page not found"
         }), 404
-
-
-
-# ============================================================
-# PWA FILES
-# ============================================================
-
-@app.route("/manifest.json", methods=["GET"])
-def pwa_manifest():
-    response = send_from_directory(
-        BASE_DIR,
-        "manifest.json",
-        mimetype="application/manifest+json"
-    )
-
-    # Always allow the browser to retrieve the current manifest.
-    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
-    response.headers["Pragma"] = "no-cache"
-    response.headers["Expires"] = "0"
-
-    return response
-
-
-@app.route("/sw.js", methods=["GET"])
-def pwa_service_worker():
-    response = send_from_directory(
-        BASE_DIR,
-        "sw.js",
-        mimetype="application/javascript"
-    )
-
-    # Do not let PythonAnywhere/browser caching prevent
-    # Chrome from receiving an updated service worker.
-    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
-    response.headers["Pragma"] = "no-cache"
-    response.headers["Expires"] = "0"
-
-    return response
-
-
-
-# ============================================================
-# COMMON WEBSITE PAGES
-# ============================================================
-
-@app.route(
-    "/<path:filename>",
-    methods=["GET"]
-)
-def static_files(filename):
-
-    # Never let this catch API routes
-    if filename.startswith("api/"):
-
-        return jsonify({
-            "error": "Resource not found",
-            "request_id": g.request_id
-        }), 404
-
-    file_path = os.path.join(
-        BASE_DIR,
-        filename
-    )
-
-    if os.path.isfile(file_path):
-
-        return send_from_directory(
-            BASE_DIR,
-            filename
-        )
-
-    return jsonify({
-        "error": "Resource not found",
-        "request_id": g.request_id
-    }), 404
 
 
 # ============================================================
@@ -939,6 +877,9 @@ def chat():
             silent=True
         )
 
+        if data is None:
+            data = {}
+
         if not isinstance(
             data,
             dict
@@ -951,12 +892,24 @@ def chat():
                 "request_id": g.request_id
             }), 400
 
-        user_message = sanitize_input(
-            data.get(
-                "message",
-                ""
-            ),
-            2000
+        # ====================================================
+        # USER MESSAGE
+        # ====================================================
+
+        user_message = data.get(
+            "message",
+            ""
+        )
+
+        if not isinstance(
+            user_message,
+            str
+        ):
+
+            user_message = ""
+
+        user_message = (
+            user_message.strip()[:2000]
         )
 
         if not user_message:
@@ -970,12 +923,20 @@ def chat():
                 "request_id": g.request_id
             }), 200
 
+        # ====================================================
+        # CONVERSATION HISTORY
+        # ====================================================
+
         conversation = normalize_history(
             data.get(
                 "history",
                 []
             )
         )
+
+        # ====================================================
+        # LIVE FIREBASE INCIDENT CONTEXT
+        # ====================================================
 
         incident_context = (
             normalize_incident_context(
@@ -993,14 +954,15 @@ def chat():
         )
 
         logger.info(
-            "Zazi request %s | incidents=%s",
-            g.request_id,
-            len(incident_context)
+            "Received %s incident records for Zazi. "
+            "Request ID: %s",
+            len(incident_context),
+            g.request_id
         )
 
-        # ----------------------------------------------------
-        # BUILT-IN RESPONSES
-        # ----------------------------------------------------
+        # ====================================================
+        # BUILT-IN RESPONSES FIRST
+        # ====================================================
 
         builtin_reply = get_builtin_response(
             user_message
@@ -1008,112 +970,147 @@ def chat():
 
         if builtin_reply:
 
+            logger.info(
+                "Built-in Zazi response used. "
+                "Request ID: %s",
+                g.request_id
+            )
+
             return jsonify({
                 "reply": builtin_reply,
                 "type": "text",
                 "source": "builtin",
                 "incident_context_used": False,
-                "incident_count": len(
-                    incident_context
-                ),
                 "request_id": g.request_id
             }), 200
 
-        # ----------------------------------------------------
-        # OPENAI CHECK
-        # ----------------------------------------------------
+        # ====================================================
+        # GEMINI CONFIGURATION CHECK
+        # ====================================================
 
-        if client is None:
+        if not client:
 
             logger.error(
-                "OpenAI client is not configured."
+                "Gemini client is not configured."
             )
 
             return jsonify({
                 "reply": (
                     "⚠️ Zazi's AI connection isn't configured "
-                    "right now. Please check the OpenAI API key."
+                    "right now. Please check the Gemini API key."
                 ),
-                "type": "text",
-                "source": "error",
                 "request_id": g.request_id
             }), 503
 
-        # ----------------------------------------------------
-        # AI MESSAGES
-        # ----------------------------------------------------
+        # ====================================================
+        # ZAZI REQUEST
+        # ====================================================
 
-        messages = [
+        contents = []
 
-            {
-                "role": "system",
-                "content": ZAZI_SYSTEM_INSTRUCTION
-            },
+        for message in conversation:
 
-            {
-                "role": "system",
-                "content": (
-                    "CURRENT ZALIA INCIDENT DATA\n\n"
-                    f"{incident_context_text}\n\n"
-                    "Use this data only when relevant. "
-                    "Never invent incident information."
+            role = message["role"]
+
+            content = message["content"]
+
+            gemini_role = (
+                "model"
+                if role == "assistant"
+                else "user"
+            )
+
+            contents.append(
+                types.Content(
+                    role=gemini_role,
+                    parts=[
+                        types.Part(
+                            text=content
+                        )
+                    ]
                 )
-            },
+            )
 
-            *conversation,
+        contents.append(
+            types.Content(
+                role="user",
+                parts=[
+                    types.Part(
+                        text=user_message
+                    )
+                ]
+            )
+        )
 
-            {
-                "role": "user",
-                "content": user_message
-            }
-        ]
+        full_system_instruction = (
+            ZAZI_SYSTEM_INSTRUCTION
+            + "\n\n"
+            + "================================================\n"
+            + "CURRENT ZALIA INCIDENT DATA\n"
+            + "================================================\n\n"
+            + "The following incident records were supplied "
+            + "by Zalia's Firebase Firestore incident feed.\n\n"
+            + incident_context_text
+            + "\n\n"
+            + "Use these records only when relevant to the "
+            + "user's question. Do not invent details that "
+            + "are not present in these records."
+        )
 
-        # ----------------------------------------------------
-        # OPENAI REQUEST
-        # ----------------------------------------------------
-
-        response = client.chat.completions.create(
+        response = client.models.generate_content(
 
             model=app.config[
-                "OPENAI_MODEL"
+                "GEMINI_MODEL"
             ],
 
-            messages=messages,
+            contents=contents,
 
-            temperature=app.config[
-                "OPENAI_TEMPERATURE"
-            ],
+            config=types.GenerateContentConfig(
 
-            max_tokens=app.config[
-                "OPENAI_MAX_TOKENS"
-            ],
+                system_instruction=(
+                    full_system_instruction
+                ),
 
-            timeout=app.config[
-                "API_TIMEOUT"
-            ]
+                temperature=app.config[
+                    "GEMINI_TEMPERATURE"
+                ],
+
+                max_output_tokens=app.config[
+                    "GEMINI_MAX_OUTPUT_TOKENS"
+                ]
+            )
         )
 
         reply = (
-            response
-            .choices[0]
-            .message
-            .content
+            getattr(
+                response,
+                "text",
+                ""
+            )
             or ""
         ).strip()
 
         if not reply:
 
+            logger.error(
+                "Gemini returned an empty response. "
+                "Request ID: %s",
+                g.request_id
+            )
+
             return jsonify({
                 "reply": (
                     "Zazi didn't receive a complete answer. "
-                    "Please try again. 🐾"
+                    "Please try again."
                 ),
                 "request_id": g.request_id
             }), 502
 
         logger.info(
-            "Zazi response generated successfully. "
+            "Zazi AI response generated successfully. "
+            "Incident records supplied: %s. "
             "Request ID: %s",
+            len(incident_context),
             g.request_id
         )
 
@@ -1137,65 +1134,77 @@ def chat():
 
         }), 200
 
-    # --------------------------------------------------------
-    # OPENAI ERRORS
-    # --------------------------------------------------------
+    # ========================================================
+    # ERRORS
+    # ========================================================
 
-    except RateLimitError:
+    except Exception as e:
 
-        logger.warning(
-            "OpenAI rate limit reached."
-        )
+        error_text = str(e).lower()
 
-        return jsonify({
-            "reply": (
-                "Zazi is getting a little busy! 😅🐾 "
-                "Please try again in a moment."
-            ),
-            "request_id": g.request_id
-        }), 429
-
-    except APIConnectionError:
-
-        logger.error(
-            "Could not connect to OpenAI."
-        )
-
-        return jsonify({
-            "reply": (
-                "🐾 I can't reach Zazi's AI brain right now. "
-                "Please check your internet connection and "
-                "try again."
-            ),
-            "request_id": g.request_id
-        }), 503
-
-    except APIError as e:
-
-        logger.error(
-            "OpenAI API error: %s",
+        logger.exception(
+            "Unexpected error in Gemini chat endpoint: %s",
             e
         )
+
+        # ----------------------------------------------------
+        # GEMINI RATE LIMIT / QUOTA
+        # ----------------------------------------------------
+
+        if (
+            "429" in error_text
+            or "resource exhausted" in error_text
+            or "quota" in error_text
+            or "rate limit" in error_text
+        ):
+
+            logger.warning(
+                "Gemini rate limit or quota reached. "
+                "Request ID: %s",
+                g.request_id
+            )
+
+            return jsonify({
+                "reply": (
+                    "Zazi's AI service is temporarily busy. 😅🐾 "
+                    "Please try again in a moment."
+                ),
+                "request_id": g.request_id
+            }), 503
+
+        # ----------------------------------------------------
+        # GEMINI CONNECTION ERROR
+        # ----------------------------------------------------
+
+        if (
+            "connection" in error_text
+            or "connect" in error_text
+            or "timeout" in error_text
+        ):
+
+            logger.error(
+                "Could not connect to Gemini. "
+                "Request ID: %s",
+                g.request_id
+            )
+
+            return jsonify({
+                "reply": (
+                    "🐾 I can't reach Zazi's AI brain right now. "
+                    "Please check your internet connection and "
+                    "try again."
+                ),
+                "request_id": g.request_id
+            }), 503
+
+        # ----------------------------------------------------
+        # GEMINI API ERROR
+        # ----------------------------------------------------
 
         return jsonify({
             "reply": (
                 "Oops! 😭🐾 Zazi had trouble processing that. "
                 "Please try again."
-            ),
-            "request_id": g.request_id
-        }), 500
-
-    except Exception as e:
-
-        logger.exception(
-            "Unexpected error in /api/chat: %s",
-            e
-        )
-
-        return jsonify({
-            "reply": (
-                "Something unexpected happened. 😕🐾 "
-                "Please try again later."
             ),
             "request_id": g.request_id
         }), 500
@@ -1215,13 +1224,9 @@ def health_check():
 
         "status": "healthy",
 
-        "openai_configured": (
+        "gemini_configured": (
             client is not None
         ),
-
-        "zazi_page": "/zazi",
-
-        "chat_endpoint": "/api/chat",
 
         "firebase_incident_bridge": True,
 
@@ -1264,13 +1269,9 @@ def readiness_check():
 
         },
 
-        "zazi_page": "/zazi",
-
-        "chat_endpoint": "/api/chat",
-
         "request_id": g.request_id
 
-    }), 200
+    })
 
 
 # ============================================================
@@ -1300,8 +1301,9 @@ def not_found(error):
 @app.errorhandler(500)
 def internal_error(error):
 
-    logger.exception(
-        "Internal server error"
+    logger.error(
+        "Internal server error: %s",
+        error
     )
 
     return jsonify({
@@ -1339,7 +1341,7 @@ if __name__ == "__main__":
         os.getenv(
             "FLASK_ENV",
             "development"
-        ).lower()
+        )
         == "development"
     )
 
