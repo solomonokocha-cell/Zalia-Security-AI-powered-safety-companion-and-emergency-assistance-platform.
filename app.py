@@ -76,7 +76,7 @@ app.config["GEMINI_TEMPERATURE"] = float(
 app.config["GEMINI_MAX_OUTPUT_TOKENS"] = int(
     os.getenv(
         "GEMINI_MAX_OUTPUT_TOKENS",
-        "600"
+        "1200"
     )
 )
 
